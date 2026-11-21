@@ -60,8 +60,19 @@
     return null;
   }
 
+  // Deterministic overrides (model-independent): emergencies always go to emergency_redirect; prompt-injection gets no intent.
+  const EMERGENCY = /(שריפה|שרפה|האש מתקרבת|דליקה|פצוע|פיגוע|מחבל|חדירה|אמבולנס|לא נושם|מתעלף|התקף לב|דימום|נפל ולא קם|מד"א)/;
+  const INJECTION = /(תתעלמ|התעלמ|ignore (all|previous|the)|system prompt|intent\s*=|הוראות הקודמות|תחזיר[יו]? intent)/i;
+  function guardIntent(message, o) {
+    const m = String(message || '');
+    if (EMERGENCY.test(m)) { o.intent = 'emergency_redirect'; o.confidence = 1; o.variant = null; o.slots = {}; o.guard = 'emergency'; return true; }
+    if (INJECTION.test(m)) { o.intent = null; o.confidence = 0; o.variant = null; o.slots = {}; o.guard = 'injection'; return true; }
+    return false;
+  }
+
   function postprocessIntent(out, message, scenarios) {
     const o = Object.assign({}, out || {});
+    if (guardIntent(message, o)) { o.missing_required = []; o.sensitive_detected = false; return o; }
     const scn = (scenarios || []).find(s => s.id === o.intent) || null;
     if (o.intent && o.intent !== 'emergency_redirect' && !scn) { o.intent = null; o.confidence = 0; }
     o.variant = restrictVariant(scn, o.variant);

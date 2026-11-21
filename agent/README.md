@@ -6,3 +6,9 @@
 
 - Generation cap: call the model with `num_predict: 512`. E2B sometimes runs to ~2,200 tokens without it.
 - `eval/postproc.js` applies these guards to raw model outputs before scoring.
+
+## Two-stage intent (for small models such as E2B)
+
+- Stage 1: classify only, with the intent constrained to an enum (`format` schema). Stage 2: extract slots with that scenario's own schema (its fields, its variant list).
+- `eval/build_twostage.js scenarios.json` builds `twostage.json`; `eval/run_twostage.py <model> <out.jsonl>` runs it against local Ollama.
+- `postprocessIntent` also applies deterministic overrides: emergency wording always becomes `emergency_redirect`, and prompt-injection wording gets no intent, whatever the model said.
