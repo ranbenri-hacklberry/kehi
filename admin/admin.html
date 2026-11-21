@@ -136,6 +136,7 @@
       <button class="tab" type="button" data-kind="events" role="tab">אירועים <b id="n-events">0</b></button>
       <button class="tab" type="button" data-kind="posts" role="tab">פרסומים <b id="n-posts">0</b></button>
       <button class="tab" type="button" data-kind="residents" role="tab">תושבים <b id="n-residents">0</b></button>
+      <button class="tab" type="button" data-kind="business" role="tab">חשבונות עסק <b id="n-business">0</b></button>
       <button class="tab admin-only" type="button" data-kind="managers" role="tab">מנהלי/ות קהילה</button>
       <button class="btn ghost sm" id="reload" type="button" style="margin-inline-start:auto">רענון</button>
     </div>
@@ -171,7 +172,7 @@
 <div class="toast" id="toast" role="status" hidden></div>
 
 <script id="cfg" type="application/json">__CFG__</script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.2/dist/umd/supabase.js"></script>
+<script src="/admin/supabase-2.119.2.js"></script>
 <script>
 (function(){
   'use strict';
@@ -182,11 +183,12 @@
   const $ = id => document.getElementById(id);
   const esc = t => String(t == null ? '' : t).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const TZ = 'Asia/Jerusalem';
-  const ST = {pending_publish:'ממתין', published:'מפורסם', rejected:'נדחה', hidden:'מוסתר', pending:'ממתין', open:'פתוח', closed:'נסגר', approved:'מאומת', verified:'מאומת'};
+  const ST = {pending_publish:'ממתין', published:'מפורסם', rejected:'נדחה', hidden:'מוסתר', pending:'ממתין', open:'פתוח', closed:'נסגר', approved:'מאומת', verified:'מאומת', trial:'ניסיון', active:'פעיל', expired:'פג', cancelled:'בוטל', claim_pending:'ממתין לשיוך'};
   const ORDER = ['pending_publish','published','rejected','hidden'];
   const POST_ORDER = ['pending','open','closed','hidden','rejected'];
   const RES_ORDER = ['pending','verified','rejected'];
-  const S = {kind:'places', status:'pending_publish', cat:'', q:'', rows:{places:[], events:[], posts:[], residents:[]}, managers:[], candidates:[], sel:new Set(), email:'', role:''};
+  const BIZ_ORDER = ['claim_pending','trial','active','expired','cancelled'];
+  const S = {kind:'places', status:'pending_publish', cat:'', q:'', rows:{places:[], events:[], posts:[], residents:[], business:[]}, managers:[], candidates:[], sel:new Set(), email:'', role:''};
 
   function toast(t){ const el = $('toast'); el.textContent = t; el.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => el.hidden = true, 3500); }
   function show(v){ ['v-login','v-denied','v-main'].forEach(id => $(id).hidden = id !== v); $('who').hidden = v === 'v-login'; }
@@ -263,8 +265,8 @@
   // ---------- נתונים ----------
   function isAdmin(){ return S.role === 'admin'; }
   function isStaff(){ return S.role === 'admin' || S.role === 'manager'; }
-  function orderFor(kind){ return kind==='posts' ? POST_ORDER : kind==='residents' ? RES_ORDER : ORDER; }
-  function defaultStatus(kind){ return kind==='posts' || kind==='residents' ? 'pending' : 'pending_publish'; }
+  function orderFor(kind){ return kind==='posts' ? POST_ORDER : kind==='residents' ? RES_ORDER : kind==='business' ? BIZ_ORDER : ORDER; }
+  function defaultStatus(kind){ return kind==='business' ? 'claim_pending' : (kind==='posts' || kind==='residents' ? 'pending' : 'pending_publish'); }
   function rid(r){ return r && (r.id || r.user_id); }
   function setRoleUI(){
     const b = $('who-role');
@@ -280,14 +282,16 @@
   async function load(){
     if (S.demo) { render(); return; }
     $('meta').textContent = 'טוען…';
-    const [p, ev, posts, resi] = await Promise.all([
+    const [p, ev, posts, resi, biz] = await Promise.all([
       sb.rpc('admin_list_places'), sb.rpc('admin_list_events'),
-      sb.rpc('staff_list_posts'), sb.rpc('staff_list_residents')
+      sb.rpc('staff_list_posts'), sb.rpc('staff_list_residents'),
+      sb.rpc('staff_list_business_accounts')
     ]);
     if (p.error || ev.error) { $('meta').textContent = errMsg(p.error || ev.error); return; }
     S.rows.places = p.data || []; S.rows.events = ev.data || [];
     S.rows.posts = (posts && !posts.error) ? (posts.data || []) : [];
     S.rows.residents = (resi && !resi.error) ? (resi.data || []) : [];
+    S.rows.business = (biz && !biz.error) ? (biz.data || []) : [];
     if (isAdmin()) {
       const [ms, cs] = await Promise.all([sb.rpc('admin_list_managers'), sb.rpc('admin_list_manager_candidates')]);
       if (!ms.error) S.managers = ms.data || [];
@@ -301,11 +305,17 @@
     if (S.kind === 'places') return [r.id, r.name_he, r.name_en, r.category, r.category_group, r.address, r.note, r.source, r.badge].join(' ').toLowerCase();
     if (S.kind === 'posts') return [r.id, r.title, r.body, r.type, r.status].join(' ').toLowerCase();
     if (S.kind === 'residents') return [r.user_id, r.display_name, r.status].join(' ').toLowerCase();
+    if (S.kind === 'business') return [r.user_id, r.display_name, r.business_name, r.place_name, r.pending_place_name, r.status, r.claim_status, r.subscription_tier].join(' ').toLowerCase();
     return [r.id, r.title, r.venue_name, r.address, r.organizer, r.description, r.source, r.when_text].join(' ').toLowerCase();
   }
   function visible(){
     const q = S.q.toLowerCase();
-    return cur().filter(r => (S.status === 'all' || r.status === S.status) && (!S.cat || (r.category_group || 'ללא קטגוריה') === S.cat) && (!q || text(r).includes(q)));
+    return cur().filter(r => {
+      const stOk = S.status === 'all' || (S.kind === 'business'
+        ? (S.status === 'claim_pending' ? r.claim_status === 'pending' : r.status === S.status)
+        : r.status === S.status);
+      return stOk && (!S.cat || (r.category_group || 'ללא קטגוריה') === S.cat) && (!q || text(r).includes(q));
+    });
   }
 
   // ---------- תצוגה ----------
@@ -329,6 +339,7 @@
     $('n-events').textContent = (S.rows.events||[]).length;
     $('n-posts').textContent = (S.rows.posts||[]).length;
     $('n-residents').textContent = (S.rows.residents||[]).length;
+    if ($('n-business')) $('n-business').textContent = (S.rows.business||[]).length;
     document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t.dataset.kind === S.kind));
     renderManagers();
     if (S.kind === 'managers') { $('meta').textContent = isAdmin() ? ((S.managers||[]).length + ' מנהלי/ות קהילה') : ''; return; }
@@ -343,7 +354,7 @@
       catSel.innerHTML = '<option value="">כל הקטגוריות</option>' + cats.map(c => '<option' + (c === S.cat ? ' selected' : '') + '>' + esc(c) + '</option>').join('');
       catSel.hidden = false;
     } else { catSel.hidden = true; S.cat = ''; }
-    const bulkMap = S.kind==='posts' ? [['open','אישור'],['hidden','הסתרה'],['rejected','דחייה']] : S.kind==='residents' ? [['verified','אימות'],['rejected','דחייה'],['pending','החזרה לממתין']] : [['published','פרסום'],['rejected','דחייה'],['pending_publish','החזרה לממתין']];
+    const bulkMap = S.kind==='posts' ? [['open','אישור'],['hidden','הסתרה'],['rejected','דחייה']] : S.kind==='residents' ? [['verified','אימות'],['rejected','דחייה'],['pending','החזרה לממתין']] : S.kind==='business' ? [] : [['published','פרסום'],['rejected','דחייה'],['pending_publish','החזרה לממתין']];
     const bulk = $('bulk');
     [...bulk.querySelectorAll('[data-bulk]')].forEach((b,i) => {
       const m = bulkMap[i]; if (!m) { b.hidden = true; return; }
@@ -351,6 +362,7 @@
     });
     const list = visible();
     $('meta').textContent = list.length + ' מוצגים מתוך ' + cur().length;
+    $('bulk').style.display = S.kind === 'business' ? 'none' : '';
     $('list').innerHTML = list.length ? list.map(card).join('') : '<div class="empty card">אין רשומות שמתאימות לסינון.</div>';
     syncSel(list);
   }
@@ -380,7 +392,31 @@
     return h;
   }
 
+
+  function businessCard(r){
+    const st = r.status || '';
+    const claim = r.claim_status || '';
+    const tier = ({business_monthly:'אהבה חודשי', business_yearly:'אהבה שנתי', pro_monthly:'פרו', founder_yearly:'מייסד'}[r.subscription_tier] || r.subscription_tier || '');
+    let h = '<article class="card"><div class="row" style="justify-content:space-between"><h3 style="margin:0">' + esc(r.business_name || r.display_name || 'בלי שם') + '</h3><span class="st ' + esc(claim === 'pending' ? 'pending' : st) + '">' + esc(claim === 'pending' ? (ST.claim_pending) : (ST[st]||st)) + '</span></div>';
+    h += '<div class="sub">' + esc((r.display_name || '') + (tier ? ' · ' + tier : '') + (r.billing_cycle === 'yearly' ? ' · שנתי' : r.billing_cycle === 'monthly' ? ' · חודשי' : '')) + '</div>';
+    const place = r.place_name || '';
+    const pending = r.pending_place_name || '';
+    if (claim === 'pending' && pending) h += '<div class="sub">מבקש/ת שיוך למקום: ' + esc(pending) + '</div>';
+    else if (place) h += '<div class="sub">מקום מאושר: ' + esc(place) + '</div>';
+    if (r.trial_ends_at && st === 'trial') h += '<div class="sub">הניסיון עד ' + esc(fmt(r.trial_ends_at)) + '</div>';
+    if (r.subscription_expires_at && st === 'active') h += '<div class="sub">בתוקף עד ' + esc(fmt(r.subscription_expires_at)) + '</div>';
+    if (r.claim_review_note) h += '<div class="sub">' + esc(r.claim_review_note) + '</div>';
+    h += '<div class="acts" style="margin-top:8px">';
+    if (claim === 'pending'){
+      h += '<button class="btn ok sm" type="button" data-claim="approved" data-user="' + esc(r.user_id) + '">אישור שיוך</button>';
+      h += '<button class="btn no sm" type="button" data-claim="rejected" data-user="' + esc(r.user_id) + '">דחיית שיוך</button>';
+    }
+    h += '</div></article>';
+    return h;
+  }
+
   function card(r){
+    if (S.kind === 'business') return businessCard(r);
     if (S.kind === 'posts' || S.kind === 'residents') return staffCard(r);
 
     const P = S.kind === 'places';
@@ -522,6 +558,21 @@
     const { error } = await sb.rpc('admin_grant_manager', { p_user: id });
     if (error) { toast(errMsg(error)); return; }
     toast('התפקיד הוענק'); load();
+  });
+  document.addEventListener('click', async e => {
+    const claimBtn = e.target.closest('[data-claim]');
+    if (claimBtn){
+      e.preventDefault();
+      const user = claimBtn.getAttribute('data-user');
+      const decision = claimBtn.getAttribute('data-claim');
+      if (!user || !decision) return;
+      const note = decision === 'rejected' ? (window.prompt('סיבה לדחייה (לא חובה)') || null) : null;
+      const { error } = await sb.rpc('staff_review_business_claim', { p_user: user, p_decision: decision, p_note: note });
+      if (error) { toast(errMsg(error)); return; }
+      toast(decision === 'approved' ? 'השיוך אושר' : 'השיוך נדחה');
+      load();
+      return;
+    }
   });
   document.addEventListener('click', async e => {
     const b = e.target.closest('[data-revoke]'); if (!b) return;

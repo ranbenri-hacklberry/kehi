@@ -178,6 +178,32 @@
   .me-av{width:56px;height:56px;border-radius:50%;object-fit:cover;background:var(--accent-bg);color:var(--accent);display:grid;place-items:center;font-weight:700;font-size:22px;flex:none}
   .st.none{background:var(--line);color:var(--soft)}
   .st.verified{background:var(--ok-bg, #e8f5e9);color:var(--ok, #1b5e20)}
+
+  .st.admin,.st.manager{background:var(--accent-bg);color:var(--accent)}
+  .st.trial{background:var(--amber);color:#6b5a1f}
+  .st.expired{background:var(--line);color:var(--soft)}
+  .biz-card ul{margin:8px 0 12px;padding:0 18px 0 0;color:var(--soft);font-size:14px}
+  .biz-card .days{font-size:15px;margin:8px 0}
+  .pay-screen{padding-bottom:12px}
+  .pay-screen .back{display:inline-block;margin:0 0 8px;color:var(--soft);text-decoration:none;font-size:14px}
+  .pay-toggle{display:flex;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:4px;margin:12px 0 16px}
+  .pay-toggle button{flex:1;border:0;background:transparent;font:inherit;padding:8px 10px;border-radius:999px;cursor:pointer;color:var(--soft)}
+  .pay-toggle button.on{background:var(--accent);color:var(--on-accent,#fff8f0)}
+  .pay-card{position:relative;margin-bottom:14px}
+  .pay-card .badge-hot{display:inline-block;background:var(--accent-bg);color:var(--accent);border-radius:999px;padding:2px 8px;font-size:12px;margin-bottom:6px}
+  .pay-card .price-big{font-size:34px;line-height:1.1;margin:4px 0}
+  .pay-card .price-big span{font-size:16px;color:var(--soft)}
+  .pay-card .save{color:var(--accent);font-size:13px;margin:0 0 8px}
+  .pay-card ul{margin:8px 0 12px;padding:0 18px 0 0}
+  .pay-card li{margin:0 0 6px}
+  .soon{display:inline-block;margin-inline-start:6px;font-size:11px;color:var(--soft);background:var(--mint,#efe6cf);border-radius:999px;padding:0 7px;vertical-align:middle}
+  .pay-methods{font-size:13px;color:var(--soft);margin:0 0 10px}
+  .pay-note{font-size:13px;color:var(--soft);margin:0 0 16px}
+  .pay-form label{display:block;font-size:13px;color:var(--soft);margin:8px 0 4px}
+  .pay-suggest{border:1px solid var(--line);border-radius:12px;background:var(--panel);margin:4px 0 8px;max-height:180px;overflow:auto}
+  .pay-suggest button{display:block;width:100%;text-align:right;border:0;background:transparent;font:inherit;padding:8px 12px;cursor:pointer}
+  .pay-suggest button:hover{background:var(--accent-bg)}
+
   .slot-card .seats{font-size:13px;white-space:nowrap;color:var(--soft)}
   .cal-acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;align-items:center}
   .auth-gate{position:fixed;inset:0;background:rgba(30,20,10,.4);display:grid;place-items:center;z-index:50;padding:18px}
@@ -396,6 +422,7 @@
   <section class="screen" id="s-me">
     <header class="bar"><h1 style="margin:0;font-size:26px">האזור שלי</h1><span></span></header>
     <div id="me-account"></div>
+    <div id="me-biz"></div>
     <div id="me-bookings" hidden></div>
     <div id="me-legacy" hidden>
     <div class="card">
@@ -417,6 +444,15 @@
     </div>
     <div class="card"><h3>פרטיות</h3><p class="meta" style="margin:4px 0 0">הורדת המידע שלי · מחיקת החשבון · ניהול הסכמות</p></div>
     </div>
+  </section>
+
+  <section class="screen" id="s-pricing">
+    <header class="bar">
+      <a class="back" href="#/me">→ האזור שלי</a>
+      <h1 style="margin:0;font-size:26px">מסלולים</h1>
+      <span></span>
+    </header>
+    <div id="pricing-root" class="pay-screen"></div>
   </section>
 </div>
 
@@ -995,6 +1031,8 @@ function isOpenNow(hours, date=new Date()){
     ? window.supabase.createClient(AUTH_URL, KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storageKey: 'resident-auth-' + COMMUNITY_ID } })
     : null;
   let resident = null; // {status, request_note, review_note} | null  (null + session = none)
+  let staffRole = null; // admin | manager | null
+  let businessAccount = null;
   let myBookings = [];
   let authReady = false;
   let lastBooked = null; // {slot, post} after a successful book, for calendar buttons
@@ -1089,7 +1127,7 @@ function isOpenNow(hours, date=new Date()){
   async function signOut(){
     if (DEMO){ window.__demoSignedOut = true; lastBooked = null; renderMe(); renderHomeExtras(); return; }
     if (sbAuth) try { await sbAuth.auth.signOut(); } catch (e) {}
-    sessionUser = null; resident = null; myPosts = []; myBookings = []; lastBooked = null;
+    sessionUser = null; resident = null; staffRole = null; businessAccount = null; myPosts = []; myBookings = []; lastBooked = null;
     renderMe(); renderHomeExtras();
   }
 
@@ -1109,6 +1147,8 @@ function isOpenNow(hours, date=new Date()){
       });
     } catch (e) {}
     await loadResident();
+    await loadStaff();
+    await loadBusinessAccount();
     authReady = true;
     if (typeof loadPosts === 'function') try { await loadMyContent(); } catch (e) {}
     renderMe(); renderHomeExtras();
@@ -1231,24 +1271,34 @@ function isOpenNow(hours, date=new Date()){
       el.innerHTML = banner + '<div class="card me-card"><h2 style="margin:0 0 8px">האזור שלי</h2><p class="meta">נכנסים עם Google. רואים את השם והתמונה מהחשבון, בלי למסור מספר טלפון. פרסום, תגובה והרשמה לקורס פתוחים לתושבות/ים אחרי אימות קצר.</p><button class="btn main" type="button" data-google-signin>כניסה עם Google</button><p class="err" id="auth-msg" hidden></p><p class="meta" style="margin:16px 0 0"><a href="https://kehi.ranbenri.workers.dev/privacy" target="_blank" rel="noopener">מדיניות פרטיות</a></p></div>';
       const rest = $('me-legacy'); if (rest) rest.hidden = true;
       const book = $('me-bookings'); if (book) book.hidden = true;
+      if (typeof renderMeBiz === 'function') renderMeBiz();
       return;
     }
-    const st = residentStatus() || 'none';
     const av = googleAvatar();
     const avHtml = av ? '<img class="me-av" alt="" src="' + esc(av) + '">' : initialsAvatar(googleName());
     let actions = '<button class="btn ghost sm" type="button" data-signout>יציאה</button>';
     let form = '';
-    if (st === 'none' || st === 'rejected'){
-      form = '<label for="verify-note">הערה למנהל/ת (לא חובה)</label><textarea class="f" id="verify-note" rows="2" placeholder="למשל: גר/ה ביישוב, או איך מכירים את הקהילה"></textarea><button class="btn main" type="button" data-request-verify>בקשת אימות תושב</button>';
-    } else if (st === 'pending'){
-      form = '<p class="note">הבקשה ממתינה לאישור מנהל/ת קהילה.</p>';
+    let stClass = residentStatus() || 'none';
+    let stLabel = STATUS_HE[stClass] || stClass;
+    if (staffRole === 'admin' || staffRole === 'manager'){
+      stClass = staffRole === 'admin' ? 'admin' : 'manager';
+      stLabel = staffRole === 'admin' ? 'אדמין' : 'מנהל/ת קהילה';
+      form = '';
+      actions = '<a class="btn main sm" href="/admin">לניהול</a> ' + actions;
+    } else {
+      const st = residentStatus() || 'none';
+      if (st === 'none' || st === 'rejected'){
+        form = '<label for="verify-note">הערה למנהל/ת (לא חובה)</label><textarea class="f" id="verify-note" rows="2" placeholder="למשל: גר/ה ביישוב, או איך מכירים את הקהילה"></textarea><button class="btn main" type="button" data-request-verify>בקשת אימות תושב</button>';
+      } else if (st === 'pending'){
+        form = '<p class="note">הבקשה ממתינה לאישור מנהל/ת קהילה.</p>';
+      }
+      if (st === 'rejected' && resident && resident.review_note) form = '<p class="note">סיבת הדחייה: ' + esc(resident.review_note) + '</p>' + form;
     }
-    if (st === 'rejected' && resident && resident.review_note) form = '<p class="note">סיבת הדחייה: ' + esc(resident.review_note) + '</p>' + form;
-    el.innerHTML = banner + '<div class="card me-card"><div class="me-row">' + avHtml + '<div style="flex:1;min-width:0"><h2 style="margin:0">' + esc(googleName()) + '</h2><div class="st ' + esc(st) + '">' + esc(STATUS_HE[st]||st) + '</div></div></div>' + form + '<div style="margin-top:12px">' + actions + '</div><p class="err" id="auth-msg" hidden></p><p class="meta" style="margin:16px 0 0"><a href="https://kehi.ranbenri.workers.dev/privacy" target="_blank" rel="noopener">מדיניות פרטיות</a></p></div>';
+    el.innerHTML = banner + '<div class="card me-card"><div class="me-row">' + avHtml + '<div style="flex:1;min-width:0"><h2 style="margin:0">' + esc(googleName()) + '</h2><div class="st ' + esc(stClass) + '">' + esc(stLabel) + '</div></div></div>' + form + '<div style="margin-top:12px">' + actions + '</div><p class="err" id="auth-msg" hidden></p><p class="meta" style="margin:16px 0 0"><a href="https://kehi.ranbenri.workers.dev/privacy" target="_blank" rel="noopener">מדיניות פרטיות</a></p></div>';
     const rest = $('me-legacy'); if (rest) rest.hidden = true;
     renderMyBookingsList();
+    if (typeof renderMeBiz === 'function') renderMeBiz();
   }
-
   function demoCourse(){
     const a = (d,h,m) => new Date(2026, 10, d, h, m).toISOString();
     const slots = [
@@ -1559,6 +1609,22 @@ function isOpenNow(hours, date=new Date()){
     if (ev.target.closest('[data-google-signin]')){ ev.preventDefault(); signInGoogle(); }
     if (ev.target.closest('[data-signout]')){ ev.preventDefault(); signOut(); }
     if (ev.target.closest('[data-request-verify]')){ ev.preventDefault(); requestVerification(); }
+
+    if (ev.target.closest('[data-pay-cycle]')){ ev.preventDefault(); pricingState.cycle = ev.target.closest('[data-pay-cycle]').getAttribute('data-pay-cycle'); renderPricing(); }
+    if (ev.target.closest('[data-start-trial]')){ ev.preventDefault(); pricingState.pick = ev.target.closest('[data-start-trial]').getAttribute('data-start-trial'); renderPricing(); const f=$('trial-form'); if (f) f.scrollIntoView({behavior:'smooth', block:'start'}); }
+    if (ev.target.closest('[data-pay-soon]')){ ev.preventDefault(); const n=$('trial-msg')||$('auth-msg'); alert('התשלום ייפתח בקרוב'); }
+    if (ev.target.closest('[data-confirm-trial]')){ ev.preventDefault(); confirmTrial(); }
+    if (ev.target.closest('[data-pick-place]')){
+      ev.preventDefault();
+      const b = ev.target.closest('[data-pick-place]');
+      const id = b.getAttribute('data-pick-place');
+      const name = b.getAttribute('data-pick-name') || '';
+      if ($('biz-place-id')) $('biz-place-id').value = id;
+      if ($('biz-place')) $('biz-place').value = name;
+      if ($('biz-name') && !$('biz-name').value) $('biz-name').value = name;
+      if ($('biz-suggest')) $('biz-suggest').hidden = true;
+    }
+
     if (ev.target.closest('[data-gate-close]')){ ev.preventDefault(); hideGate(); }
     const bk = ev.target.closest('[data-book-slot]');
     if (bk){ ev.preventDefault(); const post = (DEMO && (demoKind().indexOf('course')===0 || location.hash.indexOf('demo-course')>=0)) ? demoCourse() : (pulsePosts.concat(myPosts).find(p => (p.slots||[]).some(s => String(s.id)===String(bk.dataset.bookSlot))) || {id: location.hash.split('/')[2], slots:[]}); bookSlot(bk.dataset.bookSlot, post); }
@@ -1591,18 +1657,263 @@ function isOpenNow(hours, date=new Date()){
 
 </script><!-- DATA:END -->
 <script>
-  const routes = {'':'home','cats':'cats','cat':'home','item':'item','ask':'ask','add':'add','me':'me','events':'events','place':'place','post':'post'};
+  const routes = {'':'home','cats':'cats','cat':'home','item':'item','ask':'ask','add':'add','me':'me','events':'events','place':'place','post':'post','pricing':'pricing'};
+
+  const PRICING_CONFIG = [
+    {tier_id:'community', name_he:'קהילה', family:'community', price_ils:0, monthly_equivalent_ils:0, storage_gb:null, billing_cycle:'free', allow_bit_applepay:false, highlight_he:null, savings_ils:null, founder_limit:null, features:[
+      {text:'צפייה מלאה וחיפוש חכם ב«שאלו את נחת»'},
+      {text:'פרסומים קהילתיים קצרים (טרמפים, מסירות/יד שנייה, עזרה, אירועים חינמיים) ותגובות'},
+      {text:'ניהול פרסומים פתוחים מהבית'}
+    ]},
+    {tier_id:'business_monthly', name_he:'אהבה', family:'business', price_ils:17, monthly_equivalent_ils:17, storage_gb:null, billing_cycle:'monthly', allow_bit_applepay:false, highlight_he:null, savings_ils:null, founder_limit:null, features:[
+      {text:'כל מה שבמסלול הקהילה'},
+      {text:'דף עסק מלא בקטגוריות ובתשובות «שאלו את נחת»'},
+      {text:'פרסום אירועים, סדנאות בתשלום ומבצעים באירועים הקרובים'},
+      {text:'שעות פתיחה חיות ברצועת «פתוח עכשיו / קורה היום»'},
+      {text:'כפתור יצירת קשר ישיר בוואטסאפ או בטלפון'}
+    ]},
+    {tier_id:'business_yearly', name_he:'אהבה', family:'business', price_ils:156, monthly_equivalent_ils:13, storage_gb:null, billing_cycle:'yearly', allow_bit_applepay:true, highlight_he:'חוסכים 48 ₪ בשנה', savings_ils:48, founder_limit:null, features:[
+      {text:'כל מה שבמסלול הקהילה'},
+      {text:'דף עסק מלא בקטגוריות ובתשובות «שאלו את נחת»'},
+      {text:'פרסום אירועים, סדנאות בתשלום ומבצעים באירועים הקרובים'},
+      {text:'שעות פתיחה חיות ברצועת «פתוח עכשיו / קורה היום»'},
+      {text:'כפתור יצירת קשר ישיר בוואטסאפ או בטלפון'}
+    ]},
+    {tier_id:'pro_monthly', name_he:'פרו', family:'pro', price_ils:73, monthly_equivalent_ils:73, storage_gb:64, billing_cycle:'monthly', allow_bit_applepay:false, highlight_he:'הכי משתלם לעסקים פעילים', savings_ils:null, founder_limit:null, features:[
+      {text:'כל מה שבמסלול אהבה'},
+      {text:'סטודיו AI לתמונות ועיצוב (Mac Studio)', soon:true},
+      {text:'אחסון אישי 64GB', soon:true},
+      {text:'מסנן רעש למייל עם כתובת העברה אישית בדומיין הקהילה (התראות דחופות לוואטסאפ, סיכום יומי, השתקת ניוזלטרים)', soon:true},
+      {text:'תיוק אוטומטי ב-OCR של חשבוניות וקבלות', soon:true},
+      {text:'יצירת תוכן ב-AI ותרגום לאנגלית', soon:true}
+    ]},
+    {tier_id:'founder_yearly', name_he:'מייסד', family:'founder', price_ils:730, monthly_equivalent_ils:60.83, storage_gb:128, billing_cycle:'yearly', allow_bit_applepay:true, highlight_he:'שנתי, חודשיים חינם על פרו', savings_ils:146, founder_limit:20, features:[
+      {text:'כל מה שבמסלול פרו'},
+      {text:'פגישת התנעה של 45 דקות עם רן, כולל ראיון AI באפליקציה להכנת תוכנית פעולה', soon:true},
+      {text:'עד 3 פגישות המשך בשנה בהנחת מייסד', soon:true},
+      {text:'אחסון אישי 128GB', soon:true},
+      {text:'תג «מייסד» ו«זרקור מייסדים» (בלי להטות את החיפוש האורגני)', soon:true},
+      {text:'גישה מוקדמת', soon:true}
+    ]}
+  ];
+  let pricingState = { cycle:'yearly', plans: PRICING_CONFIG.slice(), founder_remaining:20, founder_limit:20, pick:null, trialBusy:false };
+
+  async function loadStaff(){
+    staffRole = null;
+    if (!sessionUser) return;
+    try {
+      // admin_whoami is the public RPC for is_admin / is_manager (private.is_staff is not exposed)
+      const r = await fetch(AUTH_URL + '/rest/v1/rpc/admin_whoami', { method:'POST', headers: authHeaders(), body: '{}' });
+      if (r.ok){
+        const w = await r.json();
+        if (w && w.is_admin) staffRole = 'admin';
+        else if (w && (w.is_manager || w.role === 'manager')) staffRole = 'manager';
+      }
+    } catch (e) { staffRole = null; }
+  }
+  async function loadBusinessAccount(){
+    businessAccount = null;
+    if (!sessionUser) return;
+    try {
+      const r = await fetch(AUTH_URL + '/rest/v1/rpc/my_business_account', { method:'POST', headers: authHeaders(), body: '{}' });
+      if (r.ok){
+        const row = await r.json();
+        businessAccount = (row && row.user_id) ? row : null;
+      }
+    } catch (e) { businessAccount = null; }
+  }
+  async function loadPricingPlans(){
+    try {
+      const r = await fetch((AUTH_URL || '') + '/rest/v1/rpc/list_pricing_plans', { method:'POST', headers: authHeaders(), body: '{}' });
+      if (!r.ok) return;
+      const data = await r.json();
+      if (data && Array.isArray(data.plans) && data.plans.length){
+        pricingState.plans = data.plans;
+        if (data.founder_remaining != null) pricingState.founder_remaining = data.founder_remaining;
+        if (data.founder_limit != null) pricingState.founder_limit = data.founder_limit;
+      }
+    } catch (e) {}
+  }
+  function planById(id){ return (pricingState.plans || PRICING_CONFIG).find(p => p.tier_id === id); }
+  function daysLeft(iso){
+    if (!iso) return null;
+    const ms = new Date(iso).getTime() - Date.now();
+    return Math.max(0, Math.ceil(ms / 86400000));
+  }
+  function featureList(feats){
+    return '<ul>' + (feats||[]).map(f => {
+      const text = (typeof f === 'string') ? f : (f && f.text) || '';
+      const soon = f && f.soon;
+      return '<li>' + esc(text) + (soon ? '<span class="soon">בקרוב</span>' : '') + '</li>';
+    }).join('') + '</ul>';
+  }
+
+  function renderMeBiz(){
+    const el = $('me-biz'); if (!el) return;
+    const acc = businessAccount;
+    let h = '<div class="card biz-card"><h2 style="margin:0 0 6px">חשבון עסק</h2>';
+    if (!acc){
+      h += '<p class="meta" style="margin:0 0 8px">אהבה — 13 ₪ לחודש בחיוב שנתי, או 17 ₪ לחודש ללא התחייבות. שבועיים ראשונים חינם, בלי כרטיס אשראי.</p>';
+      h += '<ul><li>דף עסק מורחב</li><li>עדכון שעות ותמונות</li><li>הדגשה בהמלצות נחת</li><li>דוח צפיות</li></ul>';
+      h += '<a class="btn main" href="#/pricing">למסלולים והתחלת ניסיון</a></div>';
+      el.innerHTML = h; el.hidden = false; return;
+    }
+    const plan = planById(acc.subscription_tier) || {name_he: acc.subscription_tier};
+    const st = acc.status || '';
+    const days = daysLeft(acc.trial_ends_at);
+    h += '<div class="st ' + esc(st === 'trial' ? 'trial' : st === 'active' ? 'verified' : 'expired') + '">' + esc(plan.name_he || '') + (acc.billing_cycle === 'yearly' ? ' · שנתי' : acc.billing_cycle === 'monthly' ? ' · חודשי' : '') + '</div>';
+    h += '<p class="meta" style="margin:8px 0 0">' + esc(acc.business_name || '') + '</p>';
+    if (acc.claim_status === 'pending') h += '<p class="note">בקשת השיוך לעסק ממתינה לאישור מנהל/ת. הניסיון כבר פעיל.</p>';
+    if (acc.claim_status === 'rejected') h += '<p class="note">שיוך העסק לא אושר' + (acc.claim_review_note ? ': ' + esc(acc.claim_review_note) : '') + '.</p>';
+    if (st === 'trial'){
+      h += '<p class="days">נותרו ' + (days == null ? '—' : days) + ' ימים לניסיון החינם. לא נדרש כרטיס.</p>';
+    } else if (st === 'expired'){
+      h += '<p class="note">תקופת הניסיון הסתיימה. 13 ₪ לחודש בחיוב שנתי — התשלום יופעל בקרוב.</p>';
+      h += '<button class="btn main" type="button" data-pay-soon>לתשלום</button>';
+    } else if (st === 'active' && acc.billing_cycle === 'monthly' && (acc.subscription_tier === 'business_monthly' || (plan && plan.family === 'business'))){
+      h += '<p class="note">אפשר לעבור לחיוב שנתי ב-13 ₪ לחודש ולחסוך 48 ₪ בשנה. התשלום יופעל בקרוב.</p>';
+      h += '<a class="btn ghost" href="#/pricing">למסלול השנתי</a>';
+    }
+    h += '<p style="margin:12px 0 0"><a class="btn ghost sm" href="#/pricing">כל המסלולים</a></p></div>';
+    el.innerHTML = h; el.hidden = false;
+  }
+
+  function renderPricing(){
+    const el = $('pricing-root'); if (!el) return;
+    const cycle = pricingState.cycle === 'monthly' ? 'monthly' : 'yearly';
+    const plans = pricingState.plans || PRICING_CONFIG;
+    const byFamily = (fam, cyc) => plans.find(p => p.family === fam && (fam === 'community' || p.billing_cycle === cyc || (fam === 'pro' && p.billing_cycle === 'monthly') || (fam === 'founder' && p.billing_cycle === 'yearly')));
+    const community = plans.find(p => p.family === 'community') || PRICING_CONFIG[0];
+    const business = plans.find(p => p.family === 'business' && p.billing_cycle === cycle) || planById(cycle === 'yearly' ? 'business_yearly' : 'business_monthly');
+    const pro = plans.find(p => p.family === 'pro') || planById('pro_monthly');
+    const founder = plans.find(p => p.family === 'founder') || planById('founder_yearly');
+    const remaining = pricingState.founder_remaining;
+    const limit = pricingState.founder_limit || (founder && founder.founder_limit) || 20;
+
+    function priceBlock(p){
+      if (!p) return '';
+      if (p.billing_cycle === 'free' || Number(p.price_ils) === 0) return '<div class="price-big">0 ₪ <span>חינם</span></div>';
+      if (p.billing_cycle === 'yearly'){
+        const mo = p.monthly_equivalent_ils;
+        return '<div class="price-big">' + esc(String(mo)) + ' ₪ <span>/ חודש</span></div><p class="meta">בחיוב שנתי · ' + esc(String(p.price_ils)) + ' ₪ לשנה, כולל מע״מ</p>' + (p.savings_ils ? '<p class="save">חוסכים ' + esc(String(p.savings_ils)) + ' ₪ בשנה</p>' : '');
+      }
+      return '<div class="price-big">' + esc(String(p.price_ils)) + ' ₪ <span>/ חודש ללא התחייבות</span></div><p class="meta">כולל מע״מ</p>';
+    }
+    function card(p, opts){
+      opts = opts || {};
+      if (!p) return '';
+      const feats = p.features || [];
+      let h = '<div class="card pay-card" data-tier="' + esc(p.tier_id) + '">';
+      if (p.highlight_he) h += '<div class="badge-hot">' + esc(p.highlight_he) + '</div>';
+      if (opts.slots) h += '<div class="badge-hot">נשארו ' + esc(String(opts.slots.remaining)) + ' מתוך ' + esc(String(opts.slots.limit)) + ' מקומות</div>';
+      h += '<h2 style="margin:0 0 4px">' + esc(p.name_he) + '</h2>';
+      h += priceBlock(p);
+      h += featureList(feats);
+      if (p.allow_bit_applepay && p.billing_cycle === 'yearly') h += '<p class="pay-methods">אפשרות לתשלום בכרטיס, בביט וב-Apple Pay (כשהסליקה תופעל).</p>';
+      else if (p.billing_cycle === 'monthly') h += '<p class="pay-methods">תשלום בכרטיס או בהוראת קבע (כשהסליקה תופעל).</p>';
+      if (p.billing_cycle !== 'free'){
+        const full = opts.slots && opts.slots.remaining <= 0;
+        if (full) h += '<p class="note">מסלול המייסד מלא בקהילה הזו.</p>';
+        else h += '<button class="btn main" type="button" data-start-trial="' + esc(p.tier_id) + '">התחל שבועיים חינם</button> ';
+        h += '<button class="btn ghost" type="button" data-pay-soon>לתשלום</button>';
+      }
+      h += '</div>';
+      return h;
+    }
+
+    let h = '<p class="pay-note">המחירים כוללים מע״מ. במסלולים בתשלום יש שבועיים ניסיון חינם, בלי כרטיס אשראי. התשלום עצמו ייפתח בקרוב.</p>';
+    h += '<div class="pay-toggle" role="tablist" aria-label="מחזור חיוב">';
+    h += '<button type="button" data-pay-cycle="yearly"' + (cycle==='yearly'?' class="on"':'') + '>חיוב שנתי</button>';
+    h += '<button type="button" data-pay-cycle="monthly"' + (cycle==='monthly'?' class="on"':'') + '>חיוב חודשי</button>';
+    h += '</div>';
+    if (cycle === 'yearly') h += '<p class="meta" style="margin:-8px 0 12px">אהבה ב-13 ₪ לחודש בחיוב שנתי. אפשר לעבור לתצוגת 17 ₪ לחודש ללא התחייבות.</p>';
+    else h += '<p class="meta" style="margin:-8px 0 12px">אהבה ב-17 ₪ לחודש ללא התחייבות. בחיוב שנתי זה 13 ₪ לחודש.</p>';
+    h += card(community);
+    h += card(business);
+    h += card(pro);
+    h += card(founder, { slots: { remaining: remaining, limit: limit } });
+    if (pricingState.pick){
+      const p = planById(pricingState.pick);
+      h += '<div class="card pay-form" id="trial-form"><h3 style="margin:0 0 6px">התחלת ניסיון · ' + esc((p && p.name_he) || '') + '</h3>';
+      h += '<p class="meta">שבועיים חינם, בלי כרטיס. אם תבחרו מקום מהמדריך, השיוך יעבור לאישור מנהל/ת — הניסיון מתחיל מיד.</p>';
+      if (!isAuthed()){
+        h += '<button class="btn main" type="button" data-google-signin>כניסה עם Google כדי להתחיל</button></div>';
+      } else {
+        h += '<label for="biz-name">שם העסק</label><input class="f" id="biz-name" type="text" autocomplete="organization">';
+        h += '<label for="biz-place">חיפוש במדריך (לא חובה)</label><input class="f" id="biz-place" type="search" placeholder="שם המקום" data-biz-search>';
+        h += '<input type="hidden" id="biz-place-id" value="">';
+        h += '<div class="pay-suggest" id="biz-suggest" hidden></div>';
+        h += '<p class="err" id="trial-msg" hidden></p>';
+        h += '<button class="btn main" type="button" data-confirm-trial>אישור והתחלת שבועיים חינם</button></div>';
+      }
+    }
+    el.innerHTML = h;
+  }
+
+  function searchBizPlaces(q){
+    const box = $('biz-suggest'); if (!box) return;
+    q = (q || '').trim().toLowerCase();
+    const list = (typeof visiblePlaces === 'function' ? visiblePlaces() : (S.places || [])).filter(p => !q || ((p.name_he||'') + ' ' + (p.name_en||'') + ' ' + (p.address||'')).toLowerCase().includes(q));
+    const shown = list.slice(0, 8);
+    if (!shown.length){ box.hidden = true; box.innerHTML = ''; return; }
+    box.hidden = false;
+    box.innerHTML = shown.map(p => '<button type="button" data-pick-place="' + esc(p.id) + '" data-pick-name="' + esc(p.name_he || '') + '">' + esc(p.name_he || p.id) + (p.address ? '<div class="meta">' + esc(p.address) + '</div>' : '') + '</button>').join('');
+  }
+
+  async function confirmTrial(){
+    if (pricingState.trialBusy) return;
+    if (!isAuthed()) return signInGoogle();
+    const name = (($('biz-name')||{}).value || '').trim();
+    const placeId = (($('biz-place-id')||{}).value || '').trim() || null;
+    const msg = $('trial-msg');
+    if (!name){ if (msg){ msg.hidden = false; msg.textContent = 'צריך שם עסק כדי להתחיל.'; } return; }
+    pricingState.trialBusy = true;
+    if (msg){ msg.hidden = false; msg.textContent = 'מתחילים את הניסיון…'; msg.className = 'err'; }
+    try {
+      const r = await fetch(AUTH_URL + '/rest/v1/rpc/start_business_trial', {
+        method:'POST', headers: authHeaders(),
+        body: JSON.stringify({ p_tier_id: pricingState.pick, p_business_name: name, p_place_id: placeId })
+      });
+      const body = await r.json().catch(()=>({}));
+      if (!r.ok){
+        const m = String((body && (body.message || body.details || body.hint || body.error)) || '');
+        let he = 'לא הצלחנו להתחיל את הניסיון.';
+        if (/not authenticated/i.test(m)) he = 'צריך להיכנס קודם עם Google.';
+        else if (/trial already used/i.test(m)) he = 'כבר נוצל ניסיון בחשבון הזה.';
+        else if (/already has/i.test(m)) he = 'כבר יש חשבון עסק בחשבון הזה.';
+        else if (/founder plan is full/i.test(m)) he = 'מסלול המייסד מלא בקהילה הזו.';
+        else if (/business name/i.test(m)) he = 'צריך שם עסק כדי להתחיל.';
+        else if (/place not found/i.test(m)) he = 'המקום שנבחר לא נמצא.';
+        if (msg){ msg.hidden = false; msg.textContent = he; }
+        return;
+      }
+      businessAccount = body && body.user_id ? body : businessAccount;
+      pricingState.pick = null;
+      if (msg){ msg.hidden = true; }
+      renderMe();
+      location.hash = '#/me';
+    } catch (e) {
+      if (msg){ msg.hidden = false; msg.textContent = 'לא הצלחנו להתחיל את הניסיון.'; }
+    } finally { pricingState.trialBusy = false; }
+  }
+
   function go(){
     const r = routes[location.hash.replace(/^#\/?/,'').split('/')[0]] || 'home';
     if (r === 'place' && window.NAHAT_renderPlace) window.NAHAT_renderPlace(decodeURIComponent(location.hash.split('/')[2] || ''));
     if (r === 'post') { const id = decodeURIComponent(location.hash.split('/')[2] || ''); if (window.renderPostThread) window.renderPostThread(id); }
     if (r === 'me' && window.renderMe) window.renderMe();
+    if (r === 'pricing') { loadPricingPlans().then(function(){ if (window.renderPricing) window.renderPricing(); }); }
     document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === 's-' + r));
-    document.querySelectorAll('nav.tabs a').forEach(a => a.classList.toggle('on', a.dataset.r === r || ((r==='item'||r==='place'||r==='events') && a.dataset.r==='home')));
+    document.querySelectorAll('nav.tabs a').forEach(a => a.classList.toggle('on', a.dataset.r === r || ((r==='item'||r==='place'||r==='events') && a.dataset.r==='home') || (r==='pricing' && a.dataset.r==='me')));
     document.getElementById('composer').style.display = r === 'ask' ? '' : 'none';
     window.scrollTo(0,0);
   }
   window.addEventListener('hashchange', go); go();
+
+  document.addEventListener('input', ev => {
+    if (ev.target && ev.target.id === 'biz-place') searchBizPlaces(ev.target.value);
+  });
+
   document.querySelectorAll('[data-demo]').forEach(b => b.addEventListener('click', () => {
     const t = b.closest('section, .card').querySelector('.toast'); if (t) t.classList.add('show');
   }));
