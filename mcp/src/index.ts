@@ -16,6 +16,9 @@ export interface Env {
   SUPABASE_ANON_KEY: string; // public anon/publishable key (not a secret)
   COMMUNITY_NAME: string; // Hebrew display name, e.g. "נחת · מצפה רמון"
   PUBLIC_URL: string; // e.g. https://nahat-mcp.ranbenri.workers.dev
+  APP_ORIGIN?: string; // the community app origin allowed to call /app/mcp from a browser
+  COMMUNITY_ID?: string; // optional community_id filter (e.g. "mitzpe")
+  HIDE_GROUPS?: string; // comma-separated category_group values the app hides (e.g. "אירוח")
 }
 
 type Props = {
@@ -120,6 +123,8 @@ function getProvider(env: Env) {
 
 export default {
   fetch(request: Request, env: Env, ctx: ExecutionContext) {
+    // Resident tier: read-only public tools, outside the admin OAuth flow. Admin tools stay on /mcp only.
+    if (new URL(request.url).pathname === RESIDENT_ROUTE) return residentApi(request, env, ctx);
     return getProvider(env).fetch(request, env, ctx);
   },
 };
@@ -430,5 +435,152 @@ export function buildServer(env: Env) {
   tool("cancel_course_booking", "Cancel one attendee's booking in a course slot.", z.object({ booking_id: z.number().int() }), true,
     (a) => call("staff_cancel_booking", { p_booking: a.booking_id }));
 
+  return server;
+}
+
+// ---------- Resident tier (/app/mcp) ----------
+// Read-only tools for the in-app chat agent and the local Gemma agent.
+// - No OAuth: the caller may pass the signed-in user's own Supabase access token (Authorization: Bearer).
+//   Without it the anon (public) key is used. Either way Postgres RLS decides what is visible:
+//   anon/residents only ever see status=published places/events and status=open posts.
+// - No admin tool is registered here, whatever the caller's role. Admin tools live only on /mcp behind OAuth.
+// - Browser calls are accepted only from the community app origin (APP_ORIGIN).
+const RESIDENT_ROUTE = "/app/mcp";
+type Caller = { jwt: string | null; uid: string | null; role: "guest" | "member" | "admin" };
+
+async function sbGet(env: Env, jwt: string | null, path: string) {
+  const r = await fetch(`${env.SUPABASE_URL}/rest/v1/${path}`, {
+    headers: { apikey: env.SUPABASE_ANON_KEY, authorization: `Bearer ${jwt || env.SUPABASE_ANON_KEY}`, accept: "application/json" },
+  });
+  const text = await r.text();
+  let j: any = null;
+  try { j = text ? JSON.parse(text) : null; } catch { j = text; }
+  if (!r.ok) throw new RpcError(r.status, j && j.code, String((j && j.message) || `HTTP ${r.status}`));
+  return j;
+}
+
+async function residentApi(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+  const appOrigin = env.APP_ORIGIN || "";
+  const corsH: Record<string, string> = appOrigin ? {
+    "access-control-allow-origin": appOrigin,
+    "access-control-allow-headers": "authorization, content-type, accept, mcp-protocol-version, mcp-session-id",
+    "access-control-allow-methods": "POST, OPTIONS",
+    "access-control-max-age": "86400",
+    vary: "origin",
+  } : {};
+  const origin = request.headers.get("origin");
+  if (origin && origin !== appOrigin) return new Response("forbidden origin", { status: 403 });
+  if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: corsH });
+  if (request.method !== "POST") return new Response("Method not allowed", { status: 405, headers: { ...corsH, allow: "POST, OPTIONS" } });
+  const json401 = (d: string) => new Response(JSON.stringify({ error: "invalid_token", error_description: d }), { status: 401, headers: { ...corsH, "content-type": "application/json" } });
+
+  const caller: Caller = { jwt: null, uid: null, role: "guest" };
+  const auth = request.headers.get("authorization") || "";
+  if (auth) {
+    const m = auth.match(/^Bearer\s+([A-Za-z0-9\-_.]+)$/);
+    if (!m) return json401("malformed authorization header");
+    const u = await fetch(`${env.SUPABASE_URL}/auth/v1/user`, { headers: { apikey: env.SUPABASE_ANON_KEY, authorization: `Bearer ${m[1]}` } });
+    if (!u.ok) return json401("Supabase session is not valid; sign in again");
+    const uj: any = await u.json().catch(() => ({}));
+    caller.jwt = m[1]; caller.uid = uj?.id || null; caller.role = "member";
+    const who = await rpc(env, m[1], "admin_whoami").catch(() => null);
+    if (whoamiIsAdmin(who)) caller.role = "admin";
+  }
+  const handler = createMcpHandler(() => buildResidentServer(env, caller), {
+    route: RESIDENT_ROUTE,
+    corsOptions: appOrigin ? { origin: appOrigin, methods: "POST, OPTIONS", headers: corsH["access-control-allow-headers"] } : false,
+    allowedOriginHostnames: appOrigin ? [new URL(appOrigin).hostname] : [],
+    responseMode: "json",
+  } as any);
+  const res = await handler(request, env, ctx);
+  const h = new Headers(res.headers);
+  for (const [k, v] of Object.entries(corsH)) h.set(k, v);
+  h.set("cache-control", "no-store");
+  return new Response(res.body, { status: res.status, headers: h });
+}
+
+const HEB_PREFIX = /^[והבלמשכ]{1,2}(?=[\u05d0-\u05ea]{3,})/;
+const STOP = new Set("עם של יש את על אני מה איפה מי לי לנו הכי או גם אפשר איזה איזו כמה עכשיו היום מחר פה כאן שם זה זו יש? משהו מקום מקומות טוב טובה טובים רוצה רוצים צריך צריכה תמליצי תמליץ המלצה ממליצים מכירים מכיר בבקשה תודה the a an in of for and to is are".split(" "));
+function tokens(q: string) {
+  return String(q || "").toLowerCase().replace(/[^\p{L}\p{N}\s'"״׳-]/gu, " ").split(/\s+/).filter((t) => t.length >= 2 && !STOP.has(t)).slice(0, 12);
+}
+function scoreText(hay: string, toks: string[]) {
+  const h = hay.toLowerCase();
+  let s = 0;
+  for (const t of toks) {
+    if (h.includes(t)) s += t.length;
+    else { const b = t.replace(HEB_PREFIX, ""); if (b !== t && b.length >= 3 && h.includes(b)) s += b.length; }
+  }
+  return s;
+}
+
+export function buildResidentServer(env: Env, caller: Caller) {
+  const server = new McpServer({ name: `kehi-resident-${new URL(env.PUBLIC_URL).hostname.split(".")[0]}`, version: "1.0.0" });
+  const comm = env.COMMUNITY_ID ? `&community_id=eq.${encodeURIComponent(env.COMMUNITY_ID)}` : "";
+  const hidden = new Set(String(env.HIDE_GROUPS || "").split(",").map((x) => x.trim()).filter(Boolean));
+  const LODGING = /[\/·,\s](צימר|צימרים|מלון|מלונות|הוסטל|גסטהאוס|יורט|דירת נופש)[\/·,\s]/;
+  const PCOLS = "id,name_he,name_en,category,category_group,address,phone,hours,hours_status,website,maps_url,note,last_verified,updated_at,search_only,badge";
+  const ECOLS = "id,title,starts_at,ends_at,start_date,when_text,venue_name,venue_place_id,address,price_text,organizer,description";
+  const visible = (p: any) => !(hidden.has(p.category_group || "") || (hidden.size && LODGING.test(` ${p.category || ""} `)));
+  const places = async () => ((await sbGet(env, caller.jwt, `places?select=${PCOLS}&status=eq.published${comm}&order=name_he`)) || []).filter(visible);
+  const events = async () => (await sbGet(env, caller.jwt, `events?select=${ECOLS}&status=eq.published${comm}&order=starts_at.asc.nullslast`)) || [];
+
+  const tool = (name: string, description: string, schema: z.ZodObject<any>, handler: (a: any) => Promise<any>, needs?: "member") => {
+    if (needs === "member" && caller.role === "guest") return; // not even listed for guests
+    server.registerTool(name, { description, inputSchema: schema, annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false } } as any,
+      (async (args: any) => {
+        try { return txt(await handler(args || {})); }
+        catch (e: any) { return errTxt(e instanceof RpcError ? `DB error${e.code ? ` ${e.code}` : ""}: ${e.message}` : String(e?.message || e)); }
+      }) as any);
+  };
+
+  tool("community_info", "The community this server answers for, and the caller's role (guest, member or admin). Read-only tier: answers come only from approved (published) data.",
+    z.object({}), async () => ({
+      community: env.COMMUNITY_NAME, role: caller.role, tier: "resident-read-only",
+      note: "Only published places/events and open board posts are visible. Admin actions are not available on this endpoint.",
+    }));
+  tool("search_places", "Search approved (published) places and businesses by free text (Hebrew or English): name, category, address, notes. Returns up to `limit` best matches with hours, phone, website and a Google Maps link. Empty result means there is no approved record: say so, do not guess.",
+    z.object({ query: z.string().max(200).optional(), category_group: z.string().max(60).optional(), limit: z.number().int().min(1).max(20).optional() }),
+    async (a) => {
+      const toks = tokens(a.query || "");
+      let rows = (await places()).filter((p: any) => !a.category_group || p.category_group === a.category_group);
+      if (toks.length) rows = rows.map((p: any) => ({ p, s: scoreText([p.name_he, p.name_en, p.category, p.category_group, p.address, p.note].join(" "), toks) }))
+        .filter((x: any) => x.s > 0).sort((x: any, y: any) => y.s - x.s).map((x: any) => x.p);
+      return { total: rows.length, places: rows.slice(0, a.limit || 8).map((p: any) => ({ ...p, links: { google_maps: p.maps_url || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${p.name_he || ""} ${p.address || ""}`)}`, website: p.website || null } })) };
+    });
+  tool("get_place", "One approved place by id, with its public business calendar (opening hours / bookable slots) when the business has one.",
+    z.object({ id: z.string().max(80) }), async (a) => {
+      const rows = (await sbGet(env, caller.jwt, `places?select=${PCOLS}&status=eq.published&id=eq.${encodeURIComponent(a.id)}${comm}`)) || [];
+      if (!rows.length || !visible(rows[0])) return { found: false };
+      const cal = await rpc(env, caller.jwt || env.SUPABASE_ANON_KEY, "place_public_calendar", { p_place_id: a.id }).catch(() => null);
+      return { found: true, place: rows[0], calendar: cal };
+    });
+  tool("list_events", "Approved (published) community events, upcoming first. Optional free-text query (title, venue, organizer) and `days_ahead` window.",
+    z.object({ query: z.string().max(200).optional(), days_ahead: z.number().int().min(1).max(365).optional(), limit: z.number().int().min(1).max(30).optional() }),
+    async (a) => {
+      const now = Date.now(), until = now + (a.days_ahead || 60) * 864e5, toks = tokens(a.query || "");
+      let rows = (await events()).filter((e: any) => {
+        const t = e.starts_at ? Date.parse(e.starts_at) : e.start_date ? Date.parse(e.start_date + "T23:59:00+02:00") : NaN;
+        return isNaN(t) || (t >= now - 6 * 3600e3 && t <= until);
+      });
+      if (toks.length) rows = rows.filter((e: any) => scoreText([e.title, e.venue_name, e.organizer, e.description, e.when_text].join(" "), toks) > 0);
+      return { total: rows.length, events: rows.slice(0, a.limit || 10) };
+    });
+  tool("list_open_posts", "Open, approved community board posts (rides, giveaways, help requests, recommendations, courses/workshops). Author ids are not returned.",
+    z.object({ type: z.enum(["ride", "giveaway", "help", "recommend", "course"]).optional(), query: z.string().max(200).optional(), limit: z.number().int().min(1).max(30).optional() }),
+    async (a) => {
+      const typeQ = a.type ? `&type=eq.${a.type}` : "";
+      let rows = (await sbGet(env, caller.jwt, `posts?select=id,type,title,body,expires_at,created_at&status=eq.open${typeQ}${comm}&order=created_at.desc&limit=100`)) || [];
+      const now = Date.now(), toks = tokens(a.query || "");
+      rows = rows.filter((p: any) => !p.expires_at || Date.parse(p.expires_at) > now);
+      if (toks.length) rows = rows.filter((p: any) => scoreText(`${p.title || ""} ${p.body || ""}`, toks) > 0);
+      return { total: rows.length, posts: rows.slice(0, a.limit || 10) };
+    });
+  tool("business_availability", "Public calendar of an approved business place: opening hours, events and bookable slots (if the business enabled its calendar).",
+    z.object({ place_id: z.string().max(80) }), (a) => rpc(env, caller.jwt || env.SUPABASE_ANON_KEY, "place_public_calendar", { p_place_id: a.place_id }));
+  tool("course_slots", "Slots of an open course/workshop/tour post with capacity and remaining seats.",
+    z.object({ post_id: z.string().max(80) }), (a) => rpc(env, caller.jwt || env.SUPABASE_ANON_KEY, "list_post_slots", { p_post: a.post_id }), "member");
+  tool("my_bookings", "The signed-in user's own course/workshop bookings (requires the user's own session).",
+    z.object({}), () => rpc(env, caller.jwt as string, "list_my_bookings"), "member");
   return server;
 }

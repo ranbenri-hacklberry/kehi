@@ -28,3 +28,14 @@ node deploy/make-deploy.mjs <private-config.jsonc> > /tmp/deploy.js   # פונק
 ## Local check
 
 `npx wrangler dev test/harness.ts -c <config>` מריץ את ה-endpoint עם props מזויפים, כדי לבדוק `tools/list`. הוא לא נפרס.
+
+## שכבת תושבים: `/app/mcp` (קריאה בלבד)
+
+נקודת קצה נפרדת באותו Worker, בשביל הצ'אט "שאלו את…" באפליקציה והסוכן המקומי (Gemma).
+
+- **בלי OAuth.** אפשר לשלוח `Authorization: Bearer <access token של Supabase של המשתמש המחובר>`. בלי כותרת, הקריאה רצה עם מפתח ה-anon. טוקן לא תקין מחזיר 401.
+- **RLS קובע מה רואים:** רק מקומות ואירועים ב-`published` ופוסטים ב-`open`. אין service_role ואין סודות.
+- **כלים:** `community_info`, `search_places`, `get_place`, `list_events`, `list_open_posts`, `business_availability`. למשתמש מחובר נוספים גם `course_slots` ו-`my_bookings` (הנתונים שלו בלבד).
+- **אין כאן אף כלי אדמין**, גם כשהמחובר הוא אדמין. כלי הניהול נשארים רק ב-`/mcp` מאחורי OAuth, והבדיקה שלהם לא השתנתה.
+- **דפדפן:** מתקבלות רק בקשות מ-`APP_ORIGIN` (CORS). בקשה מ-Origin אחר מחזירה 403.
+- **משתנים:** `APP_ORIGIN`, ו-`HIDE_GROUPS` (קבוצות שהאפליקציה מסתירה, למשל `אירוח`). `COMMUNITY_ID` הוא אופציונלי.
