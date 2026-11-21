@@ -1404,7 +1404,277 @@ function isOpenNow(hours, date=new Date()){
   }
   function hideGate(){ const g = $('auth-gate'); if (g) g.hidden = true; }
 
-  async function bootAuth(){
+  const PRICING_CONFIG = [
+    {tier_id:'community', name_he:'קהילה', family:'community', price_ils:0, monthly_equivalent_ils:0, storage_gb:null, billing_cycle:'free', allow_bit_applepay:false, highlight_he:null, savings_ils:null, founder_limit:null, features:[
+      {text:'צפייה מלאה וחיפוש חכם ב«שאלו את נחת»'},
+      {text:'פרסומים קהילתיים קצרים (טרמפים, מסירות/יד שנייה, עזרה, אירועים חינמיים) ותגובות'},
+      {text:'ניהול פרסומים פתוחים מהבית'}
+    ]},
+    {tier_id:'business_monthly', name_he:'אהבה', family:'business', price_ils:17, monthly_equivalent_ils:17, storage_gb:null, billing_cycle:'monthly', allow_bit_applepay:false, highlight_he:null, savings_ils:null, founder_limit:null, features:[
+      {text:'כל מה שבמסלול הקהילה'},
+      {text:'דף עסק מלא בקטגוריות ובתשובות «שאלו את נחת»'},
+      {text:'פרסום אירועים, סדנאות בתשלום ומבצעים באירועים הקרובים'},
+      {text:'שעות פתיחה חיות ברצועת «פתוח עכשיו / קורה היום»'},
+      {text:'כפתור יצירת קשר ישיר בוואטסאפ או בטלפון'}
+    ]},
+    {tier_id:'business_yearly', name_he:'אהבה', family:'business', price_ils:156, monthly_equivalent_ils:13, storage_gb:null, billing_cycle:'yearly', allow_bit_applepay:true, highlight_he:'חוסכים 48 ₪ בשנה', savings_ils:48, founder_limit:null, features:[
+      {text:'כל מה שבמסלול הקהילה'},
+      {text:'דף עסק מלא בקטגוריות ובתשובות «שאלו את נחת»'},
+      {text:'פרסום אירועים, סדנאות בתשלום ומבצעים באירועים הקרובים'},
+      {text:'שעות פתיחה חיות ברצועת «פתוח עכשיו / קורה היום»'},
+      {text:'כפתור יצירת קשר ישיר בוואטסאפ או בטלפון'}
+    ]},
+    {tier_id:'pro_monthly', name_he:'פרו', family:'pro', price_ils:73, monthly_equivalent_ils:73, storage_gb:64, billing_cycle:'monthly', allow_bit_applepay:false, highlight_he:'הכי משתלם לעסקים פעילים', savings_ils:null, founder_limit:null, features:[
+      {text:'כל מה שבמסלול אהבה'},
+      {text:'סטודיו AI לתמונות ועיצוב (Mac Studio)', soon:true},
+      {text:'אחסון אישי 64GB', soon:true},
+      {text:'מסנן רעש למייל עם כתובת העברה אישית בדומיין הקהילה (התראות דחופות לוואטסאפ, סיכום יומי, השתקת ניוזלטרים)', soon:true},
+      {text:'תיוק אוטומטי ב-OCR של חשבוניות וקבלות', soon:true},
+      {text:'יצירת תוכן ב-AI ותרגום לאנגלית', soon:true}
+    ]},
+    {tier_id:'founder_yearly', name_he:'מייסד', family:'founder', price_ils:730, monthly_equivalent_ils:60.83, storage_gb:128, billing_cycle:'yearly', allow_bit_applepay:true, highlight_he:'שנתי, חודשיים חינם על פרו', savings_ils:146, founder_limit:20, features:[
+      {text:'כל מה שבמסלול פרו'},
+      {text:'פגישת התנעה של 45 דקות עם רן, כולל ראיון AI באפליקציה להכנת תוכנית פעולה', soon:true},
+      {text:'עד 3 פגישות המשך בשנה בהנחת מייסד', soon:true},
+      {text:'אחסון אישי 128GB', soon:true},
+      {text:'תג «מייסד» ו«זרקור מייסדים» (בלי להטות את החיפוש האורגני)', soon:true},
+      {text:'גישה מוקדמת', soon:true}
+    ]}
+  ];
+  let pricingState = { cycle:'yearly', plans: PRICING_CONFIG.slice(), founder_remaining:20, founder_limit:20, pick:null, trialBusy:false };
+
+  function hintMe(msg){
+    try {
+      console.error('[נחת]', msg);
+      let el = document.getElementById('me-dev-hint');
+      if (!el){
+        const host = document.getElementById('me-account') || document.getElementById('s-me');
+        if (!host) return;
+        el = document.createElement('p');
+        el.id = 'me-dev-hint';
+        el.className = 'meta';
+        el.setAttribute('dir','ltr');
+        el.style.cssText = 'margin:8px 0 0;font-size:11px;color:var(--faint);word-break:break-word';
+        host.appendChild(el);
+      }
+      el.hidden = !msg;
+      el.textContent = msg ? String(msg).slice(0, 240) : '';
+    } catch (e) {}
+  }
+  function parseRpc(d){
+    if (d == null) return null;
+    if (Array.isArray(d)) return d[0] || null;
+    return d;
+  }
+  async function loadStaff(){
+    staffRole = null;
+    if (!sessionUser) return;
+    try {
+      const r = await fetch(AUTH_URL + '/rest/v1/rpc/admin_whoami', { method:'POST', headers: authHeaders(), body: '{}' });
+      const w = parseRpc(await r.json().catch(() => null));
+      if (!r.ok){
+        hintMe('admin_whoami ' + r.status);
+        return;
+      }
+      if (w && (w.is_admin === true || w.role === 'admin')) staffRole = 'admin';
+      else if (w && (w.is_manager === true || w.role === 'manager')) staffRole = 'manager';
+    } catch (e) {
+      hintMe('loadStaff: ' + (e && e.message ? e.message : e));
+      staffRole = null;
+    }
+  }
+  async function loadBusinessAccount(){
+    businessAccount = null;
+    if (!sessionUser) return;
+    try {
+      const r = await fetch(AUTH_URL + '/rest/v1/rpc/my_business_account', { method:'POST', headers: authHeaders(), body: '{}' });
+      const row = parseRpc(await r.json().catch(() => null));
+      if (!r.ok){
+        hintMe('my_business_account ' + r.status);
+        return;
+      }
+      businessAccount = (row && row.user_id) ? row : null;
+    } catch (e) {
+      hintMe('loadBusinessAccount: ' + (e && e.message ? e.message : e));
+      businessAccount = null;
+    }
+  }
+  async function loadPricingPlans(){
+    try {
+      const r = await fetch((AUTH_URL || '') + '/rest/v1/rpc/list_pricing_plans', { method:'POST', headers: authHeaders(), body: '{}' });
+      if (!r.ok) return;
+      const data = await r.json();
+      if (data && Array.isArray(data.plans) && data.plans.length){
+        pricingState.plans = data.plans;
+        if (data.founder_remaining != null) pricingState.founder_remaining = data.founder_remaining;
+        if (data.founder_limit != null) pricingState.founder_limit = data.founder_limit;
+      }
+    } catch (e) {}
+  }
+  function planById(id){ return (pricingState.plans || PRICING_CONFIG).find(p => p.tier_id === id); }
+  function daysLeft(iso){
+    if (!iso) return null;
+    const ms = new Date(iso).getTime() - Date.now();
+    return Math.max(0, Math.ceil(ms / 86400000));
+  }
+  function featureList(feats){
+    return '<ul>' + (feats||[]).map(f => {
+      const text = (typeof f === 'string') ? f : (f && f.text) || '';
+      const soon = f && f.soon;
+      return '<li>' + esc(text) + (soon ? '<span class="soon">בקרוב</span>' : '') + '</li>';
+    }).join('') + '</ul>';
+  }
+
+  function renderMeBiz(){
+    const el = $('me-biz'); if (!el) return;
+    const acc = businessAccount;
+    let h = '<div class="card biz-card"><h2 style="margin:0 0 6px">חשבון עסק</h2>';
+    if (!acc){
+      h += '<p class="meta" style="margin:0 0 8px">אהבה — 13 ₪ לחודש בחיוב שנתי, או 17 ₪ לחודש ללא התחייבות. שבועיים ראשונים חינם, בלי כרטיס אשראי.</p>';
+      h += '<ul><li>דף עסק מורחב</li><li>עדכון שעות ותמונות</li><li>הדגשה בהמלצות נחת</li><li>דוח צפיות</li></ul>';
+      h += '<a class="btn main" href="#/pricing">למסלולים והתחלת ניסיון</a></div>';
+      el.innerHTML = h; el.hidden = false; return;
+    }
+    const plan = planById(acc.subscription_tier) || {name_he: acc.subscription_tier};
+    const st = acc.status || '';
+    const days = daysLeft(acc.trial_ends_at);
+    h += '<div class="st ' + esc(st === 'trial' ? 'trial' : st === 'active' ? 'verified' : 'expired') + '">' + esc(plan.name_he || '') + (acc.billing_cycle === 'yearly' ? ' · שנתי' : acc.billing_cycle === 'monthly' ? ' · חודשי' : '') + '</div>';
+    h += '<p class="meta" style="margin:8px 0 0">' + esc(acc.business_name || '') + '</p>';
+    if (acc.claim_status === 'pending') h += '<p class="note">בקשת השיוך לעסק ממתינה לאישור מנהל/ת. הניסיון כבר פעיל.</p>';
+    if (acc.claim_status === 'rejected') h += '<p class="note">שיוך העסק לא אושר' + (acc.claim_review_note ? ': ' + esc(acc.claim_review_note) : '') + '.</p>';
+    if (st === 'trial'){
+      h += '<p class="days">נותרו ' + (days == null ? '—' : days) + ' ימים לניסיון החינם. לא נדרש כרטיס.</p>';
+    } else if (st === 'expired'){
+      h += '<p class="note">תקופת הניסיון הסתיימה. 13 ₪ לחודש בחיוב שנתי — התשלום יופעל בקרוב.</p>';
+      h += '<button class="btn main" type="button" data-pay-soon>לתשלום</button>';
+    } else if (st === 'active' && acc.billing_cycle === 'monthly' && (acc.subscription_tier === 'business_monthly' || (plan && plan.family === 'business'))){
+      h += '<p class="note">אפשר לעבור לחיוב שנתי ב-13 ₪ לחודש ולחסוך 48 ₪ בשנה. התשלום יופעל בקרוב.</p>';
+      h += '<a class="btn ghost" href="#/pricing">למסלול השנתי</a>';
+    }
+    h += '<p style="margin:12px 0 0"><a class="btn ghost sm" href="#/pricing">כל המסלולים</a></p></div>';
+    el.innerHTML = h; el.hidden = false;
+  }
+
+  function renderPricing(){
+    const el = $('pricing-root'); if (!el) return;
+    const cycle = pricingState.cycle === 'monthly' ? 'monthly' : 'yearly';
+    const plans = pricingState.plans || PRICING_CONFIG;
+    const byFamily = (fam, cyc) => plans.find(p => p.family === fam && (fam === 'community' || p.billing_cycle === cyc || (fam === 'pro' && p.billing_cycle === 'monthly') || (fam === 'founder' && p.billing_cycle === 'yearly')));
+    const community = plans.find(p => p.family === 'community') || PRICING_CONFIG[0];
+    const business = plans.find(p => p.family === 'business' && p.billing_cycle === cycle) || planById(cycle === 'yearly' ? 'business_yearly' : 'business_monthly');
+    const pro = plans.find(p => p.family === 'pro') || planById('pro_monthly');
+    const founder = plans.find(p => p.family === 'founder') || planById('founder_yearly');
+    const remaining = pricingState.founder_remaining;
+    const limit = pricingState.founder_limit || (founder && founder.founder_limit) || 20;
+
+    function priceBlock(p){
+      if (!p) return '';
+      if (p.billing_cycle === 'free' || Number(p.price_ils) === 0) return '<div class="price-big">0 ₪ <span>חינם</span></div>';
+      if (p.billing_cycle === 'yearly'){
+        const mo = p.monthly_equivalent_ils;
+        return '<div class="price-big">' + esc(String(mo)) + ' ₪ <span>/ חודש</span></div><p class="meta">בחיוב שנתי · ' + esc(String(p.price_ils)) + ' ₪ לשנה, כולל מע״מ</p>' + (p.savings_ils ? '<p class="save">חוסכים ' + esc(String(p.savings_ils)) + ' ₪ בשנה</p>' : '');
+      }
+      return '<div class="price-big">' + esc(String(p.price_ils)) + ' ₪ <span>/ חודש ללא התחייבות</span></div><p class="meta">כולל מע״מ</p>';
+    }
+    function card(p, opts){
+      opts = opts || {};
+      if (!p) return '';
+      const feats = p.features || [];
+      let h = '<div class="card pay-card" data-tier="' + esc(p.tier_id) + '">';
+      if (p.highlight_he) h += '<div class="badge-hot">' + esc(p.highlight_he) + '</div>';
+      if (opts.slots) h += '<div class="badge-hot">נשארו ' + esc(String(opts.slots.remaining)) + ' מתוך ' + esc(String(opts.slots.limit)) + ' מקומות</div>';
+      h += '<h2 style="margin:0 0 4px">' + esc(p.name_he) + '</h2>';
+      h += priceBlock(p);
+      h += featureList(feats);
+      if (p.allow_bit_applepay && p.billing_cycle === 'yearly') h += '<p class="pay-methods">אפשרות לתשלום בכרטיס, בביט וב-Apple Pay (כשהסליקה תופעל).</p>';
+      else if (p.billing_cycle === 'monthly') h += '<p class="pay-methods">תשלום בכרטיס או בהוראת קבע (כשהסליקה תופעל).</p>';
+      if (p.billing_cycle !== 'free'){
+        const full = opts.slots && opts.slots.remaining <= 0;
+        if (full) h += '<p class="note">מסלול המייסד מלא בקהילה הזו.</p>';
+        else h += '<button class="btn main" type="button" data-start-trial="' + esc(p.tier_id) + '">התחל שבועיים חינם</button> ';
+        h += '<button class="btn ghost" type="button" data-pay-soon>לתשלום</button>';
+      }
+      h += '</div>';
+      return h;
+    }
+
+    let h = (staffRole && window.PAY_TEST_URL && (typeof COMMUNITY_ID==='undefined' || COMMUNITY_ID==='mitzpe') ? '<div class="pay-test-banner">מצב בדיקה — לא יחויב כסף</div>' : '') + '<p class="pay-note">המחירים כוללים מע״מ. במסלולים בתשלום יש שבועיים ניסיון חינם, בלי כרטיס אשראי. ' + ((staffRole && window.PAY_TEST_URL && (typeof COMMUNITY_ID==='undefined' || COMMUNITY_ID==='mitzpe')) ? 'צוות יכול לבדוק תשלום במסוף הבדיקות.' : 'התשלום עצמו ייפתח בקרוב.') + '</p>';
+    h += '<div class="pay-toggle" role="tablist" aria-label="מחזור חיוב">';
+    h += '<button type="button" data-pay-cycle="yearly"' + (cycle==='yearly'?' class="on"':'') + '>חיוב שנתי</button>';
+    h += '<button type="button" data-pay-cycle="monthly"' + (cycle==='monthly'?' class="on"':'') + '>חיוב חודשי</button>';
+    h += '</div>';
+    if (cycle === 'yearly') h += '<p class="meta" style="margin:-8px 0 12px">אהבה ב-13 ₪ לחודש בחיוב שנתי. אפשר לעבור לתצוגת 17 ₪ לחודש ללא התחייבות.</p>';
+    else h += '<p class="meta" style="margin:-8px 0 12px">אהבה ב-17 ₪ לחודש ללא התחייבות. בחיוב שנתי זה 13 ₪ לחודש.</p>';
+    h += card(community);
+    h += card(business);
+    h += card(pro);
+    h += card(founder, { slots: { remaining: remaining, limit: limit } });
+    if (pricingState.pick){
+      const p = planById(pricingState.pick);
+      h += '<div class="card pay-form" id="trial-form"><h3 style="margin:0 0 6px">התחלת ניסיון · ' + esc((p && p.name_he) || '') + '</h3>';
+      h += '<p class="meta">שבועיים חינם, בלי כרטיס. אם תבחרו מקום מהמדריך, השיוך יעבור לאישור מנהל/ת — הניסיון מתחיל מיד.</p>';
+      if (!isAuthed()){
+        h += '<button class="btn main" type="button" data-google-signin>כניסה עם Google כדי להתחיל</button></div>';
+      } else {
+        h += '<label for="biz-name">שם העסק</label><input class="f" id="biz-name" type="text" autocomplete="organization">';
+        h += '<label for="biz-place">חיפוש במדריך (לא חובה)</label><input class="f" id="biz-place" type="search" placeholder="שם המקום" data-biz-search>';
+        h += '<input type="hidden" id="biz-place-id" value="">';
+        h += '<div class="pay-suggest" id="biz-suggest" hidden></div>';
+        h += '<p class="err" id="trial-msg" hidden></p>';
+        h += '<button class="btn main" type="button" data-confirm-trial>אישור והתחלת שבועיים חינם</button></div>';
+      }
+    }
+    el.innerHTML = h;
+  }
+
+  function searchBizPlaces(q){
+    const box = $('biz-suggest'); if (!box) return;
+    q = (q || '').trim().toLowerCase();
+    const list = (typeof visiblePlaces === 'function' ? visiblePlaces() : (S.places || [])).filter(p => !q || ((p.name_he||'') + ' ' + (p.name_en||'') + ' ' + (p.address||'')).toLowerCase().includes(q));
+    const shown = list.slice(0, 8);
+    if (!shown.length){ box.hidden = true; box.innerHTML = ''; return; }
+    box.hidden = false;
+    box.innerHTML = shown.map(p => '<button type="button" data-pick-place="' + esc(p.id) + '" data-pick-name="' + esc(p.name_he || '') + '">' + esc(p.name_he || p.id) + (p.address ? '<div class="meta">' + esc(p.address) + '</div>' : '') + '</button>').join('');
+  }
+
+  async function confirmTrial(){
+    if (pricingState.trialBusy) return;
+    if (!isAuthed()) return signInGoogle();
+    const name = (($('biz-name')||{}).value || '').trim();
+    const placeId = (($('biz-place-id')||{}).value || '').trim() || null;
+    const msg = $('trial-msg');
+    if (!name){ if (msg){ msg.hidden = false; msg.textContent = 'צריך שם עסק כדי להתחיל.'; } return; }
+    pricingState.trialBusy = true;
+    if (msg){ msg.hidden = false; msg.textContent = 'מתחילים את הניסיון…'; msg.className = 'err'; }
+    try {
+      const r = await fetch(AUTH_URL + '/rest/v1/rpc/start_business_trial', {
+        method:'POST', headers: authHeaders(),
+        body: JSON.stringify({ p_tier_id: pricingState.pick, p_business_name: name, p_place_id: placeId })
+      });
+      const body = await r.json().catch(()=>({}));
+      if (!r.ok){
+        const m = String((body && (body.message || body.details || body.hint || body.error)) || '');
+        let he = 'לא הצלחנו להתחיל את הניסיון.';
+        if (/not authenticated/i.test(m)) he = 'צריך להיכנס קודם עם Google.';
+        else if (/trial already used/i.test(m)) he = 'כבר נוצל ניסיון בחשבון הזה.';
+        else if (/already has/i.test(m)) he = 'כבר יש חשבון עסק בחשבון הזה.';
+        else if (/founder plan is full/i.test(m)) he = 'מסלול המייסד מלא בקהילה הזו.';
+        else if (/business name/i.test(m)) he = 'צריך שם עסק כדי להתחיל.';
+        else if (/place not found/i.test(m)) he = 'המקום שנבחר לא נמצא.';
+        if (msg){ msg.hidden = false; msg.textContent = he; }
+        return;
+      }
+      businessAccount = body && body.user_id ? body : businessAccount;
+      pricingState.pick = null;
+      if (msg){ msg.hidden = true; }
+      renderMe();
+      location.hash = '#/me';
+    } catch (e) {
+      if (msg){ msg.hidden = false; msg.textContent = 'לא הצלחנו להתחיל את הניסיון.'; }
+    } finally { pricingState.trialBusy = false; }
+  }
+
+    async function bootAuth(){
     if (DEMO){ authReady = true; if (isDemoAuthed()) { sessionUser = { user:{ id:'demo-user' }, token:'demo' }; resident = { status: demoResidentStatus() }; myBookings = demoBookings(); } renderMe(); return; }
     if (!sbAuth){ authReady = true; renderMe(); return; }
     const { data: { session } } = await sbAuth.auth.getSession();
@@ -1815,6 +2085,9 @@ function isOpenNow(hours, date=new Date()){
   window.bootAuth = bootAuth;
   window.renderMe = renderMe;
   window.renderStaffQueue = renderStaffQueue;
+  window.renderPricing = renderPricing;
+  window.renderMeBiz = renderMeBiz;
+  window.loadPricingPlans = loadPricingPlans;
   window.requireVerified = requireVerified;
 
   window.renderPostThread = renderPostThread;
@@ -1827,251 +2100,12 @@ function isOpenNow(hours, date=new Date()){
 <script>
   const routes = {'':'home','cats':'cats','cat':'home','item':'item','ask':'ask','add':'add','me':'me','events':'events','place':'place','post':'post','pricing':'pricing'};
 
-  const PRICING_CONFIG = [
-    {tier_id:'community', name_he:'קהילה', family:'community', price_ils:0, monthly_equivalent_ils:0, storage_gb:null, billing_cycle:'free', allow_bit_applepay:false, highlight_he:null, savings_ils:null, founder_limit:null, features:[
-      {text:'צפייה מלאה וחיפוש חכם ב«שאלו את נחת»'},
-      {text:'פרסומים קהילתיים קצרים (טרמפים, מסירות/יד שנייה, עזרה, אירועים חינמיים) ותגובות'},
-      {text:'ניהול פרסומים פתוחים מהבית'}
-    ]},
-    {tier_id:'business_monthly', name_he:'אהבה', family:'business', price_ils:17, monthly_equivalent_ils:17, storage_gb:null, billing_cycle:'monthly', allow_bit_applepay:false, highlight_he:null, savings_ils:null, founder_limit:null, features:[
-      {text:'כל מה שבמסלול הקהילה'},
-      {text:'דף עסק מלא בקטגוריות ובתשובות «שאלו את נחת»'},
-      {text:'פרסום אירועים, סדנאות בתשלום ומבצעים באירועים הקרובים'},
-      {text:'שעות פתיחה חיות ברצועת «פתוח עכשיו / קורה היום»'},
-      {text:'כפתור יצירת קשר ישיר בוואטסאפ או בטלפון'}
-    ]},
-    {tier_id:'business_yearly', name_he:'אהבה', family:'business', price_ils:156, monthly_equivalent_ils:13, storage_gb:null, billing_cycle:'yearly', allow_bit_applepay:true, highlight_he:'חוסכים 48 ₪ בשנה', savings_ils:48, founder_limit:null, features:[
-      {text:'כל מה שבמסלול הקהילה'},
-      {text:'דף עסק מלא בקטגוריות ובתשובות «שאלו את נחת»'},
-      {text:'פרסום אירועים, סדנאות בתשלום ומבצעים באירועים הקרובים'},
-      {text:'שעות פתיחה חיות ברצועת «פתוח עכשיו / קורה היום»'},
-      {text:'כפתור יצירת קשר ישיר בוואטסאפ או בטלפון'}
-    ]},
-    {tier_id:'pro_monthly', name_he:'פרו', family:'pro', price_ils:73, monthly_equivalent_ils:73, storage_gb:64, billing_cycle:'monthly', allow_bit_applepay:false, highlight_he:'הכי משתלם לעסקים פעילים', savings_ils:null, founder_limit:null, features:[
-      {text:'כל מה שבמסלול אהבה'},
-      {text:'סטודיו AI לתמונות ועיצוב (Mac Studio)', soon:true},
-      {text:'אחסון אישי 64GB', soon:true},
-      {text:'מסנן רעש למייל עם כתובת העברה אישית בדומיין הקהילה (התראות דחופות לוואטסאפ, סיכום יומי, השתקת ניוזלטרים)', soon:true},
-      {text:'תיוק אוטומטי ב-OCR של חשבוניות וקבלות', soon:true},
-      {text:'יצירת תוכן ב-AI ותרגום לאנגלית', soon:true}
-    ]},
-    {tier_id:'founder_yearly', name_he:'מייסד', family:'founder', price_ils:730, monthly_equivalent_ils:60.83, storage_gb:128, billing_cycle:'yearly', allow_bit_applepay:true, highlight_he:'שנתי, חודשיים חינם על פרו', savings_ils:146, founder_limit:20, features:[
-      {text:'כל מה שבמסלול פרו'},
-      {text:'פגישת התנעה של 45 דקות עם רן, כולל ראיון AI באפליקציה להכנת תוכנית פעולה', soon:true},
-      {text:'עד 3 פגישות המשך בשנה בהנחת מייסד', soon:true},
-      {text:'אחסון אישי 128GB', soon:true},
-      {text:'תג «מייסד» ו«זרקור מייסדים» (בלי להטות את החיפוש האורגני)', soon:true},
-      {text:'גישה מוקדמת', soon:true}
-    ]}
-  ];
-  let pricingState = { cycle:'yearly', plans: PRICING_CONFIG.slice(), founder_remaining:20, founder_limit:20, pick:null, trialBusy:false };
-
-  async function loadStaff(){
-    staffRole = null;
-    if (!sessionUser) return;
-    try {
-      // admin_whoami is the public RPC for is_admin / is_manager (private.is_staff is not exposed)
-      const r = await fetch(AUTH_URL + '/rest/v1/rpc/admin_whoami', { method:'POST', headers: authHeaders(), body: '{}' });
-      if (r.ok){
-        const w = await r.json();
-        if (w && w.is_admin) staffRole = 'admin';
-        else if (w && (w.is_manager || w.role === 'manager')) staffRole = 'manager';
-      }
-    } catch (e) { staffRole = null; }
-  }
-  async function loadBusinessAccount(){
-    businessAccount = null;
-    if (!sessionUser) return;
-    try {
-      const r = await fetch(AUTH_URL + '/rest/v1/rpc/my_business_account', { method:'POST', headers: authHeaders(), body: '{}' });
-      if (r.ok){
-        const row = await r.json();
-        businessAccount = (row && row.user_id) ? row : null;
-      }
-    } catch (e) { businessAccount = null; }
-  }
-  async function loadPricingPlans(){
-    try {
-      const r = await fetch((AUTH_URL || '') + '/rest/v1/rpc/list_pricing_plans', { method:'POST', headers: authHeaders(), body: '{}' });
-      if (!r.ok) return;
-      const data = await r.json();
-      if (data && Array.isArray(data.plans) && data.plans.length){
-        pricingState.plans = data.plans;
-        if (data.founder_remaining != null) pricingState.founder_remaining = data.founder_remaining;
-        if (data.founder_limit != null) pricingState.founder_limit = data.founder_limit;
-      }
-    } catch (e) {}
-  }
-  function planById(id){ return (pricingState.plans || PRICING_CONFIG).find(p => p.tier_id === id); }
-  function daysLeft(iso){
-    if (!iso) return null;
-    const ms = new Date(iso).getTime() - Date.now();
-    return Math.max(0, Math.ceil(ms / 86400000));
-  }
-  function featureList(feats){
-    return '<ul>' + (feats||[]).map(f => {
-      const text = (typeof f === 'string') ? f : (f && f.text) || '';
-      const soon = f && f.soon;
-      return '<li>' + esc(text) + (soon ? '<span class="soon">בקרוב</span>' : '') + '</li>';
-    }).join('') + '</ul>';
-  }
-
-  function renderMeBiz(){
-    const el = $('me-biz'); if (!el) return;
-    const acc = businessAccount;
-    let h = '<div class="card biz-card"><h2 style="margin:0 0 6px">חשבון עסק</h2>';
-    if (!acc){
-      h += '<p class="meta" style="margin:0 0 8px">אהבה — 13 ₪ לחודש בחיוב שנתי, או 17 ₪ לחודש ללא התחייבות. שבועיים ראשונים חינם, בלי כרטיס אשראי.</p>';
-      h += '<ul><li>דף עסק מורחב</li><li>עדכון שעות ותמונות</li><li>הדגשה בהמלצות נחת</li><li>דוח צפיות</li></ul>';
-      h += '<a class="btn main" href="#/pricing">למסלולים והתחלת ניסיון</a></div>';
-      el.innerHTML = h; el.hidden = false; return;
-    }
-    const plan = planById(acc.subscription_tier) || {name_he: acc.subscription_tier};
-    const st = acc.status || '';
-    const days = daysLeft(acc.trial_ends_at);
-    h += '<div class="st ' + esc(st === 'trial' ? 'trial' : st === 'active' ? 'verified' : 'expired') + '">' + esc(plan.name_he || '') + (acc.billing_cycle === 'yearly' ? ' · שנתי' : acc.billing_cycle === 'monthly' ? ' · חודשי' : '') + '</div>';
-    h += '<p class="meta" style="margin:8px 0 0">' + esc(acc.business_name || '') + '</p>';
-    if (acc.claim_status === 'pending') h += '<p class="note">בקשת השיוך לעסק ממתינה לאישור מנהל/ת. הניסיון כבר פעיל.</p>';
-    if (acc.claim_status === 'rejected') h += '<p class="note">שיוך העסק לא אושר' + (acc.claim_review_note ? ': ' + esc(acc.claim_review_note) : '') + '.</p>';
-    if (st === 'trial'){
-      h += '<p class="days">נותרו ' + (days == null ? '—' : days) + ' ימים לניסיון החינם. לא נדרש כרטיס.</p>';
-    } else if (st === 'expired'){
-      h += '<p class="note">תקופת הניסיון הסתיימה. 13 ₪ לחודש בחיוב שנתי — התשלום יופעל בקרוב.</p>';
-      h += '<button class="btn main" type="button" data-pay-soon>לתשלום</button>';
-    } else if (st === 'active' && acc.billing_cycle === 'monthly' && (acc.subscription_tier === 'business_monthly' || (plan && plan.family === 'business'))){
-      h += '<p class="note">אפשר לעבור לחיוב שנתי ב-13 ₪ לחודש ולחסוך 48 ₪ בשנה. התשלום יופעל בקרוב.</p>';
-      h += '<a class="btn ghost" href="#/pricing">למסלול השנתי</a>';
-    }
-    h += '<p style="margin:12px 0 0"><a class="btn ghost sm" href="#/pricing">כל המסלולים</a></p></div>';
-    el.innerHTML = h; el.hidden = false;
-  }
-
-  function renderPricing(){
-    const el = $('pricing-root'); if (!el) return;
-    const cycle = pricingState.cycle === 'monthly' ? 'monthly' : 'yearly';
-    const plans = pricingState.plans || PRICING_CONFIG;
-    const byFamily = (fam, cyc) => plans.find(p => p.family === fam && (fam === 'community' || p.billing_cycle === cyc || (fam === 'pro' && p.billing_cycle === 'monthly') || (fam === 'founder' && p.billing_cycle === 'yearly')));
-    const community = plans.find(p => p.family === 'community') || PRICING_CONFIG[0];
-    const business = plans.find(p => p.family === 'business' && p.billing_cycle === cycle) || planById(cycle === 'yearly' ? 'business_yearly' : 'business_monthly');
-    const pro = plans.find(p => p.family === 'pro') || planById('pro_monthly');
-    const founder = plans.find(p => p.family === 'founder') || planById('founder_yearly');
-    const remaining = pricingState.founder_remaining;
-    const limit = pricingState.founder_limit || (founder && founder.founder_limit) || 20;
-
-    function priceBlock(p){
-      if (!p) return '';
-      if (p.billing_cycle === 'free' || Number(p.price_ils) === 0) return '<div class="price-big">0 ₪ <span>חינם</span></div>';
-      if (p.billing_cycle === 'yearly'){
-        const mo = p.monthly_equivalent_ils;
-        return '<div class="price-big">' + esc(String(mo)) + ' ₪ <span>/ חודש</span></div><p class="meta">בחיוב שנתי · ' + esc(String(p.price_ils)) + ' ₪ לשנה, כולל מע״מ</p>' + (p.savings_ils ? '<p class="save">חוסכים ' + esc(String(p.savings_ils)) + ' ₪ בשנה</p>' : '');
-      }
-      return '<div class="price-big">' + esc(String(p.price_ils)) + ' ₪ <span>/ חודש ללא התחייבות</span></div><p class="meta">כולל מע״מ</p>';
-    }
-    function card(p, opts){
-      opts = opts || {};
-      if (!p) return '';
-      const feats = p.features || [];
-      let h = '<div class="card pay-card" data-tier="' + esc(p.tier_id) + '">';
-      if (p.highlight_he) h += '<div class="badge-hot">' + esc(p.highlight_he) + '</div>';
-      if (opts.slots) h += '<div class="badge-hot">נשארו ' + esc(String(opts.slots.remaining)) + ' מתוך ' + esc(String(opts.slots.limit)) + ' מקומות</div>';
-      h += '<h2 style="margin:0 0 4px">' + esc(p.name_he) + '</h2>';
-      h += priceBlock(p);
-      h += featureList(feats);
-      if (p.allow_bit_applepay && p.billing_cycle === 'yearly') h += '<p class="pay-methods">אפשרות לתשלום בכרטיס, בביט וב-Apple Pay (כשהסליקה תופעל).</p>';
-      else if (p.billing_cycle === 'monthly') h += '<p class="pay-methods">תשלום בכרטיס או בהוראת קבע (כשהסליקה תופעל).</p>';
-      if (p.billing_cycle !== 'free'){
-        const full = opts.slots && opts.slots.remaining <= 0;
-        if (full) h += '<p class="note">מסלול המייסד מלא בקהילה הזו.</p>';
-        else h += '<button class="btn main" type="button" data-start-trial="' + esc(p.tier_id) + '">התחל שבועיים חינם</button> ';
-        h += '<button class="btn ghost" type="button" data-pay-soon>לתשלום</button>';
-      }
-      h += '</div>';
-      return h;
-    }
-
-    let h = (staffRole && window.PAY_TEST_URL && (typeof COMMUNITY_ID==='undefined' || COMMUNITY_ID==='mitzpe') ? '<div class="pay-test-banner">מצב בדיקה — לא יחויב כסף</div>' : '') + '<p class="pay-note">המחירים כוללים מע״מ. במסלולים בתשלום יש שבועיים ניסיון חינם, בלי כרטיס אשראי. ' + ((staffRole && window.PAY_TEST_URL && (typeof COMMUNITY_ID==='undefined' || COMMUNITY_ID==='mitzpe')) ? 'צוות יכול לבדוק תשלום במסוף הבדיקות.' : 'התשלום עצמו ייפתח בקרוב.') + '</p>';
-    h += '<div class="pay-toggle" role="tablist" aria-label="מחזור חיוב">';
-    h += '<button type="button" data-pay-cycle="yearly"' + (cycle==='yearly'?' class="on"':'') + '>חיוב שנתי</button>';
-    h += '<button type="button" data-pay-cycle="monthly"' + (cycle==='monthly'?' class="on"':'') + '>חיוב חודשי</button>';
-    h += '</div>';
-    if (cycle === 'yearly') h += '<p class="meta" style="margin:-8px 0 12px">אהבה ב-13 ₪ לחודש בחיוב שנתי. אפשר לעבור לתצוגת 17 ₪ לחודש ללא התחייבות.</p>';
-    else h += '<p class="meta" style="margin:-8px 0 12px">אהבה ב-17 ₪ לחודש ללא התחייבות. בחיוב שנתי זה 13 ₪ לחודש.</p>';
-    h += card(community);
-    h += card(business);
-    h += card(pro);
-    h += card(founder, { slots: { remaining: remaining, limit: limit } });
-    if (pricingState.pick){
-      const p = planById(pricingState.pick);
-      h += '<div class="card pay-form" id="trial-form"><h3 style="margin:0 0 6px">התחלת ניסיון · ' + esc((p && p.name_he) || '') + '</h3>';
-      h += '<p class="meta">שבועיים חינם, בלי כרטיס. אם תבחרו מקום מהמדריך, השיוך יעבור לאישור מנהל/ת — הניסיון מתחיל מיד.</p>';
-      if (!isAuthed()){
-        h += '<button class="btn main" type="button" data-google-signin>כניסה עם Google כדי להתחיל</button></div>';
-      } else {
-        h += '<label for="biz-name">שם העסק</label><input class="f" id="biz-name" type="text" autocomplete="organization">';
-        h += '<label for="biz-place">חיפוש במדריך (לא חובה)</label><input class="f" id="biz-place" type="search" placeholder="שם המקום" data-biz-search>';
-        h += '<input type="hidden" id="biz-place-id" value="">';
-        h += '<div class="pay-suggest" id="biz-suggest" hidden></div>';
-        h += '<p class="err" id="trial-msg" hidden></p>';
-        h += '<button class="btn main" type="button" data-confirm-trial>אישור והתחלת שבועיים חינם</button></div>';
-      }
-    }
-    el.innerHTML = h;
-  }
-
-  function searchBizPlaces(q){
-    const box = $('biz-suggest'); if (!box) return;
-    q = (q || '').trim().toLowerCase();
-    const list = (typeof visiblePlaces === 'function' ? visiblePlaces() : (S.places || [])).filter(p => !q || ((p.name_he||'') + ' ' + (p.name_en||'') + ' ' + (p.address||'')).toLowerCase().includes(q));
-    const shown = list.slice(0, 8);
-    if (!shown.length){ box.hidden = true; box.innerHTML = ''; return; }
-    box.hidden = false;
-    box.innerHTML = shown.map(p => '<button type="button" data-pick-place="' + esc(p.id) + '" data-pick-name="' + esc(p.name_he || '') + '">' + esc(p.name_he || p.id) + (p.address ? '<div class="meta">' + esc(p.address) + '</div>' : '') + '</button>').join('');
-  }
-
-  async function confirmTrial(){
-    if (pricingState.trialBusy) return;
-    if (!isAuthed()) return signInGoogle();
-    const name = (($('biz-name')||{}).value || '').trim();
-    const placeId = (($('biz-place-id')||{}).value || '').trim() || null;
-    const msg = $('trial-msg');
-    if (!name){ if (msg){ msg.hidden = false; msg.textContent = 'צריך שם עסק כדי להתחיל.'; } return; }
-    pricingState.trialBusy = true;
-    if (msg){ msg.hidden = false; msg.textContent = 'מתחילים את הניסיון…'; msg.className = 'err'; }
-    try {
-      const r = await fetch(AUTH_URL + '/rest/v1/rpc/start_business_trial', {
-        method:'POST', headers: authHeaders(),
-        body: JSON.stringify({ p_tier_id: pricingState.pick, p_business_name: name, p_place_id: placeId })
-      });
-      const body = await r.json().catch(()=>({}));
-      if (!r.ok){
-        const m = String((body && (body.message || body.details || body.hint || body.error)) || '');
-        let he = 'לא הצלחנו להתחיל את הניסיון.';
-        if (/not authenticated/i.test(m)) he = 'צריך להיכנס קודם עם Google.';
-        else if (/trial already used/i.test(m)) he = 'כבר נוצל ניסיון בחשבון הזה.';
-        else if (/already has/i.test(m)) he = 'כבר יש חשבון עסק בחשבון הזה.';
-        else if (/founder plan is full/i.test(m)) he = 'מסלול המייסד מלא בקהילה הזו.';
-        else if (/business name/i.test(m)) he = 'צריך שם עסק כדי להתחיל.';
-        else if (/place not found/i.test(m)) he = 'המקום שנבחר לא נמצא.';
-        if (msg){ msg.hidden = false; msg.textContent = he; }
-        return;
-      }
-      businessAccount = body && body.user_id ? body : businessAccount;
-      pricingState.pick = null;
-      if (msg){ msg.hidden = true; }
-      renderMe();
-      location.hash = '#/me';
-    } catch (e) {
-      if (msg){ msg.hidden = false; msg.textContent = 'לא הצלחנו להתחיל את הניסיון.'; }
-    } finally { pricingState.trialBusy = false; }
-  }
-
-
   function go(){
     const r = routes[location.hash.replace(/^#\/?/,'').split('/')[0]] || 'home';
     if (r === 'place' && window.NAHAT_renderPlace) { try { window.NAHAT_renderPlace(decodeURIComponent(location.hash.split('/')[2] || '')); } catch (e) {} }
     if (r === 'post') { const id = decodeURIComponent(location.hash.split('/')[2] || ''); try { if (window.renderPostThread) window.renderPostThread(id); } catch (e) {} }
     if (r === 'me' && window.renderMe) { try { window.renderMe(); } catch (e) {} }
-    if (r === 'pricing') { loadPricingPlans().then(function(){ if (window.renderPricing) window.renderPricing(); }); }
+    if (r === 'pricing') { const lp = window.loadPricingPlans; Promise.resolve(lp ? lp() : null).then(function(){ if (window.renderPricing) window.renderPricing(); }); }
     document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === 's-' + r));
     document.querySelectorAll('nav.tabs a').forEach(a => a.classList.toggle('on', a.dataset.r === r || ((r==='item'||r==='place'||r==='events') && a.dataset.r==='home') || (r==='pricing' && a.dataset.r==='me')));
     document.getElementById('composer').style.display = r === 'ask' ? '' : 'none';
