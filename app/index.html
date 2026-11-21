@@ -1228,7 +1228,7 @@ function isOpenNow(hours, date=new Date()){
     const el = $('me-account'); if (!el) return;
     const banner = DEMO ? '<div class="demo-banner">הדגמה · משתמש לדוגמה, לא חשבון אמיתי</div>' : '';
     if (!isAuthed()){
-      el.innerHTML = banner + '<div class="card me-card"><h2 style="margin:0 0 8px">האזור שלי</h2><p class="meta">נכנסים עם Google. רואים את השם והתמונה מהחשבון, בלי למסור מספר טלפון. פרסום, תגובה והרשמה לקורס פתוחים לתושבות/ים אחרי אימות קצר.</p><button class="btn main" type="button" data-google-signin>כניסה עם Google</button><p class="err" id="auth-msg" hidden></p></div>';
+      el.innerHTML = banner + '<div class="card me-card"><h2 style="margin:0 0 8px">האזור שלי</h2><p class="meta">נכנסים עם Google. רואים את השם והתמונה מהחשבון, בלי למסור מספר טלפון. פרסום, תגובה והרשמה לקורס פתוחים לתושבות/ים אחרי אימות קצר.</p><button class="btn main" type="button" data-google-signin>כניסה עם Google</button><p class="err" id="auth-msg" hidden></p><p class="meta" style="margin:16px 0 0"><a href="https://kehi.ranbenri.workers.dev/privacy" target="_blank" rel="noopener">מדיניות פרטיות</a></p></div>';
       const rest = $('me-legacy'); if (rest) rest.hidden = true;
       const book = $('me-bookings'); if (book) book.hidden = true;
       return;
@@ -1244,7 +1244,7 @@ function isOpenNow(hours, date=new Date()){
       form = '<p class="note">הבקשה ממתינה לאישור מנהל/ת קהילה.</p>';
     }
     if (st === 'rejected' && resident && resident.review_note) form = '<p class="note">סיבת הדחייה: ' + esc(resident.review_note) + '</p>' + form;
-    el.innerHTML = banner + '<div class="card me-card"><div class="me-row">' + avHtml + '<div style="flex:1;min-width:0"><h2 style="margin:0">' + esc(googleName()) + '</h2><div class="st ' + esc(st) + '">' + esc(STATUS_HE[st]||st) + '</div></div></div>' + form + '<div style="margin-top:12px">' + actions + '</div><p class="err" id="auth-msg" hidden></p></div>';
+    el.innerHTML = banner + '<div class="card me-card"><div class="me-row">' + avHtml + '<div style="flex:1;min-width:0"><h2 style="margin:0">' + esc(googleName()) + '</h2><div class="st ' + esc(st) + '">' + esc(STATUS_HE[st]||st) + '</div></div></div>' + form + '<div style="margin-top:12px">' + actions + '</div><p class="err" id="auth-msg" hidden></p><p class="meta" style="margin:16px 0 0"><a href="https://kehi.ranbenri.workers.dev/privacy" target="_blank" rel="noopener">מדיניות פרטיות</a></p></div>';
     const rest = $('me-legacy'); if (rest) rest.hidden = true;
     renderMyBookingsList();
   }

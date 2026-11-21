@@ -5,6 +5,7 @@
 Kehi is an open-source system for any community or village in Israel to build its own local guide and community app.
 
 - דף הבית: [https://kehi.ranbenri.workers.dev](https://kehi.ranbenri.workers.dev) (זמני, עד לרכישת kehi.love)
+- [מדיניות פרטיות](https://kehi.ranbenri.workers.dev/privacy) · [תנאי שימוש](https://kehi.ranbenri.workers.dev/terms)
 - דוגמאות חיות: [נחת · מצפה רמון](https://nahat-app.ranbenri.workers.dev) · [כלילי · כליל](https://klili-app.klili.workers.dev)
 - רישיון: MIT, © 2026 Ran Ben Ari
 

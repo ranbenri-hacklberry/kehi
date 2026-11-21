@@ -1,23 +1,43 @@
-// Optional: pack landing/index.html into a gitignored deploy script.
+// Pack landing HTML pages into a gitignored deploy script.
 // Usage: CLOUDFLARE_ACCOUNT_ID=... WORKER_NAME=kehi node landing/build.js
+// Optional: OUT=/path/to/deploy-kehi.js
 const fs = require("fs");
 const path = require("path");
-const html = fs.readFileSync(path.join(__dirname, "index.html"), "utf8");
+const dir = __dirname;
 const account = process.env.CLOUDFLARE_ACCOUNT_ID;
 const name = process.env.WORKER_NAME || "kehi";
 if (!account) { console.error("Set CLOUDFLARE_ACCOUNT_ID"); process.exit(1); }
-const worker = `const HTML = ${JSON.stringify(html)};
+
+function read(file) {
+  return fs.readFileSync(path.join(dir, file), "utf8");
+}
+const index = read("index.html");
+const privacy = read("privacy.html");
+const terms = read("terms.html");
+
+const worker = `const PAGES = {
+  "/": ${JSON.stringify(index)},
+  "/index.html": ${JSON.stringify(index)},
+  "/privacy": ${JSON.stringify(privacy)},
+  "/privacy/": ${JSON.stringify(privacy)},
+  "/privacy.html": ${JSON.stringify(privacy)},
+  "/terms": ${JSON.stringify(terms)},
+  "/terms/": ${JSON.stringify(terms)},
+  "/terms.html": ${JSON.stringify(terms)},
+};
 export default { async fetch(req) {
   const u = new URL(req.url);
   const h = {"x-content-type-options":"nosniff","referrer-policy":"strict-origin-when-cross-origin","cache-control":"no-cache"};
-  if (u.pathname === "/" || u.pathname === "/index.html") {
-    return new Response(HTML, {headers:{...h,"content-type":"text/html; charset=utf-8"}});
+  const page = PAGES[u.pathname];
+  if (page) {
+    return new Response(page, {headers:{...h,"content-type":"text/html; charset=utf-8"}});
   }
   if (u.pathname === "/robots.txt") {
     return new Response("User-agent: *\\nAllow: /\\n", {headers:{...h,"content-type":"text/plain; charset=utf-8"}});
   }
   return new Response("Not found", {status:404, headers:{...h,"content-type":"text/plain; charset=utf-8"}});
 } };`;
+
 const deploy = `async () => {
   if (accountId !== ${JSON.stringify(account)}) throw new Error("wrong account");
   const name = ${JSON.stringify(name)};
@@ -32,6 +52,7 @@ const deploy = `async () => {
   const sd = await cloudflare.request({method:"POST", path:\`/accounts/\${accountId}/workers/scripts/\${name}/subdomain\`, body:{enabled:true, previews_enabled:false}});
   return {existedBefore: exists, uploaded: up.success, id: up.result && up.result.id, modified: up.result && up.result.modified_on, subdomain: sd.result};
 }`;
-const out = path.join(__dirname, "deploy-" + name + ".js");
+
+const out = process.env.OUT || path.join(__dirname, "..", "deploy", "deploy-" + name + ".js");
 fs.writeFileSync(out, deploy);
-console.log("wrote", out);
+console.log("wrote", out, "bytes", deploy.length);
