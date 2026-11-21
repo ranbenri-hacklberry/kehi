@@ -93,6 +93,15 @@
     'לא מצאתי על זה מידע מאושר. כשמישהו יוסיף ויאושר, זה יופיע כאן.',
     'בינתיים אין לי תשובה מאושרת לזה. אפשר לפרסם שאלה בלוח ושכנים יענו.',
   ];
+  const TAILS = ['אפשר לשאול את הקהילה בלוח.', 'שווה לשאול בלוח הקהילה, אולי מישהו יודע.', 'כשמשהו יאושר, הוא יופיע כאן.', 'אפשר לפרסם שאלה בלוח ושכנים יענו.'];
+  let tIdx = 0;
+  // Keep the model's own first sentence (it names the topic) and rotate the closing suggestion.
+  function varyRefusal(text) {
+    const t = String(text || '').trim();
+    const parts = t.split(/(?<=[.!?])\s+/);
+    const first = parts[0] && !/בלוח|לשאול/.test(parts[0]) ? parts[0] : 'אין לי עדיין מידע מאושר על זה.';
+    return first + ' ' + TAILS[(tIdx++) % TAILS.length];
+  }
   let rIdx = 0;
   function refusal(seed) {
     const i = typeof seed === 'number' ? seed : (rIdx++);
@@ -105,8 +114,9 @@
     o.reply_he = cleanReply(o.reply_he);
     if (o.has_answer === true && !o.cited_ids.length) o.has_answer = false;
     if (!o.reply_he) o.reply_he = refusal();
+    else if (o.has_answer === false) o.reply_he = varyRefusal(o.reply_he);
     return o;
   }
-  const API = { expandDays, expandRecordDays, sensitiveScan, stripSensitive, restrictVariant, postprocessIntent, cleanReply, refusal, REFUSALS, postprocessAnswer };
+  const API = { varyRefusal, expandDays, expandRecordDays, sensitiveScan, stripSensitive, restrictVariant, postprocessIntent, cleanReply, refusal, REFUSALS, postprocessAnswer };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.KehiPipeline = API;
 })(typeof window !== 'undefined' ? window : globalThis);

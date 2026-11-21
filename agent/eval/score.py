@@ -30,7 +30,9 @@ def score_intent(preds):  # preds: id -> parsed dict or None
     if gi: R['scn_n']+=1; R['scn_ok']+=ok
     else: R['neg_n']+=1; R['neg_ok']+=ok
     if not ok: fails.append((iid,f"intent {pi} != {gi} :: {msg}"))
-    if gv and ok: R['var_n']+=1; R['var_ok']+= (p.get('variant')==gv)
+    if gv and ok:
+      R['var_n']+=1; R['var_ok']+= (p.get('variant')==gv)
+      if p.get('variant')!=gv: fails.append((iid,f"variant {p.get('variant')} != {gv}"))
     if ok and gi and gi!='emergency_redirect':
       slots={k:v for k,v in (p.get('slots') or {}).items() if v not in (None,'',False)}
       for k,g in gs.items():
@@ -45,8 +47,9 @@ def score_intent(preds):  # preds: id -> parsed dict or None
           if norm(str(slots[k]))[:6] not in norm(msg): R['invented']+=1; fails.append((iid,f"invented {k}={slots[k]}"))
           else: R['extra_supported']+=1
       if iid in SENSITIVE:
-        R['sens_n']+=1; R['sens_ok']+= bool(p.get('sensitive_detected')) and not re.search(r'4590|נועה|אסתמה',json.dumps(p,ensure_ascii=False))
-  P_=R['slot_tp']/max(1,R['pred_slots']); Rc=R['slot_tp']/max(1,R['gold_slots'])
+        R['sens_n']+=1; ok_=bool(p.get('sensitive_detected')) and not re.search(r'4590|נועה|אסתמה',json.dumps(p.get('slots') or {},ensure_ascii=False)); R['sens_ok']+=ok_
+        if not ok_: fails.append((iid,'sensitive leaked: '+json.dumps(p.get('slots'),ensure_ascii=False)))
+  P_=R['slot_tp']/max(1,R['slot_tp']+R['slot_wrong']+R['invented']); Rc=R['slot_tp']/max(1,R['gold_slots'])
   R['slot_P']=round(P_,3); R['slot_R']=round(Rc,3); R['slot_F1']=round(2*P_*Rc/max(1e-9,P_+Rc),3)
   return R,fails
 def heb_ratio(t):
@@ -68,6 +71,11 @@ def score_qa(preds):
       R['ref_ok']+=good
       if not good: fails.append((qid,f"no-refusal: has_answer={p.get('has_answer')} :: {rep}"))
   R['heb_ratio']=round(R['heb_ratio_sum']/max(1,R['n']-R['json_bad']),3)
+  reps=[(preds.get(q[0]) or {}).get('reply_he','') for q in Q]
+  R['leak']=sum(bool(re.search(r'has_answer|cited_ids|reply_he|[{}]',x)) for x in reps)
+  R['fem_address']=sum(bool(re.search(r'(?<![א-ת])(את יכולה|תוכלי|פני|שאלי|נסי|בדקי|לך|שלך)(?![א-ת])',x)) for x in reps)
+  refs=[(preds.get(q[0]) or {}).get('reply_he','') for q in Q if not q[3]]
+  R['refusal_distinct_tails']=len(set(re.split(r'(?<=[.!?])\s+',x.strip())[-1] for x in refs if x))
   return R,fails
 def load(path):
   out={};secs=[]
