@@ -1,0 +1,1771 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#f8f1e7">
+<title>__TITLE__</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="48x48" href="icons/mark.svg">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?__FONTS__&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#f8f1e7;--panel:#fffaf4;--ink:#3a2a1f;--soft:#6e5a4a;--faint:#a8927c;--line:#ead9c3;--accent:#a84d2b;--accent-bg:#f7e3d6;--mint:#efe6cf;--blush:#f6dfd8;--amber:#f7e6c4;--night:#1f2a44;--r:18px}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:Assistant,Rubik,Arial,sans-serif;font-size:16px;line-height:1.6}
+  h1,h2,h3,.serif{font-family:"Frank Ruhl Libre",Georgia,serif;font-weight:500;letter-spacing:-.005em}
+  .app{max-width:520px;margin:0 auto;min-height:100vh;padding:0 18px calc(96px + env(safe-area-inset-bottom))}
+  .demo{font-size:12px;text-align:center;color:var(--soft);background:var(--amber);border-radius:0 0 12px 12px;padding:4px 10px;margin:0 -18px 0}
+  .kehi-credit{display:block;position:sticky;top:0;z-index:50;text-align:center;text-decoration:none;color:#f3e6d8;background:var(--ink);font-size:12.5px;letter-spacing:.08em;padding:calc(8px + env(safe-area-inset-top)) 16px 8px;margin:0 -18px 0}
+  .kehi-credit strong{font-family:"Frank Ruhl Libre",Georgia,serif;font-weight:500;color:#fff;letter-spacing:.02em}
+  .kehi-credit .heart{color:#e8a090;padding:0 7px;font-size:11px;letter-spacing:0}
+
+  header.bar{display:flex;align-items:center;justify-content:space-between;padding:16px 0 8px}
+  .brand{display:flex;align-items:center;gap:8px;font-family:"Frank Ruhl Libre",serif;font-size:24px}
+  .brand img{width:30px;height:30px}
+  .spark{color:#c9785f;font-size:14px}
+  .icon-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--panel);display:grid;place-items:center;font-size:18px;cursor:pointer;position:relative}
+  .dot{position:absolute;top:6px;left:8px;width:8px;height:8px;border-radius:50%;background:#c9785f}
+  .hello h1{font-size:28px;margin:10px 0 2px}
+  .hello p{margin:0 0 14px;color:var(--soft)}
+  .search{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:12px 16px;color:var(--faint);margin-bottom:10px;cursor:pointer}
+  .chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin:0 -18px 12px;padding-inline:18px;scrollbar-width:none}
+  .chip{flex:none;border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:6px 14px;font-size:14px;cursor:pointer;color:var(--ink);font-family:inherit}
+  .chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+  .sec-title{display:flex;justify-content:space-between;align-items:baseline;margin:18px 0 10px}
+  .sec-title h2{font-size:19px;margin:0}
+  .sec-title a{font-size:14px;color:var(--accent);text-decoration:none}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:12px;display:block;color:inherit;text-decoration:none}
+  .card:active{transform:scale(.995)}
+  .row{display:flex;gap:12px;align-items:flex-start}
+  .av{flex:none;width:46px;height:46px;border-radius:14px;display:grid;place-items:center;font-size:22px}
+  .meta{font-size:13px;color:var(--soft)}
+  .card h3{margin:0;font-size:17px}
+  .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+  .tag{font-size:12px;border-radius:999px;padding:2px 10px;background:var(--accent-bg);color:var(--accent)}
+  .tag.g{background:var(--mint);color:#6b5a1f}
+  .tag.a{background:var(--amber);color:#85601a}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .cat{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px;text-decoration:none;color:inherit}
+  .cat .e{font-size:26px}.cat h3{margin:6px 0 0;font-size:16px}.cat p{margin:0;font-size:13px;color:var(--soft)}
+
+  .home-cats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:2px 0 6px}
+  .cat-tile{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-height:108px;padding:14px 12px 12px;border-radius:20px;box-shadow:0 1px 0 #ead9c3}
+  .cat-tile .e{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;font-size:22px;margin-bottom:4px}
+  .cat-tile h3{margin:0;font-size:16px;line-height:1.25}
+  .cat-tile p{margin:2px 0 0;font-size:13px;color:var(--soft)}
+  .home-cats .cat-tile:nth-child(5){grid-column:1/-1;min-height:0;flex-direction:row;align-items:center;gap:12px;padding:12px 14px}
+  .home-cats .cat-tile:nth-child(5) .e{margin-bottom:0}
+  .home-ev .card{padding:12px 14px;margin-bottom:8px}
+  .ev-none{margin:0 0 4px;color:var(--soft);font-size:14px}
+  .results-h{font-size:26px;margin:8px 0 14px}
+  #home-results .back{margin:4px 0 0}
+  .prep-note{text-align:center;margin:8px 0 0}
+  .back{display:inline-flex;align-items:center;gap:6px;color:var(--soft);text-decoration:none;font-size:15px;margin:6px 0 4px}
+  .hero-item{padding:20px}
+  .hero-item h1{font-size:26px;margin:10px 0 0}
+  .kv{display:grid;gap:10px;margin-top:4px}
+  .kv .k{font-size:13px;color:var(--soft)}
+  .vouch{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+  .vouch:first-of-type{border-top:0}
+  .mini-av{width:32px;height:32px;border-radius:50%;background:var(--accent-bg);display:grid;place-items:center;font-size:14px;color:var(--accent)}
+  .hours{background:var(--mint);border-radius:14px;padding:12px 14px}
+  .hours .now{font-weight:600;color:#6b5a1f}
+  .slots{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .slot{border:1px solid var(--line);background:var(--panel);border-radius:12px;padding:8px 12px;font-size:14px;cursor:pointer;font-family:inherit;color:var(--ink)}
+  .slot.on{border-color:var(--accent);background:var(--accent-bg);color:var(--accent)}
+  .btn{display:block;width:100%;text-align:center;border:0;border-radius:14px;padding:14px;font:inherit;font-weight:600;cursor:pointer;text-decoration:none}
+  .btn.main{background:var(--ink);color:var(--bg)}
+  .btn.ghost{background:var(--panel);color:var(--ink);border:1px solid var(--line)}
+  .stack{display:grid;gap:10px;margin-top:14px}
+  /* chat */
+  .chat{display:flex;flex-direction:column;gap:14px;padding-top:6px}
+  .msg-u{align-self:flex-start;background:var(--accent-bg);border-radius:18px 18px 18px 6px;padding:10px 14px;max-width:85%}
+  .msg-a{align-self:stretch}
+  .msg-a .who{font-size:13px;color:var(--soft);display:flex;align-items:center;gap:6px;margin-bottom:4px}
+  .msg-a .body{font-size:16px}
+  .pending{display:flex;gap:8px;align-items:center;background:var(--amber);color:#85601a;border-radius:12px;padding:8px 12px;font-size:13px;margin-top:8px}
+  .src{font-size:13px;color:var(--soft);margin-top:6px}
+  .composer{position:fixed;bottom:calc(72px + env(safe-area-inset-bottom));left:0;right:0}
+  .composer .in{max-width:520px;margin:0 auto;padding:0 18px}
+  .composer .box{display:flex;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:8px 8px 8px 8px;box-shadow:0 6px 24px rgba(40,38,31,.06)}
+  .composer input{flex:1;border:0;outline:0;font:inherit;background:transparent;padding:6px 8px;color:var(--ink)}
+  .send{width:40px;height:40px;border-radius:12px;border:0;background:var(--ink);color:var(--bg);font-size:18px;cursor:pointer}
+  /* form */
+  label{display:block;font-size:14px;color:var(--soft);margin:12px 0 4px}
+  input.f,select.f,textarea.f{width:100%;font:inherit;border:1px solid var(--line);background:var(--panel);border-radius:12px;padding:12px;color:var(--ink)}
+  textarea.f{min-height:80px;resize:vertical}
+  .steps{display:flex;gap:6px;margin:8px 0 14px}
+  .steps span{flex:1;height:4px;border-radius:4px;background:var(--line)}
+  .steps span.on{background:var(--accent)}
+  .note{font-size:13px;color:var(--soft);margin-top:10px}
+  .toast{display:none;margin-top:12px;background:var(--mint);color:#6b5a1f;border-radius:12px;padding:10px 14px;font-size:14px}
+  .toast.show{display:block}
+  .notif{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-top:1px solid var(--line)}
+  .notif:first-child{border-top:0}
+  .notif .t{font-size:12px;color:var(--faint)}
+  .plan{display:flex;justify-content:space-between;align-items:center}
+  .plan .p{font-family:"Frank Ruhl Libre",serif;font-size:22px}
+  .reset{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:6px 14px;font:inherit;font-size:14px;color:var(--soft);cursor:pointer}
+  .empty{text-align:center;color:var(--soft);padding:26px 10px 10px}
+  .empty-ico{font-size:30px;color:#c9785f;margin-bottom:6px}
+  .suggest{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:6px 0 14px}
+  .suggest .chip{white-space:nowrap}
+  .ex{display:inline-block;font-size:11px;background:var(--amber);color:#85601a;border-radius:999px;padding:0 8px;margin-inline-start:6px}
+  .typing{display:inline-flex;gap:4px;padding:6px 0}
+  .typing i{width:7px;height:7px;border-radius:50%;background:var(--faint);animation:blink 1s infinite}
+  .typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+  @keyframes blink{0%,100%{opacity:.25}50%{opacity:1}}
+  @media (prefers-reduced-motion: reduce){.typing i{animation:none}}
+  /* tab bar */
+  nav.tabs{position:fixed;bottom:0;left:0;right:0;background:rgba(248,241,231,.95);backdrop-filter:blur(10px);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+  nav.tabs .in{max-width:520px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr)}
+  nav.tabs a{display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 0;font-size:12px;color:var(--soft);text-decoration:none}
+  nav.tabs a .e{font-size:20px;filter:grayscale(.6);opacity:.8}
+  nav.tabs a.on{color:var(--ink);font-weight:600}
+  nav.tabs a.on .e{filter:none;opacity:1}
+  .screen{display:none}.screen.on{display:block}
+
+  body{background:radial-gradient(700px 400px at 100% -5%, #fbe3d6 0%, transparent 60%),var(--bg)}
+  .ridge{display:block;width:calc(100% + 36px);margin:4px -18px 4px;height:54px}
+  .nightcard{background:linear-gradient(180deg,#1f2a44,#2c3a5c);color:#f3ece2;border:0;position:relative;overflow:hidden}
+  .nightcard h3{color:#fbf4ea}.nightcard .meta{color:#d6cfc4}
+  .nightcard .st{position:absolute;width:2px;height:2px;border-radius:50%;background:#fff;opacity:.7}
+  .brand-av{width:22px;height:22px;border-radius:50%;object-fit:cover}
+  .psearch{margin:0 0 12px}
+  .ev-date{flex:none;width:50px;border-radius:14px;background:var(--accent-bg);color:var(--accent);text-align:center;padding:6px 0;line-height:1.15}
+  .ev-date b{display:block;font-family:"Frank Ruhl Libre",serif;font-size:22px;font-weight:500}
+  .ev-date small{font-size:12px}
+  .data-status{text-align:center}
+  .pl-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  .pl-links a{flex:1 1 auto;text-align:center;border:1px solid var(--line);border-radius:12px;padding:10px 12px;text-decoration:none;color:var(--ink);background:var(--bg);font-size:15px}
+  .empty-list{color:var(--soft);text-align:center;padding:18px 0}
+  bdi{unicode-bidi:isolate}
+.badge{display:inline-block;background:#b4532a;color:#fff;font-weight:700;font-size:13px;border-radius:999px;padding:3px 10px;margin:4px 0 0}
+.hero-item .badge{font-size:15px;padding:5px 12px;margin:8px 0 2px}
+
+  html,body{max-width:100%}
+  .app{overflow-x:clip;max-width:min(520px,100%)}
+  a.search,a.search:link,a.search:visited,a.search:hover,a.search:active,a.search:focus,a.search span,a.search svg{text-decoration:none!important;color:inherit}
+  .search .ask-ico{flex:none;display:grid;place-items:center;color:var(--accent)}
+  .hscroll,.ask-chips,.chips{display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;padding-bottom:6px;margin-inline:-18px;padding-inline:18px;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+  .hscroll::-webkit-scrollbar,.ask-chips::-webkit-scrollbar,.chips::-webkit-scrollbar{display:none}
+  .chip{white-space:nowrap}
+  nav.tabs a .ico{width:22px;height:22px;display:block;margin:0 auto 2px;opacity:.7}
+  nav.tabs a.on{color:var(--accent);font-weight:700}
+  nav.tabs a.on .ico{opacity:1;color:var(--accent)}
+  .icon-btn .ico{width:20px;height:20px;color:var(--ink);display:block}
+  .demo-banner{font-size:12px;text-align:center;color:var(--soft);background:var(--accent-bg);border-radius:0 0 12px 12px;padding:5px 10px;margin:0 -18px 0}
+  .mine-scroll{align-items:stretch}
+  .mine-card{flex:0 0 min(86%,320px);cursor:pointer}
+  .mine-preview{font-size:13px;color:var(--soft);margin-top:6px;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+  .mine-acts{margin-top:10px}
+  .badge-new{flex:none;font-size:12px;background:var(--accent);color:#fff;border-radius:999px;padding:3px 8px;white-space:nowrap}
+  .btn.sm,button.sm{display:inline-block;width:auto;padding:8px 12px;font-size:13px;border-radius:999px}
+  .onow-scroll{gap:10px;margin-bottom:8px}
+  .onow-card{flex:0 0 200px;display:flex;gap:10px;align-items:center;padding:12px;margin:0}
+  .onow-card .av{width:40px;height:40px;font-size:18px}
+  .onow-card h3{font-size:15px}
+  .ev-desc{display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;margin:6px 0 0}
+  .pulse-card{margin-bottom:10px}
+  .pulse-type{color:var(--accent)}
+  .ask-chips{margin:0 -18px 14px}
+
+  .me-row{display:flex;gap:12px;align-items:center;margin-bottom:12px}
+  .me-av{width:56px;height:56px;border-radius:50%;object-fit:cover;background:var(--accent-bg);color:var(--accent);display:grid;place-items:center;font-weight:700;font-size:22px;flex:none}
+  .st.none{background:var(--line);color:var(--soft)}
+  .st.verified{background:var(--ok-bg, #e8f5e9);color:var(--ok, #1b5e20)}
+  .slot-card .seats{font-size:13px;white-space:nowrap;color:var(--soft)}
+  .cal-acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;align-items:center}
+  .auth-gate{position:fixed;inset:0;background:rgba(30,20,10,.4);display:grid;place-items:center;z-index:50;padding:18px}
+  .auth-gate[hidden]{display:none!important}
+  .gate-card{max-width:360px;width:100%}
+  .slot-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+  .attendees{margin:8px 0 0;padding:0 18px}
+  #auth-msg.ok{color:var(--ok, #1b5e20)}
+  .book-count{font-size:12px;background:var(--accent-bg);color:var(--accent);border-radius:999px;padding:3px 8px;white-space:nowrap}
+</style>
+<style id="scn-css">
+.scn-overlay{position:fixed;inset:0;z-index:50;background:rgba(30,24,18,.38);display:flex;align-items:flex-end;justify-content:center;animation:scnfade .2s ease}
+.scn-overlay[hidden]{display:none}
+.scn-sheet{width:100%;max-width:520px;max-height:88vh;overflow:auto;background:var(--panel);border-radius:26px 26px 0 0;padding:18px 20px calc(22px + env(safe-area-inset-bottom));box-shadow:0 -10px 40px rgba(0,0,0,.12);animation:scnup .28s cubic-bezier(.2,.8,.2,1)}
+@media(min-width:700px){.scn-overlay{align-items:center}.scn-sheet{border-radius:26px}}
+@media(prefers-reduced-motion:reduce){.scn-overlay,.scn-sheet{animation:none}}
+@keyframes scnup{from{transform:translateY(40px);opacity:.4}}@keyframes scnfade{from{opacity:0}}
+.scn-top{display:flex;gap:12px;align-items:center;margin-bottom:10px}
+.scn-ico{width:48px;height:48px;border-radius:15px;background:var(--accent-bg);display:grid;place-items:center;font-size:24px;flex:none}
+.scn-top h2{margin:0;font-size:22px}
+.scn-k{font-size:12px;color:var(--soft);letter-spacing:.02em;margin:6px 0}
+.scn-x{width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:var(--panel);cursor:pointer;font-size:14px;color:var(--ink)}
+.scn-p{margin:6px 0 12px;color:var(--soft)}
+.scn-choice{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.scn-opt{border:1.5px solid var(--line);background:var(--bg);border-radius:20px;padding:20px 12px;cursor:pointer;display:grid;gap:4px;justify-items:center;font-family:inherit;color:var(--ink)}
+.scn-opt span{font-size:30px}.scn-opt b{font-size:18px}.scn-opt small{color:var(--soft);font-size:13px}
+.scn-opt:hover,.scn-opt:focus-visible{border-color:var(--accent);background:var(--accent-bg)}
+.scn-known{background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:8px 12px 12px;margin-bottom:6px}
+.scn-pill{display:inline-block;background:var(--accent-bg);color:var(--ink);border-radius:999px;padding:4px 12px;margin:4px 0 0 6px;font-size:14px}
+.scn-pill i{font-style:normal;color:var(--soft)}
+.scn-form label{display:block;font-size:14px;color:var(--soft);margin:12px 0 4px}
+.scn-form input,.scn-form textarea,.scn-form select{width:100%;border:1px solid var(--line);border-radius:14px;padding:11px 13px;font:inherit;background:var(--bg);color:var(--ink)}
+.scn-form textarea{min-height:76px;resize:vertical}
+.scn-form .bad{border-color:#c0563f;background:#fdf1ee}
+.scn-err{color:#a8432f;font-size:14px;margin-top:8px}
+.scn-safe{font-size:13px;color:var(--soft);background:var(--bg);border-radius:12px;padding:8px 12px;margin:14px 0 4px}
+.scn-main{width:100%;margin-top:12px;border:0;border-radius:999px;background:var(--accent);color:#fff;padding:13px;font:inherit;font-weight:600;cursor:pointer}
+.scn-ghost{width:100%;margin-top:8px;border:1px solid var(--line);border-radius:999px;background:transparent;color:var(--ink);padding:11px;font:inherit;cursor:pointer}
+.scn-prev{white-space:pre-wrap;font-family:inherit;background:var(--bg);border:1px dashed var(--line);border-radius:16px;padding:14px;margin:0;line-height:1.7}
+.scn-done{margin-top:10px;text-align:center;color:var(--soft);font-size:14px}
+.scn-reopen{margin-top:10px;border:1px solid var(--line);background:var(--accent-bg);border-radius:999px;padding:6px 14px;font:inherit;font-size:14px;cursor:pointer;color:var(--ink)}
+.scn-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px}
+.scn-tile{border:1px solid var(--line);background:var(--panel);border-radius:18px;padding:14px 6px 12px;display:grid;gap:6px;justify-items:center;font:inherit;font-size:13px;line-height:1.3;color:var(--ink);cursor:pointer;text-align:center;min-height:96px}
+.scn-tile span{font-size:24px}
+.scn-tile:hover,.scn-tile:focus-visible{border-color:var(--accent)}
+.chip.scn-chip{border-color:var(--accent);color:var(--accent)}
+.scn-opt.sug{border-color:var(--accent);background:var(--accent-bg)}
+.scn-opt em{font-style:normal;font-size:12px;color:var(--accent);background:var(--panel);border-radius:999px;padding:1px 8px;margin-top:2px}
+</style>
+</head>
+<body>
+<div class="app">
+<script>/* כתובת דף קהי. עד לרכישת kehi.love משנים רק את הקבוע הזה. */window.KEHI_URL='https://kehi.ranbenri.workers.dev';</script>
+<a class="kehi-credit" data-kehi-link target="_blank" rel="noopener noreferrer" href="https://kehi.ranbenri.workers.dev"><span class="heart" aria-hidden="true">♥</span>powered by <strong>kehi.love</strong></a>
+<script>document.querySelectorAll('[data-kehi-link]').forEach(function(a){ a.href = window.KEHI_URL; });</script>
+
+  <div class="demo" id="demo-bar">גרסת ניסיון · המקומות והאירועים מהמאגר</div>
+
+  <!-- HOME -->
+  <section class="screen" id="s-home">
+    <header class="bar">
+      <div class="brand"><img src="icons/mark.svg" width="30" height="30" style="border-radius:50%" alt="">__BRAND__<span class="spark">✦</span></div>
+      <a class="icon-btn" href="#/me" aria-label="התראות"><svg class="ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/></svg><span class="dot"></span></a>
+    </header>
+    <div class="hello"><h1 id="hello-h">שלום</h1><p id="hello-sub">__HELLO_SUB__</p></div>
+    <svg class="ridge" viewBox="0 0 400 70" preserveAspectRatio="none" aria-hidden="true"><path d="M0 44 C60 30 100 28 150 36 S240 56 290 46 360 24 400 32 V70 H0Z" fill="#e2b98a" opacity=".55"/><path d="M0 56 C80 48 140 52 200 58 S320 64 400 56 V70 H0Z" fill="#b0532f" opacity=".8"/><circle cx="330" cy="18" r="9" fill="#e3a08f" opacity=".8"/></svg>
+    <div class="demo-banner" id="demo-banner" hidden>הדגמה · פרסומים לדוגמה, לא אמיתיים</div>
+    <a class="search" href="#/ask" id="ask-box"><svg class="ico" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg> <span id="ask-ph">__ASK_PLACEHOLDER__</span></a>
+    <div class="ask-chips hscroll" id="ask-chips"></div>
+    <div id="my-posts" hidden></div>
+    <div id="open-now" hidden></div>
+    <div id="home-browse">
+      <div class="sec-title"><h2>אירועים קרובים</h2><a href="#/events">כל האירועים</a></div>
+      <div id="home-events" class="home-ev"></div>
+      <div id="home-pulse">
+        <div class="sec-title"><h2>דופק הקהילה</h2><a href="#/add">להוסיף</a></div>
+        <div class="chips pulse-filters" id="pulse-filters"></div>
+        <div id="pulse-list"></div>
+      </div>
+    </div>
+    <div id="home-results" hidden>
+      <a class="back" href="#/" id="results-back">→ לכל הקטגוריות</a>
+      <h1 class="results-h" id="results-title"></h1>
+      <div class="psearch"><input class="f" id="place-q" type="search" placeholder="חיפוש לפי שם, סוג או כתובת" aria-label="חיפוש מקומות" autocomplete="off"></div>
+      <div id="places-list"></div>
+      <button class="btn ghost" id="places-more" type="button" hidden>עוד מקומות</button>
+    </div>
+    <p class="note data-status" id="data-status" aria-live="polite"></p>
+  </section>
+
+  <!-- POST THREAD -->
+  <section class="screen" id="s-post">
+    <div id="post-body"></div>
+  </section>
+
+  <!-- CATEGORIES -->
+  <section class="screen" id="s-cats">
+    <header class="bar"><h1 style="margin:0;font-size:26px">קטגוריות</h1><span></span></header>
+    <div class="grid2" id="cats-grid"></div>
+  </section>
+
+  <!-- ITEM -->
+  <section class="screen" id="s-item">
+    <a class="back" href="#/">→ חזרה</a>
+    <div class="card hero-item nightcard">
+      <i class="st" style="top:18px;right:40%"></i><i class="st" style="top:40px;right:70%"></i><i class="st" style="top:22px;right:88%"></i>
+      <div class="row"><div class="av" style="background:rgba(255,255,255,.1)">🔭</div><div><span class="tag">לילה וכוכבים</span></div></div>
+      <h1>מדריך/ת תצפיות כוכבים (דוגמה)</h1>
+      <p class="meta" style="font-size:15px;margin:6px 0 0">תצפיות עם טלסקופ, סיפורי שמיים ושקט של מדבר. לקבוצות קטנות ולמשפחות.</p>
+    </div>
+    <div class="card">
+      <h3 style="margin-bottom:6px">✓ מומלץ על ידי 2 שכנים</h3>
+      <div class="vouch"><div class="mini-av">ש</div><div><div>שירה (דוגמה)</div><div class="meta">מכיר/ה אישית · אומת לפני חודש</div></div></div>
+      <div class="vouch"><div class="mini-av">א</div><div><div>אורי (דוגמה)</div><div class="meta">מכיר/ה אישית · אומת לפני שבועיים</div></div></div>
+    </div>
+    <div class="card">
+      <h3 style="margin-bottom:8px">מתי אפשר לפנות</h3>
+      <div class="hours"><div class="now">● זמין עכשיו לפניות</div><div>א׳–ה׳ &#x2066;10:00–17:00&#x2069; · ערוץ מועדף: ווטסאפ</div></div>
+    </div>
+    <div class="card">
+      <h3>📅 הזמנת תצפית</h3>
+      <div class="meta">מחובר ליומן גוגל של העסק · מוצגים רק זמנים פנויים</div>
+      <div class="slots"><button class="slot">ב׳ 20:00</button><button class="slot on">ג׳ 21:30</button><button class="slot">ד׳ 20:00</button><button class="slot">ה׳ 22:00</button></div>
+    </div>
+    <div class="stack">
+      <button class="btn main" data-demo>💬 פנייה בווטסאפ</button>
+      <button class="btn ghost" data-demo>בקשת הזמנה לג׳ 21:30</button>
+      <div class="toast" role="status">מוקאפ בלבד: שום דבר לא נשלח.</div>
+    </div>
+  </section>
+
+  <!-- EVENTS -->
+  <section class="screen" id="s-events">
+    <header class="bar"><h1 style="margin:0;font-size:26px">אירועים ב__PLACE_NAME__</h1><span></span></header>
+    <p class="meta" style="margin:-4px 0 12px">מתוך לוח התרבות והאוכל של היישוב, אחרי בדיקה</p>
+    <div id="events-list"></div>
+  </section>
+
+  <!-- PLACE -->
+  <section class="screen" id="s-place">
+    <a class="back" href="#/">→ חזרה</a>
+    <div id="place-body"></div>
+  </section>
+
+  <!-- ASK -->
+  <section class="screen" id="s-ask">
+    <header class="bar"><h1 style="margin:0;font-size:26px">שואלים את __BRAND__</h1><button class="reset" id="chat-reset" type="button" aria-label="איפוס השיחה">↺ איפוס</button></header>
+    <div id="chat-empty" class="empty">
+      <div class="empty-ico"><img src="icons/mark.svg" alt="" width="72" height="72" style="border-radius:50%"></div>
+      <p>שאלו כל דבר על __PLACE_NAME__. אפשר להתחיל מאחת השאלות:</p>
+    </div>
+    <div class="suggest" id="suggest"><!-- SCN:START --><button class="chip scn-chip" type="button" data-scn-q="מחפש טרמפ מחר מ__PLACE_NAME__ לבאר שבע">🚗 מחפש טרמפ מחר</button><button class="chip scn-chip" type="button" data-scn-q="מוסר לאימוץ כלב בן שנתיים">🐾 מוסר לאימוץ כלב</button><button class="chip scn-chip" type="button" data-scn-q="נשאר אוכל: אורז ל־4 מנות">🥘 נשאר אוכל: אורז</button><!-- SCN:END -->
+      <button class="chip" data-q="0">מי מדריך תצפיות כוכבים מומלץ?</button>
+      <button class="chip" data-q="1">מי עושה סיורי ג׳יפים במכתש?</button>
+      <button class="chip" data-q="2">מה קורה השבוע ברובע האמנים?</button>
+      <button class="chip" data-q="3">יש קנייה משותפת פתוחה?</button>
+      <button class="chip" data-q="4">מי נוסע מחר לבאר שבע?</button>
+    </div>
+    <div class="chat" id="chat" aria-live="polite"></div>
+    <div style="height:110px"></div>
+    <div class="composer" id="composer"><div class="in"><form class="box" id="chat-form"><input id="chat-in" placeholder="כתבו שאלה…" aria-label="שאלה" autocomplete="off"><button class="send" type="submit" aria-label="שליחה">↑</button></form></div></div>
+  </section>
+
+  <!-- ADD / VOUCH -->
+  <section class="screen" id="s-add">
+    <header class="bar"><h1 style="margin:0;font-size:26px">מה תרצו לשתף?</h1><span></span></header>
+
+    <div class="card" id="community-post">
+      <h3 style="margin:0 0 8px">פרסום לקהילה</h3>
+      <label for="cpost-type">סוג</label>
+      <select class="f" id="cpost-type">
+        <option value="ride">טרמפ</option>
+        <option value="giveaway">מסירה / יד שנייה</option>
+        <option value="help">חיפוש עזרה</option>
+        <option value="recommend">המלצה</option>
+        <option value="course">קורס/סדנה</option>
+      </select>
+      <label for="cpost-title">כותרת</label>
+      <input class="f" id="cpost-title" maxlength="120" placeholder="בכמה מילים, בלי שמות או טלפון">
+      <label for="cpost-body">פירוט (לא חובה)</label>
+      <textarea class="f" id="cpost-body" rows="3"></textarea>
+      <div id="course-fields" hidden>
+        <div class="sec-title"><h2>מועדים</h2><button class="btn ghost sm" type="button" data-add-slot>הוספת מועד</button></div>
+        <div id="slot-rows"></div>
+      </div>
+      <p class="err" id="cpost-err" hidden></p>
+      <button class="btn main" type="button" id="cpost-go">שליחה לאישור</button>
+      <p class="note">פרסום, תגובה והרשמה לקורס פתוחים לתושבות/ים מאומתות/ים אחרי כניסה עם Google.</p>
+    </div>
+<!-- SCN:START --><div class="sec-title" style="margin-top:6px"><h2>פותחים טופס מוכן</h2><span class="meta" style="font-size:13px;color:var(--soft)">26 תרחישים</span></div><div class="scn-grid" id="scn-grid"></div><div class="sec-title"><h2>או ממליצים על מישהו</h2></div><!-- SCN:END -->
+    <div class="chips" style="margin-bottom:4px"><button class="chip on" data-tab="new">הוספת המלצה</button><button class="chip" data-tab="vouch">ממתינים לאישור (2)</button></div>
+    <div id="t-new">
+      <div class="steps"><span class="on"></span><span class="on"></span><span></span></div>
+      <div class="card">
+        <label>מה ממליצים?</label><input class="f" value="טכנאי מזגנים (דוגמה)">
+        <label>קטגוריה</label><select class="f"><option>נותני שירותים</option><option>סיורים וג׳יפים</option><option>לילה וכוכבים</option><option>אמנים וסדנאות</option><option>אירוח</option></select>
+        <label>למה כדאי? בכמה מילים</label><textarea class="f">הגיע מהר באמצע הקיץ, מקצועי והוגן.</textarea>
+        <label style="display:flex;gap:8px;align-items:center;color:var(--ink)"><input type="checkbox" checked> אני מכיר/ה אישית, ואין לי ניגוד עניינים</label>
+        <p class="note">אחרי השליחה: עוד שכן אחד צריך לאשר, ואז נבקש מבעל המקצוע הסכמה ושעות פנייה לפני הפרסום.</p>
+      </div>
+      <button class="btn main" data-demo>שליחה לבדיקה</button>
+      <div class="toast" role="status">מוקאפ בלבד: שום דבר לא נשלח.</div>
+    </div>
+    <div id="t-vouch" hidden>
+      <div class="card">
+        <div class="row"><div class="av" style="background:var(--amber)">🐪</div><div style="flex:1"><h3>טיולי גמלים (דוגמה)</h3><div class="meta">הוצע על ידי שכן · 1 מתוך 2 ממליצים</div></div></div>
+        <div class="stack" style="grid-template-columns:1fr 1fr"><button class="btn main" data-demo>מכיר/ה, ממליץ/ה</button><button class="btn ghost" data-demo>לא מדויק</button></div>
+        <div class="toast" role="status">מוקאפ בלבד: שום דבר לא נשלח.</div>
+      </div>
+      <div class="card"><div class="row"><div class="av" style="background:var(--blush)">🧘</div><div><h3>יוגה בשקיעה (דוגמה)</h3><div class="meta">0 מתוך 2 ממליצים</div></div></div></div>
+      <p class="note">אין לחץ ואין דדליין: עונים מתי שנוח.</p>
+    </div>
+  </section>
+
+  <!-- ME -->
+  <section class="screen" id="s-me">
+    <header class="bar"><h1 style="margin:0;font-size:26px">האזור שלי</h1><span></span></header>
+    <div id="me-account"></div>
+    <div id="me-bookings" hidden></div>
+    <div id="me-legacy" hidden>
+    <div class="card">
+      <div class="plan"><div><div class="meta">המסלול שלך</div><h3>מייסד · מקצועי</h3></div><div class="p">₪70<span class="meta"> לחודש כולל מע״מ</span></div></div>
+      <div class="tags"><span class="tag">גישה מוקדמת</span><span class="tag g">שולם לשנה (דוגמה)</span></div>
+    </div>
+    <div class="card">
+      <h3 style="margin-bottom:4px">🔔 התראות למייסדים</h3>
+      <div class="notif"><div class="mini-av">✦</div><div><div>הצטרף/ה מישהו חדש: סטודיו לצילום מדבר (דוגמה)</div><div class="t">לפני 20 דקות · אפשר לעבור על זה מתי שנוח</div></div></div>
+      <div class="notif"><div class="mini-av">✦</div><div><div>הומלצו טיולי גמלים, וחסרה עוד המלצה אחת</div><div class="t">לפני שעתיים</div></div></div>
+      <div class="notif"><div class="mini-av">✓</div><div><div>"טכנאי מזגנים" אושר ועלה למאגר</div><div class="t">אתמול · אושר על ידי מנהל/ת הקהילה</div></div></div>
+    </div>
+    <div class="card">
+      <h3>העסק שלי</h3>
+      <div class="kv" style="margin-top:8px">
+        <div><div class="k">שעות פנייה</div><div>א׳–ה׳ &#x2066;10:00–17:00&#x2069;</div></div>
+        <div><div class="k">יומן גוגל</div><div>מחובר ✓</div></div>
+      </div>
+    </div>
+    <div class="card"><h3>פרטיות</h3><p class="meta" style="margin:4px 0 0">הורדת המידע שלי · מחיקת החשבון · ניהול הסכמות</p></div>
+    </div>
+  </section>
+</div>
+
+<nav class="tabs" aria-label="ניווט ראשי"><div class="in">
+  <a href="#/" data-r="home"><svg class="ico" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>בית</a>
+  <a href="#/cats" data-r="cats"><svg class="ico" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>קטגוריות</a>
+  <a href="#/ask" data-r="ask"><svg class="ico" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>לשאול</a>
+  <a href="#/add" data-r="add"><svg class="ico" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg>להוסיף</a>
+  <a href="#/me" data-r="me"><svg class="ico" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>שלי</a>
+</div></nav>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.2/dist/umd/supabase.js"></script>
+<!-- DATA:START --><script id="community-snapshot" type="application/json">{"places":[],"events":[],"fetched_at":null}</script>
+<script>
+(function(){
+  // האפליקציה: קורא מקומות ואירועים מפורסמים מ־Supabase (מפתח ציבורי, RLS מאפשר רק status=published).
+  const SB = '__SUPABASE_URL__/rest/v1';
+  const KEY = '__PUBLISHABLE_KEY__';
+  const PCOLS = 'id,name_he,name_en,category,category_group,address,phone,hours,hours_status,website,maps_url,note,source,last_verified,updated_at,search_only,badge';
+  const ECOLS = 'id,title,starts_at,ends_at,start_date,when_text,venue_name,venue_place_id,address,price_text,organizer,description,updated_at';
+  const TZ = 'Asia/Jerusalem';
+  const HIDE_LODGING = true;
+  const HIDDEN_GROUPS = new Set(['אירוח']);
+  const GROUP_ORDER = ['בתי קפה','מסעדות','חנויות ושירותים','טיולים ואטרקציות','מוסדות ושירותי ציבור'];
+  const GROUPS = {'בתי קפה':['☕','var(--amber)'],'מסעדות':['🍽️','var(--blush)'],'אירוח':['🏕️','var(--mint)'],'טיולים ואטרקציות':['🏜️','var(--accent-bg)'],'חנויות ושירותים':['🛍️','var(--amber)'],'מוסדות ושירותי ציבור':['🏛️','var(--mint)']};
+  const ic = g => (GROUPS[g] || ['📍','var(--accent-bg)']);
+  function isHiddenPlace(p){
+    if (!HIDE_LODGING) return false;
+    if (HIDDEN_GROUPS.has(p.category_group || '')) return true;
+    const c = ' ' + String(p.category || '') + ' ';
+    return /[\/·,\s](צימר|צימרים|מלון|מלונות|הוסטל|גסטהאוס|יורט|דירת נופש)[\/·,\s]/.test(c);
+  }
+  function visiblePlaces(){ return S.places.filter(p => !isHiddenPlace(p)); }
+  const COMMUNITY_ID = '__COMMUNITY_ID__';
+const DAY_ALIASES = {
+  'א':0,'ב':1,'ג':2,'ד':3,'ה':4,'ו':5,'ש':6,
+  'ראשון':0,'שני':1,'שלישי':2,'רביעי':3,'חמישי':4,'שישי':5,'שבת':6
+};
+function parseTime(t){
+  t = t.trim().replace(/[.]/g,':');
+  const m = t.match(/^(\d{1,2}):(\d{2})$/);
+  if (!m) return null;
+  let h = +m[1], min = +m[2];
+  if (h === 24 && min === 0) return 24*60;
+  if (h < 0 || h > 23 || min < 0 || min > 59) return null;
+  return h*60+min;
+}
+function daysFromToken(tok){
+  tok = tok.replace(/יו[םמ]\s*/g,'').replace(/['׳]/g,'').trim();
+  if (DAY_ALIASES[tok] !== undefined) return [DAY_ALIASES[tok]];
+  const r = tok.match(/^(.+?)\s*-\s*(.+)$/);
+  if (r){
+    const a = DAY_ALIASES[r[1].replace(/['׳]/g,'').trim()];
+    const b = DAY_ALIASES[r[2].replace(/['׳]/g,'').trim()];
+    if (a == null || b == null) return null;
+    const out = [];
+    let i = a;
+    while (true){ out.push(i); if (i===b) break; i = (i+1)%7; if (out.length>7) return null; }
+    return out;
+  }
+  return null;
+}
+function splitClauses(s){
+  const out = []; let buf = ''; let seenTime = false;
+  const dayStart = /^\s*(?:יום\s*)?(?:ראשון|שני|שלישי|רביעי|חמישי|שישי|שבת|[אבגדהוש])/;
+  for (let i = 0; i < s.length; i++){
+    const ch = s[i];
+    if (ch === ';' || (ch === ',' && seenTime && dayStart.test(s.slice(i+1)))){
+      if (buf.trim()) out.push(buf.trim());
+      buf = ''; seenTime = false; continue;
+    }
+    buf += ch;
+    if (/\d{1,2}:\d{2}/.test(buf) || /סגור/.test(buf)) seenTime = true;
+  }
+  if (buf.trim()) out.push(buf.trim());
+  return out;
+}
+function parseWeeklyHours(raw){
+  if (!raw) return null;
+  let s = String(raw).replace(/\u00a0/g,' ').replace(/[־–—]/g,'-').replace(/['׳]/g,'');
+  if (/24\s*שעות/.test(s)) {
+    return [0,1,2,3,4,5,6].map(d => ({day:d, start:0, end:24*60}));
+  }
+  if (/מומלץ לוודא|בהזמנה|תיאום מראש|שעון קיץ|שעון חורף|מצאת השבת|כניסת השבת|פתוח כל השנה|פתוח בתאריכים|מים עונתיים|יום פתוח|ערבי חג|מוצאי שבת/.test(s)) return null;
+  if (/סגירה/.test(s) && !/\d{1,2}:\d{2}\s*-\s*\d{1,2}:\d{2}/.test(s)) return null;
+  s = s.replace(/\s+ו(?=שבת|יום|[אבגדהוש])/g, ',');
+  const parts = splitClauses(s);
+  const intervals = [];
+  if (!parts.length) return null;
+  for (let part of parts){
+    part = part.replace(/\s+בלבד\s*$/,'').trim();
+    const closed = /סגור/.test(part);
+    let days, rest = part;
+    const mAll = part.match(/^(כל יום|כל ימות השבוע)\s*:?\s*(.*)$/);
+    if (mAll){ days = [0,1,2,3,4,5,6]; rest = mAll[2]; }
+    else {
+      const mDays = part.match(/^((?:יום\s*)?(?:ראשון|שני|שלישי|רביעי|חמישי|שישי|שבת|[אבגדהוש])(?:\s*-\s*(?:יום\s*)?(?:ראשון|שני|שלישי|רביעי|חמישי|שישי|שבת|[אבגדהוש]))?(?:\s*,\s*(?:יום\s*)?(?:ראשון|שני|שלישי|רביעי|חמישי|שישי|שבת|[אבגדהוש]))*)\s*:?\s*(.*)$/);
+      if (!mDays) return null;
+      const daytoks = mDays[1].split(',').map(t => t.trim()).filter(Boolean);
+      days = [];
+      for (const t of daytoks){
+        const d = daysFromToken(t);
+        if (!d) return null;
+        days.push(...d);
+      }
+      rest = mDays[2] || '';
+    }
+    if (closed && !/\d/.test(rest)) { continue; }
+    const tm = rest.match(/(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})/);
+    if (!tm) return null;
+    const a = parseTime(tm[1]), b = parseTime(tm[2]);
+    if (a == null || b == null) return null;
+    let end = b;
+    if (end === 0 && a > 0) end = 24*60;
+    if (end <= a) return null;
+    days.forEach(d => intervals.push({day:d, start:a, end}));
+  }
+  return intervals.length ? intervals : null;
+}
+function isOpenNow(hours, date=new Date()){
+  const iv = parseWeeklyHours(hours);
+  if (!iv) return null;
+  const day = date.getDay();
+  const mins = date.getHours()*60 + date.getMinutes();
+  return iv.some(x => x.day===day && mins >= x.start && mins < x.end);
+}
+
+  const COMMUNITY_CONFIGS = {
+    mitzpe: {
+      id: 'mitzpe',
+      askName: 'נחת',
+      subtitle: '__HELLO_SUB__',
+      askPlaceholder: '__ASK_PLACEHOLDER__',
+      extraChips: {
+        morning: ['מי מדריך כוכבים?', 'איפה אוכלים עכשיו?'],
+        afternoon: ['איפה אוכלים עכשיו?', 'יש קנייה משותפת?'],
+        evening: ['מי מדריך כוכבים?', 'מה קורה הערב במצפה?'],
+        night: ['מי מדריך כוכבים?', 'טרמפים מחר']
+      }
+    },
+    klil: {
+      id: 'klil',
+      askName: 'כלילי',
+      subtitle: 'מה קורה בכליל השבוע',
+      askPlaceholder: 'שאלו את כלילי…',
+      extraChips: {
+        morning: ['איפה קונים ירקות אורגניים?', 'יש יוגה או תנועה?'],
+        afternoon: ['איפה קונים ירקות אורגניים?', 'מחפש/ת המלצה על טיפול'],
+        evening: ['מה קורה הערב בכליל?', 'יש יוגה או תנועה?'],
+        night: ['טרמפים מחר', 'מחפש/ת המלצה על טיפול']
+      }
+    }
+  };
+  const CFG = COMMUNITY_CONFIGS[COMMUNITY_ID];
+  const DEMO_MODE = new URLSearchParams(location.search).get('demo') || '';
+  const DEMO = !!DEMO_MODE;
+  const colKey = (typeof CFG!=='undefined' && CFG.id ? CFG.id : 'app') + '-community-col';
+  let communityCol = (sessionStorage.getItem(colKey) ?? '1') === '1', postsAvailable = true;
+  let pulseFilter = 'all';
+  let myPosts = [], pulsePosts = [], postReplies = {}, postReads = {};
+  let sessionUser = null;
+
+  const ICO = {
+    home: '<path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+    grid: '<rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/>',
+    ask: '<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>',
+    plus: '<path d="M5 12h14"/><path d="M12 5v14"/>',
+    user: '<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+    bell: '<path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/>'
+  };
+  function svgIcon(name, size){
+    return '<svg class="ico" viewBox="0 0 24 24" width="' + (size||22) + '" height="' + (size||22) + '" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICO[name]||'') + '</svg>';
+  }
+  function greetingText(){
+    const h = new Date().getHours();
+    if (h >= 5 && h < 12) return 'בוקר טוב';
+    if (h >= 12 && h < 17) return 'צהריים טובים';
+    if (h >= 17 && h < 22) return 'ערב טוב';
+    return 'לילה טוב';
+  }
+  function periodOf(d){
+    const h = d.getHours();
+    if (h >= 5 && h < 12) return 'morning';
+    if (h >= 12 && h < 17) return 'afternoon';
+    if (h >= 17 && h < 22) return 'evening';
+    return 'night';
+  }
+  function chipsForNow(){
+    const d = new Date(), day = d.getDay(), p = periodOf(d), extra = (CFG.extraChips[p] || []).slice();
+    const out = [];
+    const add = t => { if (t && !out.includes(t)) out.push(t); };
+    if (p === 'morning') add('מה פתוח עכשיו?');
+    if (p === 'evening' || p === 'night') add('מה קורה הערב?');
+    if (day === 5 && p === 'morning') { add('מה פתוח עכשיו?'); add('מה קורה הערב?'); add('בעלי מקצוע'); }
+    else if (day === 0 || day === 6) { add('מה פתוח עכשיו?'); add('מה קורה הערב?'); }
+    else {
+      if (p === 'morning' || p === 'afternoon') { add('טרמפים היום'); add('בעלי מקצוע'); }
+      else { add('טרמפים מחר'); add('בעלי מקצוע'); }
+    }
+    extra.forEach(add);
+    return out.slice(0, 4);
+  }
+
+  function withCommunity(q){
+    return communityCol ? (q + '&community_id=eq.' + encodeURIComponent(CFG.id)) : q;
+  }
+  function restGet(q, headers){
+    return fetch(SB + q, {headers}).then(r => {
+      const hadCol = /[&?]community_id=eq\./.test(q);
+      if (hadCol && !r.ok) {
+        const retry = () => {
+          communityCol = false; try { sessionStorage.setItem(colKey, '0'); } catch (e) {}
+          return fetch(SB + q.replace(/[&?]community_id=eq\.[^&]+/, ''), {headers});
+        };
+        return r.clone().json().then(body => {
+          const msg = JSON.stringify(body || {});
+          if (/community_id|42703|does not exist|PGRST204/i.test(msg) || r.status === 400 || r.status === 404) return retry();
+          return r;
+        }).catch(() => (r.status === 400 || r.status === 404) ? retry() : r);
+      }
+      return r;
+    });
+  }
+
+  const TYPE_HE = {ride:'טרמפ', giveaway:'מסירה / יד שנייה', help:'חיפוש עזרה', recommend:'המלצה', course:'קורס/סדנה'};
+  const TYPE_ALL = [['all','הכל'],['ride','טרמפים'],['giveaway','מסירה'],['help','עזרה'],['recommend','המלצות'],['course','קורס/סדנה']];
+
+  function demoData(){
+    const ago = m => new Date(Date.now() - m*60000).toISOString();
+    const mine = [
+      {id:'demo-p1', type:'ride', title:'מחפשת טרמפ מחר בבוקר לכיוון באר שבע', body:'יציאה סביב 08:00, יש מקום לתיק קטן.', status:'open', author_id:'me', created_at: ago(180), community_id: CFG.id, unread:2, last_reply:'אפשר להצטרף עד צומת שוקת, בלי בעיה.'},
+      {id:'demo-p2', type:'giveaway', title:'מוסר/ת כורסה במצב טוב, לאיסוף השבוע', body:'יושב נוח, בלי כתמים. איסוף עצמי.', status:'open', author_id:'me', created_at: ago(60*26), community_id: CFG.id, unread:1, last_reply:'עדיין פנוי? אוכל/ה להגיע בשישי בבוקר.'}
+    ];
+    const pulse = [
+      ...mine,
+      {id:'demo-p3', type:'help', title:'מחפש/ת עזרה קצרה בהובלת קרטונים', body:'שעה-שעתיים, בסוף השבוע.', status:'open', author_id:'x', created_at: ago(45), community_id: CFG.id, last_reply:null, unread:0},
+      {id:'demo-p4', type:'recommend', title:'ממליץ/ה על תיקון אופניים מקומי', body:'עבודה יסודית ומחיר הוגן, בלי להזכיר שמות כאן.', status:'open', author_id:'y', created_at: ago(90), community_id: CFG.id, last_reply:null, unread:0}
+    ];
+    const replies = {
+      'demo-p1': [
+        {id:1, body:'אני נוסע/ת בערך באותה שעה, יש מקום מאחור.', created_at: ago(40), author_id:'a'},
+        {id:2, body:'אפשר להצטרף עד צומת שוקת, בלי בעיה.', created_at: ago(15), author_id:'b'}
+      ],
+      'demo-p2': [
+        {id:3, body:'עדיין פנוי? אוכל/ה להגיע בשישי בבוקר.', created_at: ago(20), author_id:'c'}
+      ]
+    };
+    return {mine, pulse, replies};
+  }
+
+  function timeAgo(iso){
+    const t = Date.parse(iso); if (!t) return '';
+    const m = Math.max(0, Math.round((Date.now()-t)/60000));
+    if (m < 1) return 'עכשיו';
+    if (m < 60) return 'לפני ' + m + ' דק׳';
+    const h = Math.round(m/60);
+    if (h < 24) return h === 1 ? 'לפני שעה' : 'לפני ' + h + ' שעות';
+    const d = Math.round(h/24);
+    if (d === 1) return 'אתמול';
+    return 'לפני ' + d + ' ימים';
+  }
+
+  function applyGreeting(){
+    const h = $('hello-h'), s = $('hello-sub'), ph = $('ask-ph');
+    if (h) h.textContent = greetingText();
+    if (s) s.textContent = CFG.subtitle;
+    if (ph) ph.textContent = CFG.askPlaceholder;
+    const box = $('ask-box'); if (box && !box.querySelector('svg')) {
+      box.insertAdjacentHTML('afterbegin', '<span class="ask-ico">' + svgIcon('ask', 18) + '</span>');
+    }
+    const chips = $('ask-chips');
+    if (chips) chips.innerHTML = chipsForNow().map(t => '<button class="chip" type="button" data-ask="' + esc(t) + '">' + esc(t) + '</button>').join('');
+    const ban = $('demo-banner'); if (ban) ban.hidden = !DEMO;
+  }
+
+  function renderMyPosts(){
+    const el = $('my-posts'); if (!el) return;
+    const list = (DEMO ? demoData().mine : myPosts).filter(p => p.status === 'open');
+    if (!list.length) { el.hidden = true; el.innerHTML = ''; return; }
+    el.hidden = false;
+    const card = p => {
+      const unread = p.unread || 0;
+      const badge = unread ? '<span class="badge-new">' + unread + ' תגובות חדשות</span>' : (p.type==='course' && p.booking_count ? '<span class="book-count">' + p.booking_count + ' הרשמות</span>' : '');
+      const prev = p.last_reply ? '<div class="mine-preview">' + esc(p.last_reply) + '</div>' : '';
+      return '<div class="mine-card card" data-open-post="' + esc(p.id) + '"><div class="row" style="justify-content:space-between;gap:8px;align-items:flex-start"><div style="flex:1;min-width:0"><div class="meta">' + esc(TYPE_HE[p.type]||'') + ' · ' + esc(timeAgo(p.created_at)) + '</div><h3>' + esc(p.title) + '</h3>' + prev + '</div>' + badge + '</div><div class="mine-acts"><button class="btn ghost sm close-post" type="button" data-close-post="' + esc(p.id) + '">סמן כנסגר</button></div></div>';
+    };
+    const inner = list.length === 1 ? card(list[0]) : '<div class="hscroll mine-scroll">' + list.map(card).join('') + '</div>';
+    el.innerHTML = '<div class="sec-title"><h2>הפרסומים הפתוחים שלך</h2></div>' + inner;
+  }
+
+  function openNowPlaces(){
+    return visiblePlaces().filter(p => !p.search_only && isReliableHours(p) && isOpenNow(p.hours, new Date()) === true);
+  }
+  function isReliableHours(p){
+    if (!ok(p.hours) || !ok(p.hours_status)) return false;
+    if (/לא אומת|סותרות|מלקטים|דפי זהב/.test(p.hours_status)) return false;
+    return parseWeeklyHours(p.hours) != null;
+  }
+  function renderOpenNow(){
+    const el = $('open-now'); if (!el) return;
+    const list = openNowPlaces();
+    if (!list.length) { el.hidden = true; el.innerHTML = ''; return; }
+    el.hidden = false;
+    el.innerHTML = '<div class="sec-title"><h2>פתוח עכשיו</h2><a href="#/cats">כל הקטגוריות</a></div><div class="hscroll onow-scroll">' +
+      list.slice(0, 12).map(p => '<a class="card onow-card" href="#/place/' + encodeURIComponent(p.id) + '"><div class="av" style="background:' + ic(p.category_group)[1] + '">' + ic(p.category_group)[0] + '</div><div><h3>' + esc(p.name_he) + '</h3><div class="meta">' + esc(p.category || p.category_group || '') + '</div></div></a>').join('') + '</div>';
+  }
+
+  function renderPulse(){
+    const el = $('pulse-list'), filters = $('pulse-filters'), wrap = $('home-pulse');
+    if (!el || !wrap) return;
+    const src = DEMO ? demoData().pulse : pulsePosts;
+    const list = src.filter(p => p.status === 'open' && (pulseFilter === 'all' || p.type === pulseFilter));
+    if (filters) filters.innerHTML = TYPE_ALL.map(([k,l]) => '<button class="chip' + (k===pulseFilter?' on':'') + '" type="button" data-pulse="' + k + '">' + l + '</button>').join('');
+    if (!src.length && !DEMO) {
+      el.innerHTML = '<p class="ev-none">עוד אין פרסומים · <a href="#/add">להוסיף</a></p>';
+      return;
+    }
+    if (!list.length) { el.innerHTML = '<p class="ev-none">אין פרסומים בסוג הזה</p>'; return; }
+    el.innerHTML = list.map(p => '<a class="card pulse-card" href="#/post/' + encodeURIComponent(p.id) + '"><div class="meta"><span class="pulse-type">' + esc(TYPE_HE[p.type]||'') + '</span> · ' + esc(timeAgo(p.created_at)) + '</div><h3>' + esc(p.title) + '</h3>' + (p.body ? '<p class="ev-desc meta">' + esc(p.body) + '</p>' : '') + '</a>').join('');
+  }
+
+  function renderPostThread(id){
+    const el = $('post-body'); if (!el) return;
+    const all = DEMO ? demoData().pulse.concat(demoData().mine) : pulsePosts.concat(myPosts);
+    const p = all.find(x => x.id === id);
+    if (!p) { el.innerHTML = '<div class="card empty-list">הפרסום לא נמצא</div>'; return; }
+    const demoBar = DEMO ? '<div class="demo-banner">הדגמה · פרסומים לדוגמה, לא אמיתיים</div>' : '';
+    const reps = (DEMO ? (demoData().replies[id]||[]) : (postReplies[id]||[]));
+    let h = demoBar + '<a class="back" href="#/">→ חזרה</a><div class="card"><div class="meta">' + esc(TYPE_HE[p.type]||'') + ' · ' + esc(timeAgo(p.created_at)) + '</div><h1>' + esc(p.title) + '</h1>' + (p.body ? '<p>' + esc(p.body) + '</p>' : '') + '</div>';
+    h += '<div class="sec-title"><h2>תגובות</h2></div>';
+    h += reps.length ? reps.map(r => '<div class="card"><div class="meta">' + esc(timeAgo(r.created_at)) + '</div><p style="margin:0">' + esc(r.body) + '</p></div>').join('') : '<p class="ev-none">עדיין אין תגובות</p>';
+    if (DEMO && p.author_id === 'me' && p.status === 'open') h += '<button class="btn ghost" type="button" data-close-post="' + esc(p.id) + '">סמן כנסגר</button>';
+    el.innerHTML = h;
+  }
+
+  async function closePost(id){
+    if (DEMO) {
+      demoData(); // state: mutate pulse/mine in module vars
+      const mark = arr => arr.forEach(p => { if (p.id === id) p.status = 'closed'; });
+      mark(myPosts); mark(pulsePosts);
+      // also override demo by storing closed ids
+      window.__demoClosed = window.__demoClosed || new Set();
+      window.__demoClosed.add(id);
+      renderMyPosts(); renderPulse();
+      if (/#\/post\//.test(location.hash)) renderPostThread(id);
+      return;
+    }
+    if (!sessionUser) return;
+    try {
+      const H = {apikey: KEY, Authorization: 'Bearer ' + sessionUser.token, 'Content-Type': 'application/json', Accept: 'application/json', Prefer: 'return=representation'};
+      const r = await fetch(SB.replace('/rest/v1','') + '/rest/v1/rpc/close_own_post', {method:'POST', headers:H, body: JSON.stringify({p_id:id})});
+      if (r.ok) { myPosts = myPosts.filter(p => p.id !== id); pulsePosts = pulsePosts.map(p => p.id===id ? Object.assign({},p,{status:'closed'}) : p); renderMyPosts(); renderPulse(); }
+    } catch (e) {}
+  }
+
+  function renderHomeExtras(){
+    applyGreeting();
+    renderMyPosts();
+    renderOpenNow();
+    renderPulse();
+  }
+
+  const _demoOrig = demoData;
+  demoData = function(){
+    const d = _demoOrig();
+    const closed = window.__demoClosed;
+    if (closed && closed.size) {
+      d.mine = d.mine.filter(p => !closed.has(p.id));
+      d.pulse = d.pulse.map(p => closed.has(p.id) ? Object.assign({},p,{status:'closed'}) : p).filter(p => p.status==='open' || p.author_id==='me');
+      d.pulse = d.pulse.filter(p => p.status==='open');
+    }
+    return d;
+  };
+
+  async function loadPosts(){
+    if (DEMO) { renderHomeExtras(); return; }
+    const H = {apikey: KEY, Accept: 'application/json'};
+    try {
+      const q = withCommunity('/posts?select=id,community_id,author_id,type,title,body,status,expires_at,created_at&status=eq.open&order=created_at.desc&limit=30');
+      const r = await restGet(q, H);
+      if (!r.ok) { postsAvailable = false; pulsePosts = []; renderPulse(); return; }
+      const rows = await r.json();
+      pulsePosts = Array.isArray(rows) ? rows : [];
+    } catch (e) { postsAvailable = false; pulsePosts = []; }
+    renderPulse();
+    // no resident session in the public app today — personal block stays hidden unless demo
+    myPosts = [];
+    renderMyPosts();
+  }
+
+  const esc = t => String(t == null ? '' : t).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const ok = v => v && !/^לא נמצא/.test(String(v).trim());
+  const $ = id => document.getElementById(id);
+  let S = {places:[], events:[], from:'', at:null}, filter = 'הכל', q = '', shown = 20;
+
+  function load(){
+    try { const snap = JSON.parse($('community-snapshot').textContent); set(snap.places, snap.events, 'snapshot', snap.fetched_at); } catch(e) {}
+    try { const c = JSON.parse(localStorage.getItem((COMMUNITY_ID||'app')+'-data') || 'null'); if (c && c.at > (S.at || '')) set(c.places, c.events, 'cache', c.at); } catch(e) {}
+    const H = {apikey: KEY, Accept: 'application/json'};
+    Promise.all([
+      restGet(withCommunity('/places?select=' + PCOLS + '&status=eq.published&order=name_he'), H),
+      restGet(withCommunity('/events?select=' + ECOLS + '&status=eq.published&order=starts_at.asc.nullslast'), H)
+    ]).then(rs => { if (!rs.every(r => r.ok)) throw new Error('http ' + rs.map(r => r.status)); return Promise.all(rs.map(r => r.json())); })
+      .then(([p, e]) => {
+        const at = new Date().toISOString();
+        set(p, e, 'live', at);
+        try { localStorage.setItem((COMMUNITY_ID||'app')+'-data', JSON.stringify({places:p, events:e, at})); } catch(x) {}
+      })
+      .catch(() => { S.offline = true; status(); });
+  }
+  function set(p, e, from, at){ S.places = p || []; S.events = e || []; S.from = from; S.at = at; S.offline = false; renderAll(); }
+
+  function status(){
+    const el = $('data-status'); if (!el) return;
+    const when = S.at ? new Date(S.at).toLocaleString('he-IL', {timeZone:TZ, day:'numeric', month:'numeric', hour:'2-digit', minute:'2-digit'}) : '';
+    el.textContent = S.from === 'live' && !S.offline
+      ? visiblePlaces().length + ' מקומות · ' + upcoming().length + ' אירועים קרובים · מעודכן מהמאגר'
+      : 'מוצגת גרסה שמורה' + (when ? ' מ־' + when : '') + ' · ' + visiblePlaces().length + ' מקומות';
+    document.documentElement.dataset.source = S.offline ? 'offline' : S.from;
+  }
+
+  // ---- אירועים ----
+  function evKey(e){ return e.starts_at || (e.start_date ? e.start_date + 'T12:00:00+02:00' : ''); }
+  function upcoming(){
+    const now = Date.now(), today = new Date().toLocaleDateString('en-CA', {timeZone:TZ});
+    return S.events.filter(e => {
+      if (e.ends_at) return Date.parse(e.ends_at) >= now - 3600e3;
+      if (e.starts_at) return Date.parse(e.starts_at) >= now - 3 * 3600e3;
+      return !e.start_date || e.start_date >= today;
+    }).sort((a, b) => (evKey(a) || '9').localeCompare(evKey(b) || '9'));
+  }
+  function evCard(e){
+    const d = e.starts_at ? new Date(e.starts_at) : (e.start_date ? new Date(e.start_date + 'T12:00:00Z') : null);
+    const day = d ? d.toLocaleDateString('he-IL', {timeZone:TZ, day:'numeric'}) : '?';
+    const mon = d ? d.toLocaleDateString('he-IL', {timeZone:TZ, month:'short'}) : '';
+    const wd = d ? d.toLocaleDateString('he-IL', {timeZone:TZ, weekday:'long'}) : 'תאריך יפורסם';
+    const tm = e.starts_at ? new Date(e.starts_at).toLocaleTimeString('he-IL', {timeZone:TZ, hour:'2-digit', minute:'2-digit'}) : '';
+    const venue = e.venue_place_id && S.places.some(p => p.id === e.venue_place_id)
+      ? '<a href="#/place/' + encodeURIComponent(e.venue_place_id) + '" style="color:inherit">' + esc(e.venue_name) + '</a>' : esc(e.venue_name || '');
+    let h = '<div class="card"><div class="row"><div class="ev-date"><b>' + esc(day) + '</b><small>' + esc(mon) + '</small></div><div style="flex:1">';
+    h += '<h3>' + esc(e.title) + '</h3><div class="meta">' + esc(wd) + (tm ? ' · <bdi>' + esc(tm) + '</bdi>' : '') + (venue ? ' · ' + venue : '') + '</div>';
+    if (e.when_text){
+      let extra = String(e.when_text);
+      [wd, tm, e.venue_name].filter(Boolean).forEach(x => { extra = extra.split(x).join(' '); });
+      extra = extra.replace(/^[\s,·.\-–—]+|[\s,·.\-–—]+$/g,'').replace(/\s{2,}/g,' ').trim();
+      if (extra.length > 3) h += '<div class="meta">' + esc(extra) + '</div>';
+    }
+    if (e.address && e.address !== (e.venue_name||'')) h += '<div class="meta">📍 ' + esc(e.address) + '</div>';
+    if (e.description) h += '<p class="meta ev-desc">' + esc(e.description) + '</p>';
+    h += '</div></div>';
+    if (e.price_text) h += '<div class="tags"><span class="tag a">' + esc(e.price_text) + '</span></div>';
+    return h + '</div>';
+  }
+  function renderEvents(){
+    const up = upcoming();
+    const none = '<div class="card empty-list">אין כרגע אירועים קרובים במאגר. הלוח מתעדכן כל בוקר.</div>';
+    const slim = '<p class="ev-none">אין כרגע אירועים קרובים</p>';
+    $('home-events').innerHTML = up.length ? up.slice(0, 2).map(evCard).join('') : slim;
+    $('events-list').innerHTML = up.length ? up.map(evCard).join('') : none;
+  }
+
+  // ---- מקומות ----
+  function groups(){
+    const m = {};
+    visiblePlaces().filter(p => !p.search_only).forEach(p => {
+      const g = p.category_group || 'אחר';
+      if (HIDE_LODGING && HIDDEN_GROUPS.has(g)) return;
+      m[g] = (m[g] || 0) + 1;
+    });
+    const ordered = GROUP_ORDER.map(g => [g, m[g] || 0]);
+    const extras = Object.entries(m).filter(([g]) => !GROUP_ORDER.includes(g)).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'he'));
+    return ordered.concat(extras);
+  }
+  function match(p){
+    if (isHiddenPlace(p)) return false;
+    if (!q && filter !== 'הכל' && (p.category_group || 'אחר') !== filter) return false;
+    if (!q) return !p.search_only;
+    return [p.name_he, p.name_en, p.category, p.address].some(v => v && String(v).toLowerCase().includes(q));
+  }
+  function placeCard(p){
+    const [e, bg] = ic(p.category_group);
+    const tags = [];
+    if (p.badge) tags.push('<span class="badge">⏳ ' + esc(p.badge) + '</span>');
+    if (ok(p.hours)) tags.push('<span class="tag g">🕗 שעות פתיחה</span>');
+    if (p.phone) tags.push('<span class="tag">📞 טלפון</span>');
+    if (p.website) tags.push('<span class="tag a">🌐 אתר</span>');
+    return '<a class="card" href="#/place/' + encodeURIComponent(p.id) + '"><div class="row"><div class="av" style="background:' + bg + '">' + e + '</div><div style="flex:1;min-width:0"><h3>' + esc(p.name_he) + '</h3><div class="meta">' + esc(p.category || p.category_group || '') + (p.address ? ' · ' + esc(p.address.replace(new RegExp(',?\\s*' + __PLACE_NAME_RE__ + '\\s*$'), '')) : '') + '</div></div></div>' + (tags.length ? '<div class="tags">' + tags.join('') + '</div>' : '') + '</a>';
+  }
+  function catTile(g, n){
+    const [e, bg] = ic(g);
+    return '<a class="cat cat-tile" href="#/cat/' + encodeURIComponent(g) + '"><div class="e" style="background:' + bg + '">' + e + '</div><h3>' + esc(g) + '</h3><p>' + n + ' מקומות</p></a>';
+  }
+  function modeResults(){ return filter !== 'הכל' || !!q; }
+  function renderPlaces(){
+    const gs = groups();
+    const tiles = gs.map(([g, n]) => catTile(g, n)).join('');
+    const homeCats = $('home-cats'); if (homeCats) homeCats.innerHTML = tiles;
+    $('cats-grid').innerHTML = tiles + '<a class="cat cat-tile" href="#/events"><div class="e" style="background:var(--accent-bg)">🎶</div><h3>אירועים</h3><p>' + upcoming().length + ' קרובים</p></a>';
+    const browse = $('home-browse'), res = $('home-results');
+    const results = modeResults();
+    if (browse) browse.hidden = results;
+    if (res) res.hidden = !results;
+    if (results){
+      const title = $('results-title');
+      if (title) title.textContent = q ? 'תוצאות חיפוש' : filter;
+    }
+    const list = visiblePlaces().filter(match);
+    $('places-list').innerHTML = list.length ? list.slice(0, shown).map(placeCard).join('') : '<div class="card empty-list">לא נמצאו מקומות מתאימים</div>';
+    const more = $('places-more'); more.hidden = list.length <= shown; more.style.display = more.hidden ? 'none' : ''; more.textContent = 'עוד מקומות (' + Math.max(0, list.length - shown) + ')';
+  }
+  function renderPlace(id){
+    const p = S.places.find(x => x.id === id && !isHiddenPlace(x)), el = $('place-body'); if (!el) return;
+    if (!p) { el.innerHTML = '<div class="card empty-list">המקום לא נמצא במאגר</div>'; return; }
+    const [e, bg] = ic(p.category_group);
+    let h = '<div class="card hero-item"><div class="row"><div class="av" style="background:' + bg + '">' + e + '</div><div><span class="tag">' + esc(p.category || p.category_group || '') + '</span></div></div><h1>' + esc(p.name_he) + '</h1>' + (p.badge ? '<div><span class="badge">⏳ ' + esc(p.badge) + '</span></div>' : '') + (p.note ? '<p class="meta" style="font-size:15px;margin:6px 0 0">' + esc(p.note) + '</p>' : '') + '</div>';
+    const kv = [];
+    if (p.address) kv.push(['כתובת', esc(p.address)]);
+    if (p.phone) kv.push(['טלפון', '<a href="tel:' + esc(p.phone.replace(/[^\d+]/g, '')) + '" style="color:var(--accent)"><bdi>' + esc(p.phone) + '</bdi></a>']);
+    if (ok(p.hours)) kv.push(['שעות פתיחה', esc(p.hours) + (ok(p.hours_status) ? '<div class="meta">' + esc(p.hours_status) + '</div>' : '')]);
+    if (kv.length) h += '<div class="card"><div class="kv">' + kv.map(([k, v]) => '<div><div class="k">' + k + '</div><div>' + v + '</div></div>').join('') + '</div></div>';
+    const ev = upcoming().filter(x => x.venue_place_id === p.id);
+    if (ev.length) h += '<div class="sec-title"><h2>אירועים כאן</h2></div>' + ev.map(evCard).join('');
+    const links = [];
+    if (p.maps_url) links.push('<a href="' + esc(p.maps_url) + '" target="_blank" rel="noopener">🗺️ ניווט</a>');
+    if (p.website) links.push('<a href="' + esc(/^https?:/.test(p.website) ? p.website : 'https://' + p.website) + '" target="_blank" rel="noopener">🌐 לאתר</a>');
+    if (p.phone) links.push('<a href="tel:' + esc(p.phone.replace(/[^\d+]/g, '')) + '">📞 חיוג</a>');
+    if (links.length) h += '<div class="pl-links">' + links.join('') + '</div>';
+    { const vd = p.last_verified ? String(p.last_verified).split('-').reverse().join('.') : ''; const gm = /query_place_id=/.test(p.maps_url || ''); if (gm || vd) h += '<p class="note">' + (gm ? 'מופיע במפות גוגל' : 'מקור: המאגר של __BRAND__') + (vd ? ' · נבדק ' + esc(vd) : '') + '</p>'; }
+    el.innerHTML = h;
+  }
+  function renderAll(){
+    syncFilterFromHash();
+    renderEvents(); renderPlaces(); renderHomeExtras(); status();
+    const m = location.hash.match(/^#\/place\/(.+)$/); if (m) renderPlace(decodeURIComponent(m[1]));
+  }
+  window.NAHAT_renderPlace = renderPlace;
+
+  function syncFilterFromHash(){
+    const m = location.hash.match(/^#\/cat\/(.+)$/);
+    if (m){
+      filter = decodeURIComponent(m[1]);
+    } else if ((!location.hash || location.hash === '#' || location.hash === '#/') && !q){
+      filter = 'הכל';
+    }
+  }
+  function applyHomeRoute(){
+    const m = location.hash.match(/^#\/cat\/(.+)$/);
+    if (m){
+      q = ''; const inp = $('place-q'); if (inp) inp.value = ''; shown = 20;
+    } else if (!location.hash || location.hash === '#' || location.hash === '#/'){
+      if (!q) shown = 20;
+    }
+    syncFilterFromHash();
+    renderPlaces();
+  }
+  document.addEventListener('click', ev => {
+    const t = ev.target.closest('[data-cat]'); if (t) { ev.preventDefault(); location.hash = '#/cat/' + encodeURIComponent(t.dataset.cat); }
+  });
+  window.addEventListener('hashchange', applyHomeRoute);
+  $('places-more').addEventListener('click', () => { shown += 30; renderPlaces(); });
+  $('place-q').addEventListener('input', e => { q = e.target.value.trim().toLowerCase(); shown = 20; renderPlaces(); });
+  document.addEventListener('click', ev => {
+    const ask = ev.target.closest('[data-ask]');
+    if (ask){ ev.preventDefault(); const text = ask.dataset.ask; location.hash = '#/ask'; setTimeout(() => { if (window.ask) window.ask(text, {t:'זו תשובה לדוגמה במוקאפ. באפליקציה האמיתית ' + CFG.askName + ' תחפש במאגר המאושר.', pending:true}); }, 50); }
+    const pf = ev.target.closest('[data-pulse]');
+    if (pf){ pulseFilter = pf.dataset.pulse; renderPulse(); }
+    const cl = ev.target.closest('[data-close-post]');
+    if (cl){ ev.preventDefault(); ev.stopPropagation(); closePost(cl.dataset.closePost); }
+    const op = ev.target.closest('[data-open-post]');
+    if (op && !ev.target.closest('[data-close-post]')){ location.hash = '#/post/' + encodeURIComponent(op.dataset.openPost); }
+  });
+
+  // ----- כניסת תושב/ת (Google) + מושבי קורס/סדנה -----
+  const AUTH_URL = String(SB).replace(/\/rest\/v1\/?$/, '');
+  const sbAuth = (window.supabase && KEY && /supabase\.co/.test(AUTH_URL) && String(KEY).length > 40)
+    ? window.supabase.createClient(AUTH_URL, KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storageKey: 'resident-auth-' + COMMUNITY_ID } })
+    : null;
+  let resident = null; // {status, request_note, review_note} | null  (null + session = none)
+  let myBookings = [];
+  let authReady = false;
+  let lastBooked = null; // {slot, post} after a successful book, for calendar buttons
+  const DEMO_USER = { name: 'תושב/ת לדוגמה', avatar: null, status: 'pending', note: '' };
+
+  function demoKind(){ return window.__demoKind || DEMO_MODE || ''; }
+  function isDemoAuthed(){
+    if (!DEMO) return false;
+    if (window.__demoSignedOut) return false;
+    return ['me','course','course-booked','course-author'].indexOf(demoKind()) >= 0;
+  }
+  function demoResidentStatus(){
+    if (demoKind() === 'me') return 'pending';
+    if (demoKind() === 'course' || demoKind() === 'course-booked' || demoKind() === 'course-author') return 'verified';
+    if (demoKind() === '1') return 'verified';
+    return 'none';
+  }
+  function isAuthed(){ return isDemoAuthed() || !!(sessionUser && sessionUser.user); }
+  function residentStatus(){
+    if (isDemoAuthed()) return demoResidentStatus();
+    if (!isAuthed()) return null;
+    return (resident && resident.status) || 'none';
+  }
+  function isVerified(){ return residentStatus() === 'verified'; }
+  function googleName(){
+    if (isDemoAuthed()) return DEMO_USER.name;
+    const u = sessionUser && sessionUser.user;
+    if (!u) return '';
+    const m = u.user_metadata || {};
+    return m.full_name || m.name || u.email || 'משתמש/ת';
+  }
+  function googleAvatar(){
+    if (isDemoAuthed()) return null;
+    const u = sessionUser && sessionUser.user;
+    const m = (u && u.user_metadata) || {};
+    return m.avatar_url || m.picture || null;
+  }
+
+  const STATUS_HE = { none:'אין בקשת אימות עדיין', pending:'ממתין לאימות תושב/ת', verified:'תושב/ת מאומת/ת', rejected:'הבקשה נדחתה' };
+
+  function authHeaders(){
+    const h = { apikey: KEY, Accept: 'application/json', 'Content-Type': 'application/json' };
+    if (sessionUser && sessionUser.token) h.Authorization = 'Bearer ' + sessionUser.token;
+    return h;
+  }
+  function authErrHe(err){
+    const m = String((err && (err.message || err.msg || err.error_description || err.error || err.error_code)) || err || '');
+    if (/provider is not enabled|unsupported provider|validation_failed|invalid client|client_id|not enabled/i.test(m))
+      return 'כניסה עם Google עדיין לא הופעלה בקהילה הזו. אחרי שהמנהל/ת ישלימו את ההגדרה אפשר לנסות שוב.';
+    if (/redirect/i.test(m)) return 'כתובת החזרה לא מורשית עדיין בהגדרות. פנו למנהל/ת.';
+    if (/not verified/i.test(m)) return 'רק תושבות/ים מאומתות/ים יכולים לבצע את הפעולה הזו. אפשר לבקש אימות בטאב «שלי».';
+    if (/full|P0001/i.test(m)) return 'המושב מלא.';
+    if (/not authenticated|JWT/i.test(m)) return 'צריך להיכנס קודם עם Google.';
+    return 'לא הצלחנו להשלים את הפעולה. אפשר לנסות שוב.';
+  }
+  function showAuthMsg(text, ok){
+    const el = $('auth-msg'); if (el){ el.hidden = !text; el.textContent = text || ''; el.classList.toggle('ok', !!ok); }
+    const g = $('gate-msg'); if (g && text) g.textContent = text;
+  }
+
+  function appRedirectUrl(){
+    const u = new URL(location.href);
+    u.hash = '';
+    u.searchParams.delete('code');
+    u.searchParams.delete('state');
+    u.searchParams.set('after', 'me');
+    return u.origin + u.pathname + '?' + u.searchParams.toString();
+  }
+
+  async function signInGoogle(){
+    if (DEMO){ window.__demoSignedOut = false; if (!DEMO_MODE) { location.search = '?demo=me'; return; } renderMe(); renderHomeExtras(); hideGate(); return; }
+    if (!sbAuth){ showAuthMsg('כניסה עם Google עדיין לא זמינה כאן.'); return; }
+    showAuthMsg('פותחים את Google…');
+    const { data, error } = await sbAuth.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: appRedirectUrl(), skipBrowserRedirect: true }
+    });
+    if (error){ showAuthMsg(authErrHe(error)); return; }
+    const url = data && data.url;
+    if (!url){ showAuthMsg('לא הצלחנו להשלים את הפעולה. אפשר לנסות שוב.'); return; }
+    try {
+      const r = await fetch(url, { method:'GET', redirect:'manual', credentials:'omit' });
+      if (r.status >= 400){
+        let body = {};
+        try { body = await r.json(); } catch (e) {}
+        showAuthMsg(authErrHe(body));
+        return;
+      }
+    } catch (e) {}
+    location.href = url;
+  }
+  async function signOut(){
+    if (DEMO){ window.__demoSignedOut = true; lastBooked = null; renderMe(); renderHomeExtras(); return; }
+    if (sbAuth) try { await sbAuth.auth.signOut(); } catch (e) {}
+    sessionUser = null; resident = null; myPosts = []; myBookings = []; lastBooked = null;
+    renderMe(); renderHomeExtras();
+  }
+
+  async function applySession(session){
+    if (!session || !session.user){
+      sessionUser = null; resident = null; myBookings = [];
+      authReady = true;
+      renderMe(); renderHomeExtras();
+      return;
+    }
+    sessionUser = { token: session.access_token, user: session.user };
+    const m = session.user.user_metadata || {};
+    try {
+      await fetch(AUTH_URL + '/rest/v1/rpc/ensure_my_profile', {
+        method:'POST', headers: authHeaders(),
+        body: JSON.stringify({ p_display_name: m.full_name || m.name || null, p_avatar_url: m.avatar_url || m.picture || null })
+      });
+    } catch (e) {}
+    await loadResident();
+    authReady = true;
+    if (typeof loadPosts === 'function') try { await loadMyContent(); } catch (e) {}
+    renderMe(); renderHomeExtras();
+    const qs = new URLSearchParams(location.search);
+    if (qs.get('after') === 'me' && !location.hash) location.hash = '#/me';
+  }
+
+  async function loadResident(){
+    resident = null;
+    if (!sessionUser) return;
+    try {
+      const r = await fetch(AUTH_URL + '/rest/v1/rpc/my_resident', { method:'POST', headers: authHeaders(), body: '{}' });
+      if (r.ok){
+        const row = await r.json();
+        resident = (row && row.user_id) ? row : null;
+      }
+    } catch (e) { resident = null; }
+  }
+  async function loadMyContent(){
+    myBookings = [];
+    if (DEMO){ myBookings = demoBookings(); return; }
+    if (!sessionUser) { myPosts = []; return; }
+    try {
+      const q = withCommunity('/posts?select=id,community_id,author_id,type,title,body,status,expires_at,created_at&author_id=eq.' + sessionUser.user.id + '&status=eq.open&order=created_at.desc');
+      const r = await restGet(q, authHeaders());
+      if (r.ok){ const rows = await r.json(); myPosts = Array.isArray(rows) ? rows : []; }
+    } catch (e) {}
+    try {
+      const r = await fetch(AUTH_URL + '/rest/v1/rpc/list_my_bookings', { method:'POST', headers: authHeaders(), body: '{}' });
+      if (r.ok){ const rows = await r.json(); myBookings = Array.isArray(rows) ? rows : []; }
+    } catch (e) { myBookings = []; }
+    if (myPosts.some(p => p.type === 'course')) {
+      for (const p of myPosts) {
+        if (p.type !== 'course') continue;
+        try {
+          const r = await fetch(AUTH_URL + '/rest/v1/rpc/list_post_slots', { method:'POST', headers: authHeaders(), body: JSON.stringify({ p_post: p.id }) });
+          if (r.ok){
+            const slots = await r.json();
+            const cap = (slots||[]).reduce((s,x)=>s + (x.capacity||0), 0);
+            const rem = (slots||[]).reduce((s,x)=>s + (x.remaining||0), 0);
+            p.booking_count = Math.max(cap - rem, 0);
+            p.slots = slots;
+          }
+        } catch (e) {}
+      }
+    }
+  }
+
+  async function requestVerification(){
+    if (DEMO){ showAuthMsg('הבקשה נשלחה. בהדגמה הסטטוס נשאר «ממתין».', true); return; }
+    if (!isAuthed()){ return signInGoogle(); }
+    const note = (($('verify-note')||{}).value || '').trim();
+    try {
+      const r = await fetch(AUTH_URL + '/rest/v1/rpc/request_resident_verification', {
+        method:'POST', headers: authHeaders(), body: JSON.stringify({ p_note: note || null })
+      });
+      const body = await r.json().catch(()=>({}));
+      if (!r.ok){ showAuthMsg(authErrHe(body)); return; }
+      resident = body && body.user_id ? body : { status:'pending', request_note: note };
+      showAuthMsg('הבקשה נשלחה. מנהל/ת קהילה יעברו עליה.', true);
+      renderMe();
+    } catch (e) { showAuthMsg(authErrHe(e)); }
+  }
+
+  function requireVerified(actionHe){
+    if (DEMO && isVerified()) return true;
+    if (!isAuthed()){
+      showGate('כדי ' + (actionHe || 'להמשיך') + ' צריך להיכנס עם Google.');
+      return false;
+    }
+    if (!isVerified()){
+      const st = residentStatus();
+      const msg = st === 'pending'
+        ? 'הבקשה לאימות תושב/ת ממתינה לאישור. אחרי האישור אפשר ' + (actionHe || 'להמשיך') + '.'
+        : st === 'rejected'
+        ? 'הבקשה הקודמת נדחתה. אפשר לשלוח בקשה חדשה מטאב «שלי».'
+        : 'רק תושבות/ים מאומתות/ים יכולים ' + (actionHe || 'לבצע את הפעולה') + '. אפשר לבקש אימות בטאב «שלי».';
+      showGate(msg, { verify: st !== 'pending' });
+      return false;
+    }
+    return true;
+  }
+  function showGate(msg, opts){
+    opts = opts || {};
+    let g = $('auth-gate');
+    if (!g){
+      g = document.createElement('div');
+      g.id = 'auth-gate';
+      g.className = 'auth-gate';
+      g.innerHTML = '<div class="card gate-card"><p class="gate-msg" id="gate-msg"></p><div class="stack" id="gate-acts"></div><button class="btn ghost sm" type="button" data-gate-close>סגירה</button></div>';
+      document.body.appendChild(g);
+    }
+    $('gate-msg').textContent = msg;
+    const acts = $('gate-acts');
+    let b = '';
+    if (!isAuthed()) b += '<button class="btn main" type="button" data-google-signin>כניסה עם Google</button>';
+    else if (opts.verify !== false) b += '<a class="btn main" href="#/me">לבקשת אימות</a>';
+    else b += '<a class="btn main" href="#/me">למעקב בטאב שלי</a>';
+    acts.innerHTML = b;
+    g.hidden = false;
+  }
+  function hideGate(){ const g = $('auth-gate'); if (g) g.hidden = true; }
+
+  async function bootAuth(){
+    if (DEMO){ authReady = true; if (isDemoAuthed()) { sessionUser = { user:{ id:'demo-user' }, token:'demo' }; resident = { status: demoResidentStatus() }; myBookings = demoBookings(); } renderMe(); return; }
+    if (!sbAuth){ authReady = true; renderMe(); return; }
+    const { data: { session } } = await sbAuth.auth.getSession();
+    await applySession(session);
+    sbAuth.auth.onAuthStateChange((_e, sess) => { applySession(sess); });
+  }
+
+  function initialsAvatar(name){
+    const ch = (name || 'ת').trim().charAt(0);
+    return '<div class="me-av" aria-hidden="true">' + esc(ch) + '</div>';
+  }
+  function renderMe(){
+    const el = $('me-account'); if (!el) return;
+    const banner = DEMO ? '<div class="demo-banner">הדגמה · משתמש לדוגמה, לא חשבון אמיתי</div>' : '';
+    if (!isAuthed()){
+      el.innerHTML = banner + '<div class="card me-card"><h2 style="margin:0 0 8px">האזור שלי</h2><p class="meta">נכנסים עם Google. רואים את השם והתמונה מהחשבון, בלי למסור מספר טלפון. פרסום, תגובה והרשמה לקורס פתוחים לתושבות/ים אחרי אימות קצר.</p><button class="btn main" type="button" data-google-signin>כניסה עם Google</button><p class="err" id="auth-msg" hidden></p></div>';
+      const rest = $('me-legacy'); if (rest) rest.hidden = true;
+      const book = $('me-bookings'); if (book) book.hidden = true;
+      return;
+    }
+    const st = residentStatus() || 'none';
+    const av = googleAvatar();
+    const avHtml = av ? '<img class="me-av" alt="" src="' + esc(av) + '">' : initialsAvatar(googleName());
+    let actions = '<button class="btn ghost sm" type="button" data-signout>יציאה</button>';
+    let form = '';
+    if (st === 'none' || st === 'rejected'){
+      form = '<label for="verify-note">הערה למנהל/ת (לא חובה)</label><textarea class="f" id="verify-note" rows="2" placeholder="למשל: גר/ה ביישוב, או איך מכירים את הקהילה"></textarea><button class="btn main" type="button" data-request-verify>בקשת אימות תושב</button>';
+    } else if (st === 'pending'){
+      form = '<p class="note">הבקשה ממתינה לאישור מנהל/ת קהילה.</p>';
+    }
+    if (st === 'rejected' && resident && resident.review_note) form = '<p class="note">סיבת הדחייה: ' + esc(resident.review_note) + '</p>' + form;
+    el.innerHTML = banner + '<div class="card me-card"><div class="me-row">' + avHtml + '<div style="flex:1;min-width:0"><h2 style="margin:0">' + esc(googleName()) + '</h2><div class="st ' + esc(st) + '">' + esc(STATUS_HE[st]||st) + '</div></div></div>' + form + '<div style="margin-top:12px">' + actions + '</div><p class="err" id="auth-msg" hidden></p></div>';
+    const rest = $('me-legacy'); if (rest) rest.hidden = true;
+    renderMyBookingsList();
+  }
+
+  function demoCourse(){
+    const a = (d,h,m) => new Date(2026, 10, d, h, m).toISOString();
+    const slots = [
+      {id:101, post_id:'demo-course', starts_at:new Date(2026,10,28,10,0).toISOString(), ends_at:new Date(2026,10,28,12,0).toISOString(), capacity:8, location:'המתנ״ס', note:'מפגש ראשון', remaining: 3, mine_status: demoKind()==='course-booked' ? 'booked' : null},
+      {id:102, post_id:'demo-course', starts_at:new Date(2026,11,5,10,0).toISOString(), ends_at:new Date(2026,11,5,12,0).toISOString(), capacity:8, location:'המתנ״ס', note:'מפגש שני', remaining: 0, mine_status: null}
+    ];
+    const attendees = [
+      {slot_id:101, starts_at:slots[0].starts_at, ends_at:slots[0].ends_at, display_name:'תושב/ת א׳', booked_at:new Date().toISOString()},
+      {slot_id:101, starts_at:slots[0].starts_at, ends_at:slots[0].ends_at, display_name:'תושב/ת ב׳', booked_at:new Date().toISOString()},
+      {slot_id:101, starts_at:slots[0].starts_at, ends_at:slots[0].ends_at, display_name:'תושב/ת ג׳', booked_at:new Date().toISOString()},
+      {slot_id:101, starts_at:slots[0].starts_at, ends_at:slots[0].ends_at, display_name:'תושב/ת ד׳', booked_at:new Date().toISOString()},
+      {slot_id:101, starts_at:slots[0].starts_at, ends_at:slots[0].ends_at, display_name:'תושב/ת ה׳', booked_at:new Date().toISOString()}
+    ];
+    return {
+      id:'demo-course', type:'course', title:'סדנת לחם מחמצת בקהילה',
+      body:'שני מפגשים קצרים למתחילות/ים. בלי ציוד מיוחד, רק רצון לידיים בקמח.',
+      status:'open', author_id: demoKind()==='course-author' ? 'me' : 'other',
+      created_at: new Date(Date.now()-3*3600e3).toISOString(),
+      community_id: CFG.id, booking_count: 5, slots: slots, attendees: attendees
+    };
+  }
+  function demoBookings(){
+    if (demoKind() !== 'course-booked' && demoKind() !== '1') return [];
+    const c = demoCourse();
+    const s = c.slots[0];
+    return [{booking_id:1, slot_id:s.id, post_id:c.id, title:c.title, starts_at:s.starts_at, ends_at:s.ends_at, location:s.location, status:'booked', created_at:new Date().toISOString()}];
+  }
+
+  function fmtWhen(iso){
+    const d = new Date(iso); if (isNaN(d)) return '';
+    return d.toLocaleString('he-IL', { timeZone:'Asia/Jerusalem', weekday:'long', day:'numeric', month:'long', hour:'2-digit', minute:'2-digit' });
+  }
+  function fmtRange(a,b){
+    const s = new Date(a), e = new Date(b);
+    const day = s.toLocaleDateString('he-IL', { timeZone:'Asia/Jerusalem', weekday:'long', day:'numeric', month:'long' });
+    const t1 = s.toLocaleTimeString('he-IL', { timeZone:'Asia/Jerusalem', hour:'2-digit', minute:'2-digit' });
+    const t2 = e.toLocaleTimeString('he-IL', { timeZone:'Asia/Jerusalem', hour:'2-digit', minute:'2-digit' });
+    return day + ' · \u2066' + t1 + '\u2013' + t2 + '\u2069';
+  }
+  function toGCalDates(a,b){
+    const f = x => new Date(x).toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'');
+    return f(a) + '/' + f(b);
+  }
+  function calendarLinks(post, slot){
+    const title = post.title || 'קורס/סדנה';
+    const details = (post.body || '') + (CFG && CFG.askName ? '\n\n' + CFG.askName : '');
+    const loc = slot.location || '';
+    const url = 'https://calendar.google.com/calendar/render?action=TEMPLATE'
+      + '&text=' + encodeURIComponent(title)
+      + '&dates=' + toGCalDates(slot.starts_at, slot.ends_at)
+      + '&details=' + encodeURIComponent(details)
+      + '&location=' + encodeURIComponent(loc)
+      + '&ctz=Asia/Jerusalem';
+    return { url: url, ics: buildIcs(title, details, loc, slot.starts_at, slot.ends_at) };
+  }
+  function icsStamp(iso, tz){
+    const p = {};
+    new Intl.DateTimeFormat('en-CA', { timeZone: tz, year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false })
+      .formatToParts(new Date(iso)).forEach(x => { p[x.type] = x.value; });
+    const hh = p.hour === '24' ? '00' : p.hour;
+    return p.year + p.month + p.day + 'T' + hh + p.minute + p.second;
+  }
+  function buildIcs(title, details, loc, start, end){
+    const lines = [
+      'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Nahat Klili//Course//HE','CALSCALE:GREGORIAN','METHOD:PUBLISH',
+      'BEGIN:VTIMEZONE','TZID:Asia/Jerusalem','X-LIC-LOCATION:Asia/Jerusalem',
+      'BEGIN:STANDARD','TZOFFSETFROM:+0300','TZOFFSETTO:+0200','TZNAME:IST','DTSTART:19701025T020000','RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU','END:STANDARD',
+      'BEGIN:DAYLIGHT','TZOFFSETFROM:+0200','TZOFFSETTO:+0300','TZNAME:IDT','DTSTART:19700329T020000','RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU','END:DAYLIGHT',
+      'END:VTIMEZONE',
+      'BEGIN:VEVENT',
+      'DTSTART;TZID=Asia/Jerusalem:' + icsStamp(start, 'Asia/Jerusalem'),
+      'DTEND;TZID=Asia/Jerusalem:' + icsStamp(end, 'Asia/Jerusalem'),
+      'SUMMARY:' + String(title).replace(/\r?\n/g,'\\n'),
+      'DESCRIPTION:' + String(details||'').replace(/\r?\n/g,'\\n'),
+      'LOCATION:' + String(loc||'').replace(/\r?\n/g,'\\n'),
+      'END:VEVENT','END:VCALENDAR'
+    ];
+    return lines.join('\r\n');
+  }
+  function downloadIcs(filename, text){
+    const blob = new Blob([text], {type:'text/calendar;charset=utf-8'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename || 'event.ics';
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  }
+
+  function renderSlots(post, slots, opts){
+    opts = opts || {};
+    const isAuthor = opts.author || (isAuthed() && (post.author_id === 'me' || (sessionUser && sessionUser.user && post.author_id === sessionUser.user.id))) || demoKind()==='course-author';
+    let h = '<div class="sec-title"><h2>מועדים</h2></div>';
+    (slots||[]).forEach(s => {
+      const full = (s.remaining === 0) && s.mine_status !== 'booked';
+      const mine = s.mine_status === 'booked';
+      h += '<div class="card slot-card" data-slot="' + esc(s.id) + '">';
+      h += '<div class="row" style="justify-content:space-between;align-items:flex-start;gap:8px"><div><h3 style="margin:0">' + esc(fmtRange(s.starts_at, s.ends_at)) + '</h3>';
+      if (s.location) h += '<div class="meta">' + esc(s.location) + '</div>';
+      if (s.note) h += '<div class="meta">' + esc(s.note) + '</div>';
+      h += '</div><div class="seats">' + (full ? 'מלא' : ('נשארו ' + s.remaining + ' מתוך ' + s.capacity)) + '</div></div>';
+      if (isAuthor) {
+        h += '<p class="note" style="margin:8px 0 0">הנרשמות/ים מופיעות/ים למטה, בלי פרטי קשר.</p>';
+      } else if (mine) {
+        const cal = calendarLinks(post, s);
+        h += '<div class="cal-acts"><span class="note">נרשמת למועד הזה.</span>';
+        h += '<a class="btn main sm" href="' + esc(cal.url) + '" target="_blank" rel="noopener noreferrer">הוסף ליומן Google</a>';
+        h += '<button class="btn ghost sm" type="button" data-ics>הורדת .ics</button>';
+        h += '<button class="btn ghost sm" type="button" data-cancel-slot="' + esc(s.id) + '">ביטול הרשמה</button></div>';
+      } else if (full) {
+        h += '<div class="st pending" style="margin-top:8px">מלא</div>';
+      } else {
+        h += '<button class="btn main sm" type="button" style="margin-top:10px" data-book-slot="' + esc(s.id) + '">הרשמה</button>';
+      }
+      h += '</div>';
+    });
+    if (isAuthor && post.attendees && post.attendees.length){
+      h += '<div class="sec-title"><h2>נרשמות/ים (' + post.attendees.length + ')</h2></div>';
+      const by = {};
+      post.attendees.forEach(a => { (by[a.slot_id] = by[a.slot_id] || []).push(a); });
+      (slots||[]).forEach(s => {
+        const list = by[s.id] || [];
+        h += '<div class="card"><div class="meta">' + esc(fmtRange(s.starts_at,s.ends_at)) + ' · ' + list.length + ' מתוך ' + s.capacity + '</div>';
+        h += list.length ? '<ul class="attendees">' + list.map(a => '<li>' + esc(a.display_name || 'תושב/ת') + '</li>').join('') + '</ul>' : '<p class="ev-none">עדיין אין הרשמות למועד הזה</p>';
+        h += '</div>';
+      });
+    }
+    if (lastBooked && lastBooked.post && lastBooked.post.id === post.id && lastBooked.slot){
+      const cal = calendarLinks(lastBooked.post, lastBooked.slot);
+      h += '<div class="card" id="book-confirm"><h3 style="margin:0 0 6px">נרשמת בהצלחה</h3><p class="meta">' + esc(fmtRange(lastBooked.slot.starts_at, lastBooked.slot.ends_at)) + (lastBooked.slot.location ? ' · ' + esc(lastBooked.slot.location) : '') + '</p>';
+      h += '<div class="cal-acts"><a class="btn main" href="' + esc(cal.url) + '" target="_blank" rel="noopener noreferrer">הוסף ליומן Google</a>';
+      h += '<button class="btn ghost" type="button" data-ics-confirm>הורדת .ics ליומן אחר</button></div></div>';
+    }
+    return h;
+  }
+
+  function renderMyBookingsList(){
+    const el = $('me-bookings'); if (!el) return;
+    const list = DEMO ? demoBookings() : myBookings.filter(b => b.status === 'booked');
+    if (!isAuthed() || !list.length){ el.hidden = true; el.innerHTML = ''; return; }
+    el.hidden = false;
+    el.innerHTML = '<div class="sec-title"><h2>ההרשמות שלי</h2></div>' + list.map(b => {
+      return '<a class="card" href="#/post/' + encodeURIComponent(b.post_id) + '"><h3 style="margin:0">' + esc(b.title||'קורס/סדנה') + '</h3><div class="meta">' + esc(fmtRange(b.starts_at,b.ends_at)) + (b.location ? ' · ' + esc(b.location) : '') + '</div></a>';
+    }).join('');
+  }
+
+  const _renderPostThreadBase = renderPostThread;
+  renderPostThread = async function(id){
+    if (DEMO && (id === 'demo-course' || demoKind().indexOf('course') === 0)) {
+      const el = $('post-body'); if (!el) return;
+      const p = demoCourse();
+      if (demoKind() === 'course-booked') { lastBooked = { post:p, slot:p.slots[0] }; p.slots[0].mine_status = 'booked'; p.slots[0].remaining = 2; }
+      const demoBar = '<div class="demo-banner">הדגמה · פרסומים לדוגמה, לא אמיתיים</div>';
+      let h = demoBar + '<a class="back" href="#/">→ חזרה</a><div class="card"><div class="meta">' + esc(TYPE_HE[p.type]) + ' · ' + esc(timeAgo(p.created_at)) + '</div><h1>' + esc(p.title) + '</h1><p>' + esc(p.body) + '</p></div>';
+      h += renderSlots(p, p.slots, { author: demoKind()==='course-author' });
+      h += '<div class="sec-title"><h2>תגובות</h2></div><p class="ev-none">עדיין אין תגובות</p>';
+      h += renderReplyBox(p);
+      el.innerHTML = h;
+      return;
+    }
+    _renderPostThreadBase(id);
+    const el = $('post-body'); if (!el) return;
+    const all = DEMO ? demoData().pulse.concat(demoData().mine) : pulsePosts.concat(myPosts);
+    const p = all.find(x => x.id === id);
+    if (!p) return;
+    if (p.type === 'course') {
+      let slots = p.slots;
+      if (!DEMO) {
+        try {
+          const r = await fetch(AUTH_URL + '/rest/v1/rpc/list_post_slots', { method:'POST', headers: authHeaders(), body: JSON.stringify({ p_post: p.id }) });
+          if (r.ok) slots = await r.json();
+        } catch (e) { slots = slots || []; }
+        const author = sessionUser && sessionUser.user && p.author_id === sessionUser.user.id;
+        if (author || (sessionUser && residentStatus() && false)) {
+          try {
+            const r = await fetch(AUTH_URL + '/rest/v1/rpc/list_course_attendees', { method:'POST', headers: authHeaders(), body: JSON.stringify({ p_post: p.id }) });
+            if (r.ok) p.attendees = await r.json();
+          } catch (e) {}
+        }
+      }
+      el.insertAdjacentHTML('beforeend', renderSlots(p, slots || []));
+    }
+    el.insertAdjacentHTML('beforeend', renderReplyBox(p));
+  };
+
+  function renderReplyBox(p){
+    return '<div class="card" id="reply-box"><label for="reply-text">תגובה</label><textarea class="f" id="reply-text" rows="2" placeholder="תגובה קצרה לקהילה"></textarea><button class="btn main sm" type="button" data-send-reply="' + esc(p.id) + '">שליחת תגובה</button></div>';
+  }
+
+  async function bookSlot(slotId, post){
+    if (!requireVerified('להירשם למועד')) return;
+    if (DEMO){
+      const p = post || demoCourse();
+      const s = (p.slots||[]).find(x => String(x.id) === String(slotId));
+      if (!s || s.remaining === 0){ showAuthMsg('המושב מלא.'); return; }
+      s.mine_status = 'booked'; s.remaining = Math.max(s.remaining-1,0);
+      lastBooked = { post:p, slot:s };
+      if (demoKind() !== 'course-booked') {
+        const u = new URL(location.href); u.searchParams.set('demo','course-booked'); u.hash = '#/post/demo-course';
+        history.replaceState(null,'', u); window.__demoKind = 'course-booked';
+      }
+      renderPostThread(p.id); renderMyBookingsList(); return;
+    }
+    try {
+      const r = await fetch(AUTH_URL + '/rest/v1/rpc/book_slot', { method:'POST', headers: authHeaders(), body: JSON.stringify({ p_slot: Number(slotId) }) });
+      const body = await r.json().catch(()=>({}));
+      if (!r.ok){ showGate(authErrHe(body)); return; }
+      const slots = post && post.slots;
+      const s = (slots||[]).find(x => String(x.id)===String(slotId));
+      if (s){ s.mine_status='booked'; s.remaining = body.remaining; lastBooked = { post:post, slot:s }; }
+      await loadMyContent();
+      renderPostThread(post.id); renderMyBookingsList();
+    } catch (e) { showGate(authErrHe(e)); }
+  }
+  async function cancelSlot(slotId, post){
+    if (DEMO){
+      const p = post || demoCourse();
+      const s = (p.slots||[]).find(x => String(x.id)===String(slotId));
+      if (s){ s.mine_status=null; s.remaining += 1; }
+      lastBooked = null;
+      renderPostThread(p.id); renderMyBookingsList(); return;
+    }
+    try {
+      const r = await fetch(AUTH_URL + '/rest/v1/rpc/cancel_booking', { method:'POST', headers: authHeaders(), body: JSON.stringify({ p_slot: Number(slotId) }) });
+      if (!r.ok){ const body=await r.json().catch(()=>({})); showGate(authErrHe(body)); return; }
+      lastBooked = null;
+      await loadMyContent();
+      renderPostThread(post && post.id); renderMyBookingsList();
+    } catch (e) { showGate(authErrHe(e)); }
+  }
+
+  async function sendReply(postId){
+    if (!requireVerified('לכתוב תגובה')) return;
+    const text = (($('reply-text')||{}).value||'').trim();
+    if (!text) return;
+    if (DEMO){ showAuthMsg && 0; const el=$('reply-text'); if(el) el.value=''; alert('בהדגמה התגובה לא נשמרת בשרת.'); return; }
+    try {
+      const r = await fetch(SB + '/post_replies', { method:'POST', headers: Object.assign(authHeaders(), {Prefer:'return=minimal'}),
+        body: JSON.stringify({ post_id: postId, body: text }) });
+      if (!r.ok){ const b=await r.json().catch(()=>({})); showGate(authErrHe(b)); return; }
+      renderPostThread(postId);
+    } catch (e) { showGate(authErrHe(e)); }
+  }
+
+  function collectCourseSlots(){
+    const rows = [...document.querySelectorAll('.slot-edit')];
+    const out = [];
+    rows.forEach(row => {
+      const date = (row.querySelector('[name=date]')||{}).value;
+      const time = (row.querySelector('[name=time]')||{}).value;
+      const mins = parseInt((row.querySelector('[name=mins]')||{}).value, 10) || 120;
+      const seats = parseInt((row.querySelector('[name=seats]')||{}).value, 10);
+      const loc = ((row.querySelector('[name=loc]')||{}).value||'').trim();
+      if (!date || !time || !seats) return;
+      const start = new Date(date + 'T' + time + ':00');
+      const end = new Date(start.getTime() + mins*60000);
+      out.push({ starts_at: start.toISOString(), ends_at: end.toISOString(), capacity: seats, location: loc });
+    });
+    return out;
+  }
+  async function submitCommunityPost(){
+    if (!requireVerified('לפרסם בקהילה')) return;
+    const type = (($('cpost-type')||{}).value)||'help';
+    const title = (($('cpost-title')||{}).value||'').trim();
+    const body = (($('cpost-body')||{}).value||'').trim();
+    if (!title){ const e=$('cpost-err'); if(e){ e.hidden=false; e.textContent='חסרה כותרת.'; } return; }
+    if (type === 'course'){
+      const slots = collectCourseSlots();
+      if (!slots.length){ const e=$('cpost-err'); if(e){ e.hidden=false; e.textContent='צריך לפחות מועד אחד (תאריך, שעה ומקומות).'; } return; }
+      if (DEMO){ const e=$('cpost-err'); if(e){ e.hidden=false; e.textContent='בהדגמה הפרסום לא נשלח לשרת.'; } return; }
+      try {
+        const r = await fetch(AUTH_URL + '/rest/v1/rpc/create_course_post', { method:'POST', headers: authHeaders(),
+          body: JSON.stringify({ p_title:title, p_body:body||null, p_slots: slots }) });
+        const data = await r.json().catch(()=>({}));
+        if (!r.ok){ const e=$('cpost-err'); if(e){ e.hidden=false; e.textContent=authErrHe(data); } return; }
+        location.hash = '#/post/' + encodeURIComponent(data.id);
+      } catch (e) { const el=$('cpost-err'); if(el){ el.hidden=false; el.textContent=authErrHe(e); } }
+      return;
+    }
+    if (DEMO){ const e=$('cpost-err'); if(e){ e.hidden=false; e.textContent='בהדגמה הפרסום לא נשלח לשרת.'; } return; }
+    try {
+      const r = await fetch(SB + '/posts', { method:'POST', headers: Object.assign(authHeaders(), {Prefer:'return=representation'}),
+        body: JSON.stringify({ community_id: CFG.id, type, title, body: body||null }) });
+      const data = await r.json().catch(()=>({}));
+      if (!r.ok){ const e=$('cpost-err'); if(e){ e.hidden=false; e.textContent=authErrHe(Array.isArray(data)?data[0]:data); } return; }
+      const row = Array.isArray(data)?data[0]:data;
+      location.hash = '#/post/' + encodeURIComponent(row.id);
+    } catch (e) { const el=$('cpost-err'); if(el){ el.hidden=false; el.textContent=authErrHe(e); } }
+  }
+
+  function addSlotRow(){
+    const box = $('slot-rows'); if (!box) return;
+    const d = new Date(); d.setDate(d.getDate()+7);
+    const ds = d.toLocaleDateString('en-CA', {timeZone:'Asia/Jerusalem'});
+    const row = document.createElement('div');
+    row.className = 'slot-edit card';
+    row.innerHTML = '<div class="slot-grid"><label>תאריך<input class="f" name="date" type="date" value="'+ds+'"></label><label>שעה<input class="f" name="time" type="time" value="10:00"></label><label>משך (דק׳)<input class="f" name="mins" type="number" min="15" step="15" value="120"></label><label>מקומות<input class="f" name="seats" type="number" min="1" max="500" value="8"></label></div><label>מקום (לא חובה)<input class="f" name="loc" placeholder="למשל המתנ״ס"></label><button class="btn ghost sm" type="button" data-del-slot>הסרת מועד</button>';
+    box.appendChild(row);
+  }
+  function toggleCourseFields(){
+    const typ = $('cpost-type'), box = $('course-fields');
+    if (!typ || !box) return;
+    box.hidden = typ.value !== 'course';
+    if (typ.value === 'course' && !$('slot-rows').children.length) addSlotRow();
+  }
+
+
+  document.addEventListener('click', ev => {
+    if (ev.target.closest('[data-google-signin]')){ ev.preventDefault(); signInGoogle(); }
+    if (ev.target.closest('[data-signout]')){ ev.preventDefault(); signOut(); }
+    if (ev.target.closest('[data-request-verify]')){ ev.preventDefault(); requestVerification(); }
+    if (ev.target.closest('[data-gate-close]')){ ev.preventDefault(); hideGate(); }
+    const bk = ev.target.closest('[data-book-slot]');
+    if (bk){ ev.preventDefault(); const post = (DEMO && (demoKind().indexOf('course')===0 || location.hash.indexOf('demo-course')>=0)) ? demoCourse() : (pulsePosts.concat(myPosts).find(p => (p.slots||[]).some(s => String(s.id)===String(bk.dataset.bookSlot))) || {id: location.hash.split('/')[2], slots:[]}); bookSlot(bk.dataset.bookSlot, post); }
+    const cs = ev.target.closest('[data-cancel-slot]');
+    if (cs){ ev.preventDefault(); const post = (DEMO && demoKind().indexOf('course')===0) ? demoCourse() : null; cancelSlot(cs.dataset.cancelSlot, post); }
+    if (ev.target.closest('[data-ics], [data-ics-confirm]')){
+      ev.preventDefault();
+      const p = lastBooked && lastBooked.post ? lastBooked.post : (DEMO ? demoCourse() : null);
+      const s = lastBooked && lastBooked.slot ? lastBooked.slot : (p && p.slots && p.slots[0]);
+      if (p && s){ const cal = calendarLinks(p,s); downloadIcs((p.title||'course') + '.ics', cal.ics); }
+    }
+    const rp = ev.target.closest('[data-send-reply]');
+    if (rp){ ev.preventDefault(); sendReply(rp.dataset.sendReply); }
+    if (ev.target.closest('#cpost-go')){ ev.preventDefault(); submitCommunityPost(); }
+    if (ev.target.closest('[data-add-slot]')){ ev.preventDefault(); addSlotRow(); }
+    const del = ev.target.closest('[data-del-slot]');
+    if (del){ ev.preventDefault(); const row = del.closest('.slot-edit'); if (row && row.parentNode && row.parentNode.children.length>1) row.remove(); }
+  });
+  document.addEventListener('change', ev => { if (ev.target && ev.target.id === 'cpost-type') toggleCourseFields(); });
+  window.renderPostThread = renderPostThread;
+  window.bootAuth = bootAuth;
+  window.renderMe = renderMe;
+  window.requireVerified = requireVerified;
+
+  window.renderPostThread = renderPostThread;
+  load();
+  loadPosts();
+  if (window.bootAuth) bootAuth();
+})();
+
+</script><!-- DATA:END -->
+<script>
+  const routes = {'':'home','cats':'cats','cat':'home','item':'item','ask':'ask','add':'add','me':'me','events':'events','place':'place','post':'post'};
+  function go(){
+    const r = routes[location.hash.replace(/^#\/?/,'').split('/')[0]] || 'home';
+    if (r === 'place' && window.NAHAT_renderPlace) window.NAHAT_renderPlace(decodeURIComponent(location.hash.split('/')[2] || ''));
+    if (r === 'post') { const id = decodeURIComponent(location.hash.split('/')[2] || ''); if (window.renderPostThread) window.renderPostThread(id); }
+    if (r === 'me' && window.renderMe) window.renderMe();
+    document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === 's-' + r));
+    document.querySelectorAll('nav.tabs a').forEach(a => a.classList.toggle('on', a.dataset.r === r || ((r==='item'||r==='place'||r==='events') && a.dataset.r==='home')));
+    document.getElementById('composer').style.display = r === 'ask' ? '' : 'none';
+    window.scrollTo(0,0);
+  }
+  window.addEventListener('hashchange', go); go();
+  document.querySelectorAll('[data-demo]').forEach(b => b.addEventListener('click', () => {
+    const t = b.closest('section, .card').querySelector('.toast'); if (t) t.classList.add('show');
+  }));
+  document.querySelectorAll('.slot').forEach(s => s.addEventListener('click', () => { document.querySelectorAll('.slot').forEach(x => x.classList.remove('on')); s.classList.add('on'); }));
+  document.querySelectorAll('[data-tab]').forEach(c => c.addEventListener('click', () => {
+    document.querySelectorAll('[data-tab]').forEach(x => x.classList.toggle('on', x === c));
+    document.getElementById('t-new').hidden = c.dataset.tab !== 'new';
+    document.getElementById('t-vouch').hidden = c.dataset.tab !== 'vouch';
+  }));
+
+  // ---- chat (נתוני דוגמה בלבד) ----
+  const ANSWERS = [
+    {t:'יש במאגר שני מדריכי תצפיות ששני שכנים ממליצים על כל אחד מהם. לאחד יש זמנים פנויים השבוע.', card:{e:'🔭',bg:'var(--night)',h:'מדריך/ת תצפיות כוכבים (דוגמה)',m:'✓ 2 שכנים · אפשר להזמין'}, src:'מקור: מאגר __BRAND__, רשומות מאושרות'},
+    {t:'יש סיורי ג׳יפים במכתש ששני שכנים ממליצים עליהם, עם יציאות בבוקר ובשקיעה.', card:{e:'🚙',bg:'var(--amber)',h:'סיורי ג׳יפים במכתש (דוגמה)',m:'✓ 2 שכנים · זמין עכשיו'}, src:'מקור: מאגר __BRAND__, רשומות מאושרות'},
+    {t:'השבוע יש סדנת קרמיקה ברובע האמנים ביום שישי בבוקר, ונשארו מקומות אחרונים. על שאר הסדנאות עוד אין לי מידע מאושר.', card:{e:'🎨',bg:'var(--blush)',h:'סדנת קרמיקה ברובע האמנים (דוגמה)',m:'אמנים וסדנאות · שישי בבוקר'}, src:'מקור: מאגר __BRAND__, רשומות מאושרות'},
+    {t:'כן, יש קנייה משותפת של ירקות מהערבה. כבר הצטרפו 9 משפחות, והיא נסגרת בעוד 3 ימים.', card:{e:'🧺',bg:'var(--mint)',h:'קנייה משותפת של ירקות מהערבה (דוגמה)',m:'קניות משותפות · נסגר בעוד 3 ימים'}, src:'מקור: מאגר __BRAND__, רשומות מאושרות'},
+    {t:'אין לי עדיין תשובה מאושרת על נסיעות מחר לבאר שבע. ניסחתי טיוטה, והיא תופיע כאן אחרי שמנהל/ת הקהילה יאשרו אותה.', pending:true}
+  ];
+  const QS = Array.from(document.querySelectorAll('#suggest .chip')).map(c => c.textContent);
+  const chat = document.getElementById('chat'), sug = document.getElementById('suggest'), empty = document.getElementById('chat-empty');
+  let timer = null;
+  const esc = t => t.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  function scrollEnd(){ window.scrollTo({top:document.body.scrollHeight, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'}); }
+  function ask(q, ans){
+    empty.hidden = true;
+    chat.insertAdjacentHTML('beforeend', '<div class="msg-u">' + esc(q) + '</div>');
+    const a = document.createElement('div'); a.className = 'msg-a';
+    a.innerHTML = '<div class="who"><img class="brand-av" src="icons/mark.svg" alt="">__BRAND__</div><div class="typing" aria-label="__BRAND__ מקלידה"><i></i><i></i><i></i></div>';
+    chat.appendChild(a); scrollEnd();
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      let h = '<div class="who"><img class="brand-av" src="icons/mark.svg" alt="">__BRAND__ <span class="ex">תשובה לדוגמה</span></div><div class="body"' + (ans.pending ? ' style="color:var(--soft)"' : '') + '>' + ans.t + '</div>';
+      if (ans.card) h += '<a class="card" href="#/item" style="margin-top:10px;padding:12px"><div class="row"><div class="av" style="background:' + ans.card.bg + ';width:38px;height:38px;font-size:18px">' + ans.card.e + '</div><div><h3 style="font-size:15px">' + ans.card.h + '</h3><div class="meta">' + ans.card.m + '</div></div></div></a>';
+      if (ans.src) h += '<div class="src">' + ans.src + '</div>';
+      if (ans.pending) h += '<div class="pending">⏳ ממתין לאישור של מנהל/ת הקהילה</div>';
+      a.innerHTML = h; scrollEnd();
+    }, 900);
+  }
+  document.querySelectorAll('#suggest .chip').forEach(c => c.addEventListener('click', () => ask(c.textContent, ANSWERS[+c.dataset.q])));
+  document.getElementById('chat-form').addEventListener('submit', e => {
+    e.preventDefault(); const i = document.getElementById('chat-in'); const q = i.value.trim(); if (!q) return; i.value = '';
+    ask(q, {t:'זו תשובה לדוגמה במוקאפ. באפליקציה האמיתית __BRAND__ תחפש במאגר המאושר. אם אין תשובה, היא תנסח טיוטה ותעביר אותה למנהל/ת הקהילה לאישור.', pending:true});
+  });
+  document.getElementById('chat-reset').addEventListener('click', () => { clearTimeout(timer); chat.innerHTML = ''; empty.hidden = false; window.scrollTo(0,0); });
+  if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('sw.js');
+</script>
+<!-- SCN:START --><script>window.SCN_DATA={"version": "1.0.0", "language": "he", "model_target": "gemma4:12b", "default_policy": {"storage": "memory_only", "auto_post": false, "low_confidence": "clarify", "unknown_slots": null, "untrusted_user_text": true}, "scenarios": [{"id": "ride", "name_he": "טרמפ", "icon": "🚗", "trigger_phrases": ["טרמפ", "נוסע ל", "נוסעת ל", "נסיעה משותפת"], "examples_he": ["מציע טרמפ מחר מחיפה לתל אביב בשעה 18:00 עם 2 מקומות", "שלום, מציע טרמפ מחר מחיפה לתל אביב בשעה 18:00 עם 2 מקומות — אפשר לעזור עם זה?"], "modal": {"variants": ["הצעה", "בקשה"], "choose_variant_first": true, "fixed_variant": null}, "fields": [{"id": "origin", "label_he": "מאיפה", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": "(?:מ|מ־)(חיפה|תל אביב|כליל|מצפה רמון|באר שבע|נהריה|כרמיאל|עכו)", "capture": 1, "time_regex": null, "fallback": null}}, {"id": "destination", "label_he": "לאן", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": "(?:ל|ל־)(תל אביב|באר שבע|חיפה|כליל|מצפה רמון|נהריה|עכו|כרמיאל|נתב״ג|תחנת הרכבת)", "capture": 1, "time_regex": null, "fallback": null}}, {"id": "when", "label_he": "מתי יוצאים", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": "(מחר(?: בבוקר| בערב)?|היום(?: בערב)?|בשבוע הבא|ביום (?:ראשון|שני|שלישי|רביעי|חמישי|שישי|שבת)|בשבת)", "capture": "day_time", "time_regex": "בשעה (\\d{1,2}:\\d{2})", "fallback": null}}, {"id": "seats", "label_he": "מספר מקומות", "type": "number", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": "(\\d+)\\s*מקומות", "capture": 1, "time_regex": null, "fallback": null}}, {"id": "contact_hours", "label_he": "מתי ואיך נוח לפנות אליכם", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "fallback": null}}], "confirmation": {"feed": "[טיוטה לדוגמה · טרמפ]\nקהילה: {{community}}\nסוג: {{variant}}\nמאיפה: {{origin}}\nלאן: {{destination}}\nמתי יוצאים: {{when}}\nמספר מקומות: {{seats}}\nמתי ואיך נוח לפנות אליכם: {{contact_hours}}\nנדרש אישור לפני פרסום. פנייה רק בשעות שנבחרו.", "whatsapp": "[טיוטה לדוגמה · טרמפ]\nקהילה: {{community}}\nסוג: {{variant}}\nמאיפה: {{origin}}\nלאן: {{destination}}\nמתי יוצאים: {{when}}\nמספר מקומות: {{seats}}\nמתי ואיך נוח לפנות אליכם: {{contact_hours}}\nנדרש אישור לפני פרסום. פנייה רק בשעות שנבחרו.", "requires_human_approval": true}, "sample_answer_he": "תשובה לדוגמה: פתחתי טופס טרמפ עבור {{community}}. נשלים רק את הפרטים החסרים, ואז נציג טיוטה לאישור. שום דבר לא נשלח במוקאפ.", "safety_note_he": "אין לפרסם פרטי קשר של אחרים בלי הסכמתם.", "demo_only": true}, {"id": "pet_adoption", "name_he": "מסירה לאימוץ", "icon": "🐾", "trigger_phrases": ["למסירה לאימוץ", "מוסר כלב", "מוסרת חתול", "לאימוץ", "אימוץ חיות"], "examples_he": ["מוסר לאימוץ חתול בן שנתיים", "שלום, מוסר לאימוץ חתול בן שנתיים — אפשר לעזור עם זה?"], "modal": {"variants": [], "choose_variant_first": false, "fixed_variant": "מסירה"}, "fields": [{"id": "animal", "label_he": "איזו חיה", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": "(כלבה|כלב|חתולה|חתול|גורה|גור)", "capture": 1, "time_regex": null, "fallback": null}}, {"id": "age", "label_he": "גיל", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": "(?:בן|בת)\\s*(שנתיים|שנה|\\d+\\s*(?:חודשים|שנים))", "capture": 1, "time_regex": null, "fallback": null}}, {"id": "details", "label_he": "אופי, מצב בריאותי וצרכים", "type": "textarea", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "area", "label_he": "אזור", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "contact_hours", "label_he": "מתי ואיך נוח לפנות אליכם", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "fallback": null}}], "confirmation": {"feed": "[טיוטה לדוגמה · מסירה לאימוץ]\nקהילה: {{community}}\nאיזו חיה: {{animal}}\nגיל: {{age}}\nאופי, מצב בריאותי וצרכים: {{details}}\nאזור: {{area}}\nמתי ואיך נוח לפנות אליכם: {{contact_hours}}\nנדרש אישור לפני פרסום. פנייה רק בשעות שנבחרו.", "whatsapp": "[טיוטה לדוגמה · מסירה לאימוץ]\nקהילה: {{community}}\nאיזו חיה: {{animal}}\nגיל: {{age}}\nאופי, מצב בריאותי וצרכים: {{details}}\nאזור: {{area}}\nמתי ואיך נוח לפנות אליכם: {{contact_hours}}\nנדרש אישור לפני פרסום. פנייה רק בשעות שנבחרו.", "requires_human_approval": true}, "sample_answer_he": "תשובה לדוגמה: פתחתי טופס מסירה לאימוץ עבור {{community}}. נשלים רק את הפרטים החסרים, ואז נציג טיוטה לאישור. שום דבר לא נשלח במוקאפ.", "safety_note_he": "מסירה לאימוץ בלבד. לא רכישה או חיפוש לאימוץ; יש לברר צרכים ורווחת החיה.", "demo_only": true}, {"id": "food_share", "name_he": "מסירת אוכל", "icon": "🥘", "trigger_phrases": ["מסירת אוכל", "נשאר אוכל", "אוכל למסירה", "נשאר מרק", "נשארה ארוחה"], "examples_he": ["נשאר אוכל: מרק עדשים ל־4 אנשים", "שלום, נשאר אוכל: מרק עדשים ל־4 אנשים — אפשר לעזור עם זה?"], "modal": {"variants": [], "choose_variant_first": false, "fixed_variant": null}, "fields": [{"id": "food", "label_he": "מה האוכל", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": "(מרק עדשים|אורז|לחם|עוגה|מרק)", "capture": 1, "time_regex": null, "fallback": null}}, {"id": "quantity", "label_he": "כמות", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": "(\\d+\\s*(?:מנות|אנשים|קילו|יחידות))", "capture": 1, "time_regex": null, "fallback": null}}, {"id": "allergens", "label_he": "רכיבים ואלרגנים ידועים", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "prepared", "label_he": "מתי הוכן ואיך נשמר", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "pickup", "label_he": "איפה ומתי איסוף", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "contact_hours", "label_he": "מתי ואיך נוח לפנות אליכם", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "fallback": null}}], "confirmation": {"feed": "[טיוטה לדוגמה · מסירת אוכל]\nקהילה: {{community}}\nמה האוכל: {{food}}\nכמות: {{quantity}}\nרכיבים ואלרגנים ידועים: {{allergens}}\nמתי הוכן ואיך נשמר: {{prepared}}\nאיפה ומתי איסוף: {{pickup}}\nמתי ואיך נוח לפנות אליכם: {{contact_hours}}\nנדרש אישור לפני פרסום. פנייה רק בשעות שנבחרו.", "whatsapp": "[טיוטה לדוגמה · מסירת אוכל]\nקהילה: {{community}}\nמה האוכל: {{food}}\nכמות: {{quantity}}\nרכיבים ואלרגנים ידועים: {{allergens}}\nמתי הוכן ואיך נשמר: {{prepared}}\nאיפה ומתי איסוף: {{pickup}}\nמתי ואיך נוח לפנות אליכם: {{contact_hours}}\nנדרש אישור לפני פרסום. פנייה רק בשעות שנבחרו.", "requires_human_approval": true}, "sample_answer_he": "תשובה לדוגמה: פתחתי טופס מסירת אוכל עבור {{community}}. נשלים רק את הפרטים החסרים, ואז נציג טיוטה לאישור. שום דבר לא נשלח במוקאפ.", "safety_note_he": "לציין אלרגנים, מועד הכנה ואופן שמירה. לא להבטיח בטיחות מזון.", "demo_only": true}, {"id": "event", "name_he": "פרסום אירוע", "icon": "🎶", "trigger_phrases": ["פרסום אירוע", "מפרסם אירוע", "מפרסמת אירוע", "יש אירוע", "ערב קהילתי"], "examples_he": ["פרסום אירוע: ערב מוזיקה ביום חמישי בשעה 19:00", "שלום, פרסום אירוע: ערב מוזיקה ביום חמישי בשעה 19:00 — אפשר לעזור עם זה?", "ערב תצפית כוכבים במצפה"], "modal": {"variants": [], "choose_variant_first": false, "fixed_variant": null}, "fields": [{"id": "title", "label_he": "שם האירוע", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "when", "label_he": "מתי", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": "(מחר(?: בבוקר| בערב)?|היום(?: בערב)?|בשבוע הבא|ביום (?:ראשון|שני|שלישי|רביעי|חמישי|שישי|שבת)|בשבת)", "capture": "day_time", "time_regex": "בשעה (\\d{1,2}:\\d{2})", "fallback": null}}, {"id": "location", "label_he": "איפה", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "price", "label_he": "עלות או חינם", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "details", "label_he": "פרטים ונגישות", "type": "textarea", "required": false, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "contact_hours", "label_he": "מתי ואיך נוח לפנות אליכם", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "fallback": null}}], "confirmation": {"feed": "[טיוטה לדוגמה · פרסום אירוע]\nקהילה: {{community}}\nשם האירוע: {{title}}\nמתי: {{when}}\nאיפה: {{location}}\nעלות או חינם: {{price}}\nפרטים ונגישות: {{details}}\nמתי ואיך נוח לפנות אליכם: {{contact_hours}}\nנדרש אישור לפני פרסום. פנייה רק בשעות שנבחרו.", "whatsapp": "[טיוטה לדוגמה · פרסום אירוע]\nקהילה: {{community}}\nשם האירוע: {{title}}\nמתי: {{when}}\nאיפה: {{location}}\nעלות או חינם: {{price}}\nפרטים ונגישות: {{details}}\nמתי ואיך נוח לפנות אליכם: {{contact_hours}}\nנדרש אישור לפני פרסום. פנייה רק בשעות שנבחרו.", "requires_human_approval": true}, "sample_answer_he": "תשובה לדוגמה: פתחתי טופס פרסום אירוע עבור {{community}}. נשלים רק את הפרטים החסרים, ואז נציג טיוטה לאישור. שום דבר לא נשלח במוקאפ.", "safety_note_he": "אין לפרסם פרטי קשר של אחרים בלי הסכמתם.", "demo_only": true}, {"id": "item_giveaway", "name_he": "מסירת פריטים", "icon": "🎁", "trigger_phrases": ["מסירת פריטים", "למסירה ספה", "למסירה שולחן", "פריטים למסירה", "מוסר פריטים"], "examples_he": ["למסירה ספה במצב טוב", "שלום, למסירה ספה במצב טוב — אפשר לעזור עם זה?"], "modal": {"variants": [], "choose_variant_first": false, "fixed_variant": null}, "fields": [{"id": "item", "label_he": "מה מוסרים", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": "(ספה|שולחן|מקדחה|סולם|מפתחות|ארנק|כיסא)", "capture": 1, "time_regex": null, "fallback": null}}, {"id": "condition", "label_he": "מצב הפריט", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": "(מצב טוב|כמו חדש|דורש תיקון)", "capture": 1, "time_regex": null, "fallback": null}}, {"id": "pickup", "label_he": "איפה ומתי איסוף", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "contact_hours", "label_he": "מתי ואיך נוח לפנות אליכם", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "fallback": null}}], "confirmation": {"feed": "[טיוטה לדוגמה · מסירת פריטים]\nקהילה: {{community}}\nמה מוסרים: {{item}}\nמצב הפריט: {{condition}}\nאיפה ומתי איסוף: {{pickup}}\nמתי ואיך נוח לפנות אליכם: {{contact_hours}}\nנדרש אישור לפני פרסום. פנייה רק בשעות שנבחרו.", "whatsapp": "[טיוטה לדוגמה · מסירת פריטים]\nקהילה: {{community}}\nמה מוסרים: {{item}}\nמצב הפריט: {{condition}}\nאיפה ומתי איסוף: {{pickup}}\nמתי ואיך נוח לפנות אליכם: {{contact_hours}}\nנדרש אישור לפני פרסום. פנייה רק בשעות שנבחרו.", "requires_human_approval": true}, "sample_answer_he": "תשובה לדוגמה: פתחתי טופס מסירת פריטים עבור {{community}}. נשלים רק את הפרטים החסרים, ואז נציג טיוטה לאישור. שום דבר לא נשלח במוקאפ.", "safety_note_he": "אין לפרסם פרטי קשר של אחרים בלי הסכמתם.", "demo_only": true}, {"id": "yard_sale", "name_he": "מכירת חצר", "icon": "🏡", "trigger_phrases": ["מכירת חצר", "שוק יד שנייה בבית"], "examples_he": ["מכירת חצר בשבת בשעה 10:00", "שלום, מכירת חצר בשבת בשעה 10:00 — אפשר לעזור עם זה?"], "modal": {"variants": [], "choose_variant_first": false, "fixed_variant": null}, "fields": [{"id": "when", "label_he": "מתי", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": "(מחר(?: בבוקר| בערב)?|היום(?: בערב)?|בשבוע הבא|ביום (?:ראשון|שני|שלישי|רביעי|חמישי|שישי|שבת)|בשבת)", "capture": "day_time", "time_regex": "בשעה (\\d{1,2}:\\d{2})", "fallback": null}}, {"id": "location", "label_he": "איפה", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "items", "label_he": "מה מוכרים וטווח מחירים", "type": "textarea", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "contact_hours", "label_he": "מתי ואיך נוח לפנות אליכם", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "fallback": null}}], "confirmation": {"feed": "[טיוטה לדוגמה · מכירת חצר]\nקהילה: {{community}}\nמתי: {{when}}\nאיפה: {{location}}\nמה מוכרים וטווח מחירים: {{items}}\nמתי ואיך נוח לפנות אליכם: {{contact_hours}}\nנדרש אישור לפני פרסום. פנייה רק בשעות שנבחרו.", "whatsapp": "[טיוטה לדוגמה · מכירת חצר]\nקהילה: {{community}}\nמתי: {{when}}\nאיפה: {{location}}\nמה מוכרים וטווח מחירים: {{items}}\nמתי ואיך נוח לפנות אליכם: {{contact_hours}}\nנדרש אישור לפני פרסום. פנייה רק בשעות שנבחרו.", "requires_human_approval": true}, "sample_answer_he": "תשובה לדוגמה: פתחתי טופס מכירת חצר עבור {{community}}. נשלים רק את הפרטים החסרים, ואז נציג טיוטה לאישור. שום דבר לא נשלח במוקאפ.", "safety_note_he": "אין לפרסם פרטי קשר של אחרים בלי הסכמתם.", "demo_only": true}, {"id": "lost_pet", "name_he": "חיית מחמד שאבדה", "icon": "🐕", "trigger_phrases": ["אבד כלב", "אבדה חתולה", "אבד לי הכלב", "כלב אבד", "חתול נעלם"], "examples_he": ["אבד כלב חום ליד הגינה", "שלום, אבד כלב חום ליד הגינה — אפשר לעזור עם זה?"], "modal": {"variants": [], "choose_variant_first": false, "fixed_variant": null}, "fields": [{"id": "animal", "label_he": "סוג ותיאור החיה", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": "(כלבה|כלב|חתולה|חתול|גורה|גור)", "capture": 1, "time_regex": null, "fallback": null}}, {"id": "last_seen", "label_he": "איפה ומתי נראתה לאחרונה", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "identifying", "label_he": "סימנים מזהים וקולר", "type": "textarea", "required": false, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "contact_hours", "label_he": "מתי ואיך נוח לפנות אליכם", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "fallback": null}}], "confirmation": {"feed": "[טיוטה לדוגמה · חיית מחמד שאבדה]\nקהילה: {{community}}\nסוג ותיאור החיה: {{animal}}\nאיפה ומתי נראתה לאחרונה: {{last_seen}}\nסימנים מזהים וקולר: {{identifying}}\nמתי ואיך נוח לפנות אליכם: {{contact_hours}}\nנדרש אישור לפני פרסום. פנייה רק בשעות שנבחרו.", "whatsapp": "[טיוטה לדוגמה · חיית מחמד שאבדה]\nקהילה: {{community}}\nסוג ותיאור החיה: {{animal}}\nאיפה ומתי נראתה לאחרונה: {{last_seen}}\nסימנים מזהים וקולר: {{identifying}}\nמתי ואיך נוח לפנות אליכם: {{contact_hours}}\nנדרש אישור לפני פרסום. פנייה רק בשעות שנבחרו.", "requires_human_approval": true}, "sample_answer_he": "תשובה לדוגמה: פתחתי טופס חיית מחמד שאבדה עבור {{community}}. נשלים רק את הפרטים החסרים, ואז נציג טיוטה לאישור. שום דבר לא נשלח במוקאפ.", "safety_note_he": "אין לפרסם פרטי קשר של אחרים בלי הסכמתם.", "demo_only": true}, {"id": "found_pet", "name_he": "חיית מחמד שנמצאה", "icon": "🐈", "trigger_phrases": ["נמצא כלב", "נמצאה חתולה", "מצאתי כלב", "מצאתי חתול"], "examples_he": ["מצאתי כלב עם קולר ליד המכולת", "שלום, מצאתי כלב עם קולר ליד המכולת — אפשר לעזור עם זה?"], "modal": {"variants": [], "choose_variant_first": false, "fixed_variant": null}, "fields": [{"id": "animal", "label_he": "סוג ותיאור החיה", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": "(כלבה|כלב|חתולה|חתול|גורה|גור)", "capture": 1, "time_regex": null, "fallback": null}}, {"id": "found_at", "label_he": "איפה ומתי נמצא/ה", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "safe_contact", "label_he": "דרך תיאום בטוחה עם הבעלים", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "contact_hours", "label_he": "מתי ואיך נוח לפנות אליכם", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "fallback": null}}], "confirmation": {"feed": "[טיוטה לדוגמה · חיית מחמד שנמצאה]\nקהילה: {{community}}\nסוג ותיאור החיה: {{animal}}\nאיפה ומתי נמצא/ה: {{found_at}}\nדרך תיאום בטוחה עם הבעלים: {{safe_contact}}\nמתי ואיך נוח לפנות אליכם: {{contact_hours}}\nנדרש אישור לפני פרסום. פנייה רק בשעות שנבחרו.", "whatsapp": "[טיוטה לדוגמה · חיית מחמד שנמצאה]\nקהילה: {{community}}\nסוג ותיאור החיה: {{animal}}\nאיפה ומתי נמצא/ה: {{found_at}}\nדרך תיאום בטוחה עם הבעלים: {{safe_contact}}\nמתי ואיך נוח לפנות אליכם: {{contact_hours}}\nנדרש אישור לפני פרסום. פנייה רק בשעות שנבחרו.", "requires_human_approval": true}, "sample_answer_he": "תשובה לדוגמה: פתחתי טופס חיית מחמד שנמצאה עבור {{community}}. נשלים רק את הפרטים החסרים, ואז נציג טיוטה לאישור. שום דבר לא נשלח במוקאפ.", "safety_note_he": "אין לפרסם פרטי קשר של אחרים בלי הסכמתם.", "demo_only": true}, {"id": "lost_item", "name_he": "אבדה", "icon": "🔎", "trigger_phrases": ["אבד לי", "איבדתי", "אבדה לי", "ארנק אבד"], "examples_he": ["איבדתי מפתחות ליד המכולת", "שלום, איבדתי מפתחות ליד המכולת — אפשר לעזור עם זה?"], "modal": {"variants": [], "choose_variant_first": false, "fixed_variant": null}, "fields": [{"id": "item", "label_he": "מה אבד", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": "(ספה|שולחן|מקדחה|סולם|מפתחות|ארנק|כיסא)", "capture": 1, "time_regex": null, "fallback": null}}, {"id": "last_seen", "label_he": "איפה ומתי", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "identifying", "label_he": "תיאור בלי מידע אישי רגיש", "type": "textarea", "required": false, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "contact_hours", "label_he": "מתי ואיך נוח לפנות אליכם", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "fallback": null}}], "confirmation": {"feed": "[טיוטה לדוגמה · אבדה]\nקהילה: {{community}}\nמה אבד: {{item}}\nאיפה ומתי: {{last_seen}}\nתיאור בלי מידע אישי רגיש: {{identifying}}\nמתי ואיך נוח לפנות אליכם: {{contact_hours}}\nנדרש אישור לפני פרסום. פנייה רק בשעות שנבחרו.", "whatsapp": "[טיוטה לדוגמה · אבדה]\nקהילה: {{community}}\nמה אבד: {{item}}\nאיפה ומתי: {{last_seen}}\nתיאור בלי מידע אישי רגיש: {{identifying}}\nמתי ואיך נוח לפנות אליכם: {{contact_hours}}\nנדרש אישור לפני פרסום. פנייה רק בשעות שנבחרו.", "requires_human_approval": true}, "sample_answer_he": "תשובה לדוגמה: פתחתי טופס אבדה עבור {{community}}. נשלים רק את הפרטים החסרים, ואז נציג טיוטה לאישור. שום דבר לא נשלח במוקאפ.", "safety_note_he": "אין לפרסם פרטי קשר של אחרים בלי הסכמתם.", "demo_only": true}, {"id": "found_item", "name_he": "מציאה", "icon": "🗝️", "trigger_phrases": ["מצאתי מפתחות", "נמצא ארנק", "מציאה", "מצאתי פריט"], "examples_he": ["מצאתי מפתחות ליד תחנת האוטובוס", "שלום, מצאתי מפתחות ליד תחנת האוטובוס — אפשר לעזור עם זה?"], "modal": {"variants": [], "choose_variant_first": false, "fixed_variant": null}, "fields": [{"id": "item", "label_he": "מה נמצא", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": "(ספה|שולחן|מקדחה|סולם|מפתחות|ארנק|כיסא)", "capture": 1, "time_regex": null, "fallback": null}}, {"id": "found_at", "label_he": "איפה ומתי", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "handoff", "label_he": "איך מתאמים החזרה", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "contact_hours", "label_he": "מתי ואיך נוח לפנות אליכם", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "fallback": null}}], "confirmation": {"feed": "[טיוטה לדוגמה · מציאה]\nקהילה: {{community}}\nמה נמצא: {{item}}\nאיפה ומתי: {{found_at}}\nאיך מתאמים החזרה: {{handoff}}\nמתי ואיך נוח לפנות אליכם: {{contact_hours}}\nנדרש אישור לפני פרסום. פנייה רק בשעות שנבחרו.", "whatsapp": "[טיוטה לדוגמה · מציאה]\nקהילה: {{community}}\nמה נמצא: {{item}}\nאיפה ומתי: {{found_at}}\nאיך מתאמים החזרה: {{handoff}}\nמתי ואיך נוח לפנות אליכם: {{contact_hours}}\nנדרש אישור לפני פרסום. פנייה רק בשעות שנבחרו.", "requires_human_approval": true}, "sample_answer_he": "תשובה לדוגמה: פתחתי טופס מציאה עבור {{community}}. נשלים רק את הפרטים החסרים, ואז נציג טיוטה לאישור. שום דבר לא נשלח במוקאפ.", "safety_note_he": "אין לפרסם פרטי קשר של אחרים בלי הסכמתם.", "demo_only": true}, {"id": "tools", "name_he": "השאלת כלים", "icon": "🛠️", "trigger_phrases": ["להשאיל כלי", "השאלת כלים", "צריך מקדחה", "צריכה סולם", "משאיל מקדחה"], "examples_he": ["צריך מקדחה למחר בבוקר", "שלום, צריך מקדחה למחר בבוקר — אפשר לעזור עם זה?"], "modal": {"variants": ["השאלה", "בקשה להשאלה"], "choose_variant_first": true, "fixed_variant": null}, "fields": [{"id": "item", "label_he": "איזה כלי", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": "(ספה|שולחן|מקדחה|סולם|מפתחות|ארנק|כיסא)", "capture": 1, "time_regex": null, "fallback": null}}, {"id": "when", "label_he": "מתי ולכמה זמן", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": "(מחר(?: בבוקר| בערב)?|היום(?: בערב)?|בשבוע הבא|ביום (?:ראשון|שני|שלישי|רביעי|חמישי|שישי|שבת)|בשבת)", "capture": "day_time", "time_regex": "בשעה (\\d{1,2}:\\d{2})", "fallback": null}}, {"id": "area", "label_he": "אזור ותנאי החזרה", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "contact_hours", "label_he": "מתי ואיך נוח לפנות אליכם", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "fallback": null}}], "confirmation": {"feed": "[טיוטה לדוגמה · השאלת כלים]\nקהילה: {{community}}\nסוג: {{variant}}\nאיזה כלי: {{item}}\nמתי ולכמה זמן: {{when}}\nאזור ותנאי החזרה: {{area}}\nמתי ואיך נוח לפנות אליכם: {{contact_hours}}\nנדרש אישור לפני פרסום. פנייה רק בשעות שנבחרו.", "whatsapp": "[טיוטה לדוגמה · השאלת כלים]\nקהילה: {{community}}\nסוג: {{variant}}\nאיזה כלי: {{item}}\nמתי ולכמה זמן: {{when}}\nאזור ותנאי החזרה: {{area}}\nמתי ואיך נוח לפנות אליכם: {{contact_hours}}\nנדרש אישור לפני פרסום. פנייה רק בשעות שנבחרו.", "requires_human_approval": true}, "sample_answer_he": "תשובה לדוגמה: פתחתי טופס השאלת כלים עבור {{community}}. נשלים רק את הפרטים החסרים, ואז נציג טיוטה לאישור. שום דבר לא נשלח במוקאפ.", "safety_note_he": "אין לפרסם פרטי קשר של אחרים בלי הסכמתם.", "demo_only": true}, {"id": "service_request", "name_he": "בקשת המלצה לבעל מקצוע", "icon": "🔧", "trigger_phrases": ["מחפש המלצה", "חשמלאי מומלץ", "אינסטלטור מומלץ", "צריך בעל מקצוע", "מי מכיר חשמלאי", "מדריך ג׳יפים מומלץ", "מדריך כוכבים מומלץ"], "examples_he": ["מחפש המלצה לחשמלאי לשבוע הבא", "שלום, מחפש המלצה לחשמלאי לשבוע הבא — אפשר לעזור עם זה?", "מדריך ג׳יפים מומלץ במצפה רמון?"], "modal": {"variants": [], "choose_variant_first": false, "fixed_variant": null}, "fields": [{"id": "service", "label_he": "איזה שירות", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": "(חשמלאי|אינסטלטור|נגר|גנן|טכנאי מזגנים)", "capture": 1, "time_regex": null, "fallback": null}}, {"id": "area", "label_he": "אזור", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "when", "label_he": "מתי צריך", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": "(מחר(?: בבוקר| בערב)?|היום(?: בערב)?|בשבוע הבא|ביום (?:ראשון|שני|שלישי|רביעי|חמישי|שישי|שבת)|בשבת)", "capture": "day_time", "time_regex": "בשעה (\\d{1,2}:\\d{2})", "fallback": null}}, {"id": "contact_hours", "label_he": "מתי ואיך נוח לפנות אליכם", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "fallback": null}}], "confirmation": {"feed": "[טיוטה לדוגמה · בקשת המלצה לבעל מקצוע]\nקהילה: {{community}}\nאיזה שירות: {{service}}\nאזור: {{area}}\nמתי צריך: {{when}}\nמתי ואיך נוח לפנות אליכם: {{contact_hours}}\nנדרש אישור לפני פרסום. פנייה רק בשעות שנבחרו.", "whatsapp": "[טיוטה לדוגמה · בקשת המלצה לבעל מקצוע]\nקהילה: {{community}}\nאיזה שירות: {{service}}\nאזור: {{area}}\nמתי צריך: {{when}}\nמתי ואיך נוח לפנות אליכם: {{contact_hours}}\nנדרש אישור לפני פרסום. פנייה רק בשעות שנבחרו.", "requires_human_approval": true}, "sample_answer_he": "תשובה לדוגמה: פתחתי טופס בקשת המלצה לבעל מקצוע עבור {{community}}. נשלים רק את הפרטים החסרים, ואז נציג טיוטה לאישור. שום דבר לא נשלח במוקאפ.", "safety_note_he": "אין לפרסם פרטי קשר של אחרים בלי הסכמתם.", "demo_only": true}, {"id": "babysitting", "name_he": "בייביסיטר", "icon": "🧸", "trigger_phrases": ["בייביסיטר", "שמרטפות", "שמרטף"], "examples_he": ["מחפשת בייביסיטר ליום חמישי", "שלום, מחפשת בייביסיטר ליום חמישי — אפשר לעזור עם זה?"], "modal": {"variants": ["הצעה", "בקשה"], "choose_variant_first": true, "fixed_variant": null}, "fields": [{"id": "when", "label_he": "מתי ולכמה שעות", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": "(מחר(?: בבוקר| בערב)?|היום(?: בערב)?|בשבוע הבא|ביום (?:ראשון|שני|שלישי|רביעי|חמישי|שישי|שבת)|בשבת)", "capture": "day_time", "time_regex": "בשעה (\\d{1,2}:\\d{2})", "fallback": null}}, {"id": "age_range", "label_he": "טווח גילאים בלבד", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "area", "label_he": "אזור כללי", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "details", "label_he": "דרישות וניסיון", "type": "textarea", "required": false, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "contact_hours", "label_he": "מתי ואיך נוח לפנות אליכם", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "fallback": null}}], "confirmation": {"feed": "[טיוטה לדוגמה · בייביסיטר]\nקהילה: {{community}}\nסוג: {{variant}}\nמתי ולכמה שעות: {{when}}\nטווח גילאים בלבד: {{age_range}}\nאזור כללי: {{area}}\nדרישות וניסיון: {{details}}\nמתי ואיך נוח לפנות אליכם: {{contact_hours}}\nנדרש אישור לפני פרסום. פנייה רק בשעות שנבחרו.", "whatsapp": "[טיוטה לדוגמה · בייביסיטר]\nקהילה: {{community}}\nסוג: {{variant}}\nמתי ולכמה שעות: {{when}}\nטווח גילאים בלבד: {{age_range}}\nאזור כללי: {{area}}\nדרישות וניסיון: {{details}}\nמתי ואיך נוח לפנות אליכם: {{contact_hours}}\nנדרש אישור לפני פרסום. פנייה רק בשעות שנבחרו.", "requires_human_approval": true}, "sample_answer_he": "תשובה לדוגמה: פתחתי טופס בייביסיטר עבור {{community}}. נשלים רק את הפרטים החסרים, ואז נציג טיוטה לאישור. שום דבר לא נשלח במוקאפ.", "safety_note_he": "בלי שמות ילדים, כתובות מדויקות או מידע רפואי. תיאום פרטי בין מבוגרים בלבד.", "demo_only": true}, {"id": "school_carpool", "name_he": "הסעות משותפות ללימודים", "icon": "🎒", "trigger_phrases": ["הסעות לבית ספר", "הסעה לבית הספר", "קארפול לבית הספר"], "examples_he": ["מחפשים הסעה לבית הספר בבוקר", "שלום, מחפשים הסעה לבית הספר בבוקר — אפשר לעזור עם זה?"], "modal": {"variants": ["הצעה", "בקשה"], "choose_variant_first": true, "fixed_variant": null}, "fields": [{"id": "origin", "label_he": "אזור יציאה כללי", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": "(?:מ|מ־)(חיפה|תל אביב|כליל|מצפה רמון|באר שבע|נהריה|כרמיאל|עכו)", "capture": 1, "time_regex": null, "fallback": null}}, {"id": "destination", "label_he": "מוסד לימודים / נקודת מפגש", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": "(?:ל|ל־)(תל אביב|באר שבע|חיפה|כליל|מצפה רמון|נהריה|עכו|כרמיאל|נתב״ג|תחנת הרכבת)", "capture": 1, "time_regex": null, "fallback": null}}, {"id": "when", "label_he": "ימים ושעות", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": "(מחר(?: בבוקר| בערב)?|היום(?: בערב)?|בשבוע הבא|ביום (?:ראשון|שני|שלישי|רביעי|חמישי|שישי|שבת)|בשבת)", "capture": "day_time", "time_regex": "בשעה (\\d{1,2}:\\d{2})", "fallback": null}}, {"id": "details", "label_he": "אופן התיאום בין הורים", "type": "textarea", "required": false, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "contact_hours", "label_he": "מתי ואיך נוח לפנות אליכם", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "fallback": null}}], "confirmation": {"feed": "[טיוטה לדוגמה · הסעות משותפות ללימודים]\nקהילה: {{community}}\nסוג: {{variant}}\nאזור יציאה כללי: {{origin}}\nמוסד לימודים / נקודת מפגש: {{destination}}\nימים ושעות: {{when}}\nאופן התיאום בין הורים: {{details}}\nמתי ואיך נוח לפנות אליכם: {{contact_hours}}\nנדרש אישור לפני פרסום. פנייה רק בשעות שנבחרו.", "whatsapp": "[טיוטה לדוגמה · הסעות משותפות ללימודים]\nקהילה: {{community}}\nסוג: {{variant}}\nאזור יציאה כללי: {{origin}}\nמוסד לימודים / נקודת מפגש: {{destination}}\nימים ושעות: {{when}}\nאופן התיאום בין הורים: {{details}}\nמתי ואיך נוח לפנות אליכם: {{contact_hours}}\nנדרש אישור לפני פרסום. פנייה רק בשעות שנבחרו.", "requires_human_approval": true}, "sample_answer_he": "תשובה לדוגמה: פתחתי טופס הסעות משותפות ללימודים עבור {{community}}. נשלים רק את הפרטים החסרים, ואז נציג טיוטה לאישור. שום דבר לא נשלח במוקאפ.", "safety_note_he": "תיאום בין הורים בלבד; בלי שמות ילדים או שגרה מזהה בפומבי.", "demo_only": true}, {"id": "group_purchase", "name_he": "פתיחת קנייה קבוצתית", "icon": "🧺", "trigger_phrases": ["פותח קנייה", "פתיחת קנייה קבוצתית", "קנייה קבוצתית", "קנייה משותפת"], "examples_he": ["פותח קנייה קבוצתית של שמן זית", "שלום, פותח קנייה קבוצתית של שמן זית — אפשר לעזור עם זה?"], "modal": {"variants": [], "choose_variant_first": false, "fixed_variant": null}, "fields": [{"id": "product", "label_he": "מה קונים", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": "(לימונים|שמן זית|ירקות|ביצים)", "capture": 1, "time_regex": null, "fallback": null}}, {"id": "price", "label_he": "מחיר ותנאי מינימום", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "deadline", "label_he": "מועד סגירה", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "pickup", "label_he": "איפה ומתי החלוקה", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "contact_hours", "label_he": "מתי ואיך נוח לפנות אליכם", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "fallback": null}}], "confirmation": {"feed": "[טיוטה לדוגמה · פתיחת קנייה קבוצתית]\nקהילה: {{community}}\nמה קונים: {{product}}\nמחיר ותנאי מינימום: {{price}}\nמועד סגירה: {{deadline}}\nאיפה ומתי החלוקה: {{pickup}}\nמתי ואיך נוח לפנות אליכם: {{contact_hours}}\nנדרש אישור לפני פרסום. פנייה רק בשעות שנבחרו.", "whatsapp": "[טיוטה לדוגמה · פתיחת קנייה קבוצתית]\nקהילה: {{community}}\nמה קונים: {{product}}\nמחיר ותנאי מינימום: {{price}}\nמועד סגירה: {{deadline}}\nאיפה ומתי החלוקה: {{pickup}}\nמתי ואיך נוח לפנות אליכם: {{contact_hours}}\nנדרש אישור לפני פרסום. פנייה רק בשעות שנבחרו.", "requires_human_approval": true}, "sample_answer_he": "תשובה לדוגמה: פתחתי טופס פתיחת קנייה קבוצתית עבור {{community}}. נשלים רק את הפרטים החסרים, ואז נציג טיוטה לאישור. שום דבר לא נשלח במוקאפ.", "safety_note_he": "אין לפרסם פרטי קשר של אחרים בלי הסכמתם.", "demo_only": true}, {"id": "volunteers", "name_he": "קריאה למתנדבים", "icon": "🤝", "trigger_phrases": ["דרושים מתנדבים", "קריאה למתנדבים", "מחפשים מתנדבים"], "examples_he": ["דרושים מתנדבים לניקיון השביל ביום שישי", "שלום, דרושים מתנדבים לניקיון השביל ביום שישי — אפשר לעזור עם זה?"], "modal": {"variants": [], "choose_variant_first": false, "fixed_variant": null}, "fields": [{"id": "task", "label_he": "מה עושים", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "when", "label_he": "מתי ולכמה זמן", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": "(מחר(?: בבוקר| בערב)?|היום(?: בערב)?|בשבוע הבא|ביום (?:ראשון|שני|שלישי|רביעי|חמישי|שישי|שבת)|בשבת)", "capture": "day_time", "time_regex": "בשעה (\\d{1,2}:\\d{2})", "fallback": null}}, {"id": "location", "label_he": "איפה", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "needs", "label_he": "ציוד ונגישות", "type": "text", "required": false, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "contact_hours", "label_he": "מתי ואיך נוח לפנות אליכם", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "fallback": null}}], "confirmation": {"feed": "[טיוטה לדוגמה · קריאה למתנדבים]\nקהילה: {{community}}\nמה עושים: {{task}}\nמתי ולכמה זמן: {{when}}\nאיפה: {{location}}\nציוד ונגישות: {{needs}}\nמתי ואיך נוח לפנות אליכם: {{contact_hours}}\nנדרש אישור לפני פרסום. פנייה רק בשעות שנבחרו.", "whatsapp": "[טיוטה לדוגמה · קריאה למתנדבים]\nקהילה: {{community}}\nמה עושים: {{task}}\nמתי ולכמה זמן: {{when}}\nאיפה: {{location}}\nציוד ונגישות: {{needs}}\nמתי ואיך נוח לפנות אליכם: {{contact_hours}}\nנדרש אישור לפני פרסום. פנייה רק בשעות שנבחרו.", "requires_human_approval": true}, "sample_answer_he": "תשובה לדוגמה: פתחתי טופס קריאה למתנדבים עבור {{community}}. נשלים רק את הפרטים החסרים, ואז נציג טיוטה לאישור. שום דבר לא נשלח במוקאפ.", "safety_note_he": "אין לפרסם פרטי קשר של אחרים בלי הסכמתם.", "demo_only": true}, {"id": "neighbor_help", "name_he": "עזרה לשכן או שכנה", "icon": "🌷", "trigger_phrases": ["עזרה לשכן", "עזרה לשכנה", "עזרה לקשיש", "עזרה לקשישה"], "examples_he": ["צריך עזרה לשכן בהבאת קניות", "שלום, צריך עזרה לשכן בהבאת קניות — אפשר לעזור עם זה?"], "modal": {"variants": [], "choose_variant_first": false, "fixed_variant": null}, "fields": [{"id": "task", "label_he": "סוג העזרה ללא פרטי האדם", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "when", "label_he": "מתי", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": "(מחר(?: בבוקר| בערב)?|היום(?: בערב)?|בשבוע הבא|ביום (?:ראשון|שני|שלישי|רביעי|חמישי|שישי|שבת)|בשבת)", "capture": "day_time", "time_regex": "בשעה (\\d{1,2}:\\d{2})", "fallback": null}}, {"id": "area", "label_he": "אזור כללי בלבד", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "contact_hours", "label_he": "מתי ואיך נוח לפנות אליכם", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "fallback": null}}], "confirmation": {"feed": "[טיוטה לדוגמה · עזרה לשכן או שכנה]\nקהילה: {{community}}\nסוג העזרה ללא פרטי האדם: {{task}}\nמתי: {{when}}\nאזור כללי בלבד: {{area}}\nמתי ואיך נוח לפנות אליכם: {{contact_hours}}\nנדרש אישור לפני פרסום. פנייה רק בשעות שנבחרו.", "whatsapp": "[טיוטה לדוגמה · עזרה לשכן או שכנה]\nקהילה: {{community}}\nסוג העזרה ללא פרטי האדם: {{task}}\nמתי: {{when}}\nאזור כללי בלבד: {{area}}\nמתי ואיך נוח לפנות אליכם: {{contact_hours}}\nנדרש אישור לפני פרסום. פנייה רק בשעות שנבחרו.", "requires_human_approval": true}, "sample_answer_he": "תשובה לדוגמה: פתחתי טופס עזרה לשכן או שכנה עבור {{community}}. נשלים רק את הפרטים החסרים, ואז נציג טיוטה לאישור. שום דבר לא נשלח במוקאפ.", "safety_note_he": "רק בהסכמת השכן/ה; אין לציין שם, מצב רפואי או כתובת מדויקת.", "demo_only": true}, {"id": "house_sitting", "name_he": "שמירה על בית או חיות", "icon": "🏠", "trigger_phrases": ["שמירה על הבית", "דוגסיטר", "פנסיון ביתי", "האכלת חתולים", "פטסיטר"], "examples_he": ["צריך דוגסיטר בשבוע הבא", "שלום, צריך דוגסיטר בשבוע הבא — אפשר לעזור עם זה?"], "modal": {"variants": ["הצעה", "בקשה"], "choose_variant_first": true, "fixed_variant": null}, "fields": [{"id": "care", "label_he": "על מה שומרים", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "when", "label_he": "טווח תאריכים", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": "(מחר(?: בבוקר| בערב)?|היום(?: בערב)?|בשבוע הבא|ביום (?:ראשון|שני|שלישי|רביעי|חמישי|שישי|שבת)|בשבת)", "capture": "day_time", "time_regex": "בשעה (\\d{1,2}:\\d{2})", "fallback": null}}, {"id": "area", "label_he": "אזור כללי בלבד", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "details", "label_he": "הנחיות ותשלום", "type": "textarea", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "contact_hours", "label_he": "מתי ואיך נוח לפנות אליכם", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "fallback": null}}], "confirmation": {"feed": "[טיוטה לדוגמה · שמירה על בית או חיות]\nקהילה: {{community}}\nסוג: {{variant}}\nעל מה שומרים: {{care}}\nאזור כללי בלבד: {{area}}\nהנחיות ותשלום: {{details}}\nמתי ואיך נוח לפנות אליכם: {{contact_hours}}\nנדרש אישור לפני פרסום. פנייה רק בשעות שנבחרו.", "whatsapp": "[טיוטה לדוגמה · שמירה על בית או חיות]\nקהילה: {{community}}\nסוג: {{variant}}\nעל מה שומרים: {{care}}\nאזור כללי בלבד: {{area}}\nהנחיות ותשלום: {{details}}\nמתי ואיך נוח לפנות אליכם: {{contact_hours}}\nנדרש אישור לפני פרסום. פנייה רק בשעות שנבחרו.", "requires_human_approval": true}, "sample_answer_he": "תשובה לדוגמה: פתחתי טופס שמירה על בית או חיות עבור {{community}}. נשלים רק את הפרטים החסרים, ואז נציג טיוטה לאישור. שום דבר לא נשלח במוקאפ.", "safety_note_he": "לא לפרסם מיקום מדויק, קודי כניסה או שהבית ריק; תאריכים לא יפורסמו בפיד לפני בדיקה.", "demo_only": true}, {"id": "housing", "name_he": "חדר או דירה להשכרה", "icon": "🔑", "trigger_phrases": ["דירה להשכרה", "חדר להשכרה", "מחפש דירה", "מחפשת חדר"], "examples_he": ["חדר להשכרה לתקופה קצרה", "שלום, חדר להשכרה לתקופה קצרה — אפשר לעזור עם זה?"], "modal": {"variants": ["הצעה", "חיפוש"], "choose_variant_first": true, "fixed_variant": null}, "fields": [{"id": "kind", "label_he": "סוג הנכס", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "area", "label_he": "אזור כללי", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "when", "label_he": "ממתי ולכמה זמן", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": "(מחר(?: בבוקר| בערב)?|היום(?: בערב)?|בשבוע הבא|ביום (?:ראשון|שני|שלישי|רביעי|חמישי|שישי|שבת)|בשבת)", "capture": "day_time", "time_regex": "בשעה (\\d{1,2}:\\d{2})", "fallback": null}}, {"id": "price", "label_he": "מחיר ותנאים", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "contact_hours", "label_he": "מתי ואיך נוח לפנות אליכם", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "fallback": null}}], "confirmation": {"feed": "[טיוטה לדוגמה · חדר או דירה להשכרה]\nקהילה: {{community}}\nסוג: {{variant}}\nסוג הנכס: {{kind}}\nאזור כללי: {{area}}\nממתי ולכמה זמן: {{when}}\nמחיר ותנאים: {{price}}\nמתי ואיך נוח לפנות אליכם: {{contact_hours}}\nנדרש אישור לפני פרסום. פנייה רק בשעות שנבחרו.", "whatsapp": "[טיוטה לדוגמה · חדר או דירה להשכרה]\nקהילה: {{community}}\nסוג: {{variant}}\nסוג הנכס: {{kind}}\nאזור כללי: {{area}}\nממתי ולכמה זמן: {{when}}\nמחיר ותנאים: {{price}}\nמתי ואיך נוח לפנות אליכם: {{contact_hours}}\nנדרש אישור לפני פרסום. פנייה רק בשעות שנבחרו.", "requires_human_approval": true}, "sample_answer_he": "תשובה לדוגמה: פתחתי טופס חדר או דירה להשכרה עבור {{community}}. נשלים רק את הפרטים החסרים, ואז נציג טיוטה לאישור. שום דבר לא נשלח במוקאפ.", "safety_note_he": "אין לפרסם פרטי קשר של אחרים בלי הסכמתם.", "demo_only": true}, {"id": "gig", "name_he": "הצעת עבודה או משימה", "icon": "💼", "trigger_phrases": ["דרוש עובד", "דרושה עובדת", "מציע עבודה", "הצעת עבודה", "גיג"], "examples_he": ["מציע עבודה בסידור גינה מחר", "שלום, מציע עבודה בסידור גינה מחר — אפשר לעזור עם זה?"], "modal": {"variants": [], "choose_variant_first": false, "fixed_variant": null}, "fields": [{"id": "task", "label_he": "מה העבודה", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "when", "label_he": "מתי והיקף", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": "(מחר(?: בבוקר| בערב)?|היום(?: בערב)?|בשבוע הבא|ביום (?:ראשון|שני|שלישי|רביעי|חמישי|שישי|שבת)|בשבת)", "capture": "day_time", "time_regex": "בשעה (\\d{1,2}:\\d{2})", "fallback": null}}, {"id": "area", "label_he": "אזור", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "pay", "label_he": "תשלום ותנאים", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "contact_hours", "label_he": "מתי ואיך נוח לפנות אליכם", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "fallback": null}}], "confirmation": {"feed": "[טיוטה לדוגמה · הצעת עבודה או משימה]\nקהילה: {{community}}\nמה העבודה: {{task}}\nמתי והיקף: {{when}}\nאזור: {{area}}\nתשלום ותנאים: {{pay}}\nמתי ואיך נוח לפנות אליכם: {{contact_hours}}\nנדרש אישור לפני פרסום. פנייה רק בשעות שנבחרו.", "whatsapp": "[טיוטה לדוגמה · הצעת עבודה או משימה]\nקהילה: {{community}}\nמה העבודה: {{task}}\nמתי והיקף: {{when}}\nאזור: {{area}}\nתשלום ותנאים: {{pay}}\nמתי ואיך נוח לפנות אליכם: {{contact_hours}}\nנדרש אישור לפני פרסום. פנייה רק בשעות שנבחרו.", "requires_human_approval": true}, "sample_answer_he": "תשובה לדוגמה: פתחתי טופס הצעת עבודה או משימה עבור {{community}}. נשלים רק את הפרטים החסרים, ואז נציג טיוטה לאישור. שום דבר לא נשלח במוקאפ.", "safety_note_he": "אין לפרסם פרטי קשר של אחרים בלי הסכמתם.", "demo_only": true}, {"id": "workshop", "name_he": "סדנה או חוג", "icon": "🎨", "trigger_phrases": ["פותח סדנה", "סדנה", "חוג חדש", "שיעור קהילתי"], "examples_he": ["סדנה לקרמיקה ביום שישי", "שלום, סדנה לקרמיקה ביום שישי — אפשר לעזור עם זה?", "סדנת קרמיקה ברובע האמנים"], "modal": {"variants": [], "choose_variant_first": false, "fixed_variant": null}, "fields": [{"id": "title", "label_he": "שם הסדנה או החוג", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "when", "label_he": "מתי", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": "(מחר(?: בבוקר| בערב)?|היום(?: בערב)?|בשבוע הבא|ביום (?:ראשון|שני|שלישי|רביעי|חמישי|שישי|שבת)|בשבת)", "capture": "day_time", "time_regex": "בשעה (\\d{1,2}:\\d{2})", "fallback": null}}, {"id": "location", "label_he": "איפה", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "price", "label_he": "מחיר או חינם", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "audience", "label_he": "למי מתאים ונגישות", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "contact_hours", "label_he": "מתי ואיך נוח לפנות אליכם", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "fallback": null}}], "confirmation": {"feed": "[טיוטה לדוגמה · סדנה או חוג]\nקהילה: {{community}}\nשם הסדנה או החוג: {{title}}\nמתי: {{when}}\nאיפה: {{location}}\nמחיר או חינם: {{price}}\nלמי מתאים ונגישות: {{audience}}\nמתי ואיך נוח לפנות אליכם: {{contact_hours}}\nנדרש אישור לפני פרסום. פנייה רק בשעות שנבחרו.", "whatsapp": "[טיוטה לדוגמה · סדנה או חוג]\nקהילה: {{community}}\nשם הסדנה או החוג: {{title}}\nמתי: {{when}}\nאיפה: {{location}}\nמחיר או חינם: {{price}}\nלמי מתאים ונגישות: {{audience}}\nמתי ואיך נוח לפנות אליכם: {{contact_hours}}\nנדרש אישור לפני פרסום. פנייה רק בשעות שנבחרו.", "requires_human_approval": true}, "sample_answer_he": "תשובה לדוגמה: פתחתי טופס סדנה או חוג עבור {{community}}. נשלים רק את הפרטים החסרים, ואז נציג טיוטה לאישור. שום דבר לא נשלח במוקאפ.", "safety_note_he": "אין לפרסם פרטי קשר של אחרים בלי הסכמתם.", "demo_only": true}, {"id": "community_alert", "name_he": "עדכון תשתיות ומזג אוויר", "icon": "⚠️", "trigger_phrases": ["חסימת כביש", "הפסקת חשמל", "הצפה", "שריפה", "אזהרת מזג אוויר"], "examples_he": ["הפסקת חשמל באזור מהשעה 18:00", "שלום, הפסקת חשמל באזור מהשעה 18:00 — אפשר לעזור עם זה?"], "modal": {"variants": [], "choose_variant_first": false, "fixed_variant": null}, "fields": [{"id": "topic", "label_he": "סוג העדכון", "type": "select", "required": true, "options": ["כביש", "חשמל", "מים", "מזג אוויר", "אש / עשן"], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "area", "label_he": "אזור כללי", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "when", "label_he": "מתי נצפה", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": "(מחר(?: בבוקר| בערב)?|היום(?: בערב)?|בשבוע הבא|ביום (?:ראשון|שני|שלישי|רביעי|חמישי|שישי|שבת)|בשבת)", "capture": "day_time", "time_regex": "בשעה (\\d{1,2}:\\d{2})", "fallback": null}}, {"id": "source", "label_he": "מקור המידע לאימות", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "details", "label_he": "תיאור עובדתי בלבד", "type": "textarea", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "contact_hours", "label_he": "מתי ואיך נוח לפנות אליכם", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "fallback": null}}], "confirmation": {"feed": "[טיוטה לדוגמה · עדכון תשתיות ומזג אוויר]\nקהילה: {{community}}\nסוג העדכון: {{topic}}\nאזור כללי: {{area}}\nמתי נצפה: {{when}}\nמקור המידע לאימות: {{source}}\nתיאור עובדתי בלבד: {{details}}\nמתי ואיך נוח לפנות אליכם: {{contact_hours}}\nנדרש אישור לפני פרסום. פנייה רק בשעות שנבחרו.", "whatsapp": "[טיוטה לדוגמה · עדכון תשתיות ומזג אוויר]\nקהילה: {{community}}\nסוג העדכון: {{topic}}\nאזור כללי: {{area}}\nמתי נצפה: {{when}}\nמקור המידע לאימות: {{source}}\nתיאור עובדתי בלבד: {{details}}\nמתי ואיך נוח לפנות אליכם: {{contact_hours}}\nנדרש אישור לפני פרסום. פנייה רק בשעות שנבחרו.", "requires_human_approval": true}, "sample_answer_he": "תשובה לדוגמה: פתחתי טופס עדכון תשתיות ומזג אוויר עבור {{community}}. נשלים רק את הפרטים החסרים, ואז נציג טיוטה לאישור. שום דבר לא נשלח במוקאפ.", "safety_note_he": "לא כלי חירום. בסכנה מיידית פנו לגורמי החירום; אין המתנה לאישור קהילה. עדכון לפיד דורש מקור ואימות מנהל/ת.", "demo_only": true}, {"id": "parcel_favor", "name_he": "עזרה באיסוף חבילה", "icon": "📦", "trigger_phrases": ["איסוף חבילה", "לאסוף חבילה", "אוסף חבילות", "עזרה בדואר"], "examples_he": ["מי יכול לאסוף חבילה מחר", "שלום, מי יכול לאסוף חבילה מחר — אפשר לעזור עם זה?"], "modal": {"variants": [], "choose_variant_first": false, "fixed_variant": null}, "fields": [{"id": "from", "label_he": "מאיפה אוספים", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "when", "label_he": "מתי", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": "(מחר(?: בבוקר| בערב)?|היום(?: בערב)?|בשבוע הבא|ביום (?:ראשון|שני|שלישי|רביעי|חמישי|שישי|שבת)|בשבת)", "capture": "day_time", "time_regex": "בשעה (\\d{1,2}:\\d{2})", "fallback": null}}, {"id": "area", "label_he": "איפה מתאמים מסירה", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "contact_hours", "label_he": "מתי ואיך נוח לפנות אליכם", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "fallback": null}}], "confirmation": {"feed": "[טיוטה לדוגמה · עזרה באיסוף חבילה]\nקהילה: {{community}}\nמאיפה אוספים: {{from}}\nמתי: {{when}}\nאיפה מתאמים מסירה: {{area}}\nמתי ואיך נוח לפנות אליכם: {{contact_hours}}\nנדרש אישור לפני פרסום. פנייה רק בשעות שנבחרו.", "whatsapp": "[טיוטה לדוגמה · עזרה באיסוף חבילה]\nקהילה: {{community}}\nמאיפה אוספים: {{from}}\nמתי: {{when}}\nאיפה מתאמים מסירה: {{area}}\nמתי ואיך נוח לפנות אליכם: {{contact_hours}}\nנדרש אישור לפני פרסום. פנייה רק בשעות שנבחרו.", "requires_human_approval": true}, "sample_answer_he": "תשובה לדוגמה: פתחתי טופס עזרה באיסוף חבילה עבור {{community}}. נשלים רק את הפרטים החסרים, ואז נציג טיוטה לאישור. שום דבר לא נשלח במוקאפ.", "safety_note_he": "אין לכתוב קוד איסוף, מספר תעודה או מספר מעקב בפומבי. פרטים רגישים רק בתיאום פרטי.", "demo_only": true}, {"id": "produce", "name_he": "מכירת תוצרת מקומית", "icon": "🍋", "trigger_phrases": ["מוכר ירקות", "תוצרת למכירה", "מכירת תוצרת", "ביצים למכירה", "סל ירקות"], "examples_he": ["מכירת תוצרת: לימונים מהגינה", "שלום, מכירת תוצרת: לימונים מהגינה — אפשר לעזור עם זה?"], "modal": {"variants": [], "choose_variant_first": false, "fixed_variant": null}, "fields": [{"id": "product", "label_he": "איזו תוצרת", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": "(לימונים|שמן זית|ירקות|ביצים)", "capture": 1, "time_regex": null, "fallback": null}}, {"id": "quantity", "label_he": "כמות זמינה", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": "(\\d+\\s*(?:מנות|אנשים|קילו|יחידות))", "capture": 1, "time_regex": null, "fallback": null}}, {"id": "price", "label_he": "מחיר ליחידה", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "pickup", "label_he": "איפה ומתי איסוף", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "contact_hours", "label_he": "מתי ואיך נוח לפנות אליכם", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "fallback": null}}], "confirmation": {"feed": "[טיוטה לדוגמה · מכירת תוצרת מקומית]\nקהילה: {{community}}\nאיזו תוצרת: {{product}}\nכמות זמינה: {{quantity}}\nמחיר ליחידה: {{price}}\nאיפה ומתי איסוף: {{pickup}}\nמתי ואיך נוח לפנות אליכם: {{contact_hours}}\nנדרש אישור לפני פרסום. פנייה רק בשעות שנבחרו.", "whatsapp": "[טיוטה לדוגמה · מכירת תוצרת מקומית]\nקהילה: {{community}}\nאיזו תוצרת: {{product}}\nכמות זמינה: {{quantity}}\nמחיר ליחידה: {{price}}\nאיפה ומתי איסוף: {{pickup}}\nמתי ואיך נוח לפנות אליכם: {{contact_hours}}\nנדרש אישור לפני פרסום. פנייה רק בשעות שנבחרו.", "requires_human_approval": true}, "sample_answer_he": "תשובה לדוגמה: פתחתי טופס מכירת תוצרת מקומית עבור {{community}}. נשלים רק את הפרטים החסרים, ואז נציג טיוטה לאישור. שום דבר לא נשלח במוקאפ.", "safety_note_he": "אין לפרסם פרטי קשר של אחרים בלי הסכמתם.", "demo_only": true}, {"id": "business_vouch", "name_he": "בקשה לאימות עסק", "icon": "✅", "trigger_phrases": ["מי מכיר את העסק", "אימות עסק", "ממליצים לעסק", "תאשרו את העסק"], "examples_he": ["בקשה לאימות עסק: נגר מקומי", "שלום, בקשה לאימות עסק: נגר מקומי — אפשר לעזור עם זה?"], "modal": {"variants": [], "choose_variant_first": false, "fixed_variant": null}, "fields": [{"id": "business", "label_he": "שם העסק", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "service", "label_he": "מה הוא מציע", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": "(חשמלאי|אינסטלטור|נגר|גנן|טכנאי מזגנים)", "capture": 1, "time_regex": null, "fallback": null}}, {"id": "area", "label_he": "אזור פעילות", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "contact_hours", "label_he": "מתי ואיך נוח לפנות אליכם", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "fallback": null}}], "confirmation": {"feed": "[טיוטה לדוגמה · בקשה לאימות עסק]\nקהילה: {{community}}\nשם העסק: {{business}}\nמה הוא מציע: {{service}}\nאזור פעילות: {{area}}\nמתי ואיך נוח לפנות אליכם: {{contact_hours}}\nנדרש אישור לפני פרסום. פנייה רק בשעות שנבחרו.", "whatsapp": "[טיוטה לדוגמה · בקשה לאימות עסק]\nקהילה: {{community}}\nשם העסק: {{business}}\nמה הוא מציע: {{service}}\nאזור פעילות: {{area}}\nמתי ואיך נוח לפנות אליכם: {{contact_hours}}\nנדרש אישור לפני פרסום. פנייה רק בשעות שנבחרו.", "requires_human_approval": true}, "sample_answer_he": "תשובה לדוגמה: פתחתי טופס בקשה לאימות עסק עבור {{community}}. נשלים רק את הפרטים החסרים, ואז נציג טיוטה לאישור. שום דבר לא נשלח במוקאפ.", "safety_note_he": "אין לפרסם פרטי קשר של אחרים בלי הסכמתם.", "demo_only": true}, {"id": "meal_train", "name_he": "ארוחות למשפחה בהסכמה", "icon": "💛", "trigger_phrases": ["ארוחות למשפחה", "סבב ארוחות", "רכבת ארוחות", "בישולים למשפחה"], "examples_he": ["מארגנים סבב ארוחות למשפחה", "שלום, מארגנים סבב ארוחות למשפחה — אפשר לעזור עם זה?"], "modal": {"variants": [], "choose_variant_first": false, "fixed_variant": null}, "fields": [{"id": "when", "label_he": "ימים ושעות למסירה", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": "(מחר(?: בבוקר| בערב)?|היום(?: בערב)?|בשבוע הבא|ביום (?:ראשון|שני|שלישי|רביעי|חמישי|שישי|שבת)|בשבת)", "capture": "day_time", "time_regex": "בשעה (\\d{1,2}:\\d{2})", "fallback": null}}, {"id": "quantity", "label_he": "לכמה מנות", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": "(\\d+\\s*(?:מנות|אנשים|קילו|יחידות))", "capture": 1, "time_regex": null, "fallback": null}}, {"id": "diet", "label_he": "העדפות ואלרגנים", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "coordinator", "label_he": "דרך תיאום עם המארגן/ת בלבד", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "capture": 1, "time_regex": null, "fallback": null}}, {"id": "contact_hours", "label_he": "מתי ואיך נוח לפנות אליכם", "type": "text", "required": true, "options": [], "smart_default": {"source": "explicit_message_only", "regex": null, "fallback": null}}], "confirmation": {"feed": "[טיוטה לדוגמה · ארוחות למשפחה בהסכמה]\nקהילה: {{community}}\nימים ושעות למסירה: {{when}}\nלכמה מנות: {{quantity}}\nהעדפות ואלרגנים: {{diet}}\nדרך תיאום עם המארגן/ת בלבד: {{coordinator}}\nמתי ואיך נוח לפנות אליכם: {{contact_hours}}\nנדרש אישור לפני פרסום. פנייה רק בשעות שנבחרו.", "whatsapp": "[טיוטה לדוגמה · ארוחות למשפחה בהסכמה]\nקהילה: {{community}}\nימים ושעות למסירה: {{when}}\nלכמה מנות: {{quantity}}\nהעדפות ואלרגנים: {{diet}}\nדרך תיאום עם המארגן/ת בלבד: {{coordinator}}\nמתי ואיך נוח לפנות אליכם: {{contact_hours}}\nנדרש אישור לפני פרסום. פנייה רק בשעות שנבחרו.", "requires_human_approval": true}, "sample_answer_he": "תשובה לדוגמה: פתחתי טופס ארוחות למשפחה בהסכמה עבור {{community}}. נשלים רק את הפרטים החסרים, ואז נציג טיוטה לאישור. שום דבר לא נשלח במוקאפ.", "safety_note_he": "רק בהסכמת המשפחה. בלי שמות, סיבת הצורך או פרטים רפואיים בפומבי.", "demo_only": true}]};window.SCN_CFG={"community": "__PLACE_NAME__", "manager": "מנהל/ת הקהילה"};</script><script>
+/* מנוע תרחישים לדוגמה: התאמה לפי מילות מפתח, במקום המודל. שום דבר לא נשמר או נשלח. */
+(function(){
+  const D = window.SCN_DATA, C = window.SCN_CFG;
+  const esc = t => String(t == null ? '' : t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const norm = t => String(t).replace(/[׳']/g,"'").replace(/[״"]/g,'"').toLowerCase();
+  function match(text){
+    const q = norm(text); let best = null, score = 0;
+    for (const s of D.scenarios){
+      let sc = 0;
+      for (const p of s.trigger_phrases) if (q.includes(norm(p))) sc = Math.max(sc, p.length);
+      if (sc > score){ score = sc; best = s; }
+    }
+    return best;
+  }
+  function extract(s, text){
+    const v = {};
+    for (const f of s.fields){
+      const r = f.smart_default && f.smart_default.regex; if (!r) continue;
+      const m = text.match(new RegExp(r));
+      const tm = f.smart_default.time_regex ? text.match(new RegExp(f.smart_default.time_regex)) : null;
+      if (!m && !tm) continue;
+      const val = f.smart_default.capture === 'day_time' ? [m && m[1], tm && ('בשעה ' + tm[1])].filter(Boolean).join(' ') : m[1];
+      if (val && val.trim()) v[f.id] = val.trim();
+    }
+    let variant = s.modal.fixed_variant || null;
+    if (!variant && s.modal.variants.length){
+      if (/מציע|מציעה|יש לי מקום|משאיל|משאילה|להשכרה/.test(text)) variant = s.modal.variants[0];
+      else if (/מחפש|מחפשת|צריך|צריכה|מבקש|מבקשת|מי יכול/.test(text)) variant = s.modal.variants[1];
+    }
+    return {values:v, variant};
+  }
+  const root = document.createElement('div'); root.className = 'scn-overlay'; root.hidden = true;
+  root.innerHTML = '<div class="scn-sheet" role="dialog" aria-modal="true" aria-labelledby="scn-h"></div>';
+  document.body.appendChild(root);
+  const sheet = root.querySelector('.scn-sheet');
+  let state = null;
+  function close(){ root.hidden = true; document.body.style.overflow = ''; state = null; }
+  root.addEventListener('click', e => { if (e.target === root) close(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !root.hidden) close(); });
+  function head(s){
+    return '<div class="scn-top"><div class="scn-ico">' + s.icon + '</div><div style="flex:1"><div class="scn-k">טופס מוכן · דוגמה</div><h2 id="scn-h">' + esc(s.name_he) + (state.variant && state.chosen !== undefined && !s.modal.fixed_variant && state.chosen ? ' · ' + esc(state.variant) : '') + '</h2></div><button class="scn-x" type="button" data-scn-close aria-label="סגירה">✕</button></div>';
+  }
+  function render(){
+    const s = state.s;
+    if (s.modal.choose_variant_first && !state.chosen){
+      sheet.innerHTML = head(s) + '<p class="scn-p">מה תרצו לפרסם?</p><div class="scn-choice">' +
+        s.modal.variants.map((x,i) => '<button type="button" class="scn-opt" data-v="' + esc(x) + '"><span>' + (i ? '🙋' : '🤲') + '</span><b>' + esc(x) + '</b><small>' + (i ? 'מחפשים מישהו שיעזור' : 'יש לי מה להציע') + '</small>' + (x === state.variant ? '<em>זוהה מההודעה</em>' : '') + '</button>').join('') + '</div>' + foot(false);
+      sheet.querySelectorAll('[data-v]').forEach(b => b.onclick = () => { state.variant = b.dataset.v; state.chosen = true; render(); });
+    } else {
+      const known = s.fields.filter(f => state.values[f.id]);
+      const missing = s.fields.filter(f => !state.values[f.id]);
+      let h = head(s);
+      if (known.length) h += '<div class="scn-known"><div class="scn-k">זוהה מההודעה</div>' + known.map(f => '<span class="scn-pill"><i>' + esc(f.label_he) + ':</i> ' + esc(state.values[f.id]) + '</span>').join('') + '</div>';
+      h += '<form class="scn-form" novalidate>' + (missing.length ? '<div class="scn-k">רק מה שחסר</div>' : '') + missing.map(f => {
+        const req = f.required ? ' required' : '';
+        const lab = '<label for="scn-' + f.id + '">' + esc(f.label_he) + (f.required ? '' : ' <small>(רשות)</small>') + '</label>';
+        if (f.type === 'textarea') return lab + '<textarea id="scn-' + f.id + '" name="' + f.id + '"' + req + '></textarea>';
+        if (f.type === 'select') return lab + '<select id="scn-' + f.id + '" name="' + f.id + '"' + req + '><option value="">בחירה…</option>' + f.options.map(o => '<option>' + esc(o) + '</option>').join('') + '</select>';
+        return lab + '<input id="scn-' + f.id + '" name="' + f.id + '" type="' + (f.type === 'number' ? 'number' : 'text') + '" min="1"' + req + '>';
+      }).join('') + '<p class="scn-safe">🛡️ ' + esc(s.safety_note_he) + '</p><div class="scn-err" role="alert" hidden>נא למלא את השדות המסומנים.</div>' +
+        '<button class="scn-main" type="submit">תצוגה מקדימה</button>' + (s.modal.choose_variant_first ? '<button type="button" class="scn-ghost" data-back>חזרה לבחירה</button>' : '') + '</form>';
+      sheet.innerHTML = h;
+      const f = sheet.querySelector('form');
+      const back = sheet.querySelector('[data-back]'); if (back) back.onclick = () => { state.chosen = false; render(); };
+      f.onsubmit = e => {
+        e.preventDefault(); let ok = true;
+        f.querySelectorAll('[required]').forEach(i => { const bad = !i.value.trim(); i.classList.toggle('bad', bad); if (bad) ok = false; });
+        f.querySelector('.scn-err').hidden = ok; if (!ok) return;
+        new FormData(f).forEach((v,k) => { if (String(v).trim()) state.values[k] = String(v).trim(); });
+        preview();
+      };
+      const first = f.querySelector('input,textarea,select'); if (first) setTimeout(() => first.focus({preventScroll:true}), 60);
+    }
+    bindClose();
+  }
+  function fill(tpl){
+    return tpl.replace(/\{\{(\w+)\}\}/g, (m,k) => k === 'community' ? C.community : k === 'variant' ? (state.variant || '') : (state.values[k] || '—'));
+  }
+  function preview(){
+    const s = state.s;
+    sheet.innerHTML = head(s) + '<div class="scn-k">כך זה ייראה בפיד ובוואטסאפ</div><pre class="scn-prev">' + esc(fill(s.confirmation.feed)) + '</pre>' +
+      '<p class="scn-safe">⏳ נשלח לבדיקה של ' + esc(C.manager) + ' לפני פרסום.</p><div class="scn-done" role="status" hidden>מוקאפ בלבד: שום דבר לא נשמר ולא נשלח.</div>' +
+      '<button class="scn-main" type="button" data-ok>שליחה לבדיקה</button><button class="scn-ghost" type="button" data-edit>עריכה</button>';
+    sheet.querySelector('[data-ok]').onclick = () => { sheet.querySelector('.scn-done').hidden = false; };
+    sheet.querySelector('[data-edit]').onclick = () => { render(); };
+    bindClose();
+  }
+  function foot(){ return ''; }
+  function bindClose(){ sheet.querySelectorAll('[data-scn-close]').forEach(b => b.onclick = close); }
+  function open(s, text){
+    const x = text ? extract(s, text) : {values:{}, variant: s.modal.fixed_variant || null};
+    state = {s, values:x.values, variant:x.variant, chosen:false};
+    root.hidden = false; document.body.style.overflow = 'hidden'; sheet.scrollTop = 0; render();
+  }
+  window.SCN = {match, extract, open, data:D};
+  // צ'אט: אם זוהה תרחיש, עונים ופותחים טופס
+  const form = document.getElementById('chat-form');
+  if (form) form.addEventListener('submit', e => {
+    const i = document.getElementById('chat-in'); const q = i.value.trim(); const s = q && match(q);
+    if (!s) return; e.preventDefault(); e.stopImmediatePropagation(); i.value = '';
+    say(q, s);
+  }, true);
+  function say(q, s){
+    window.ask(q, {t: esc(fill.call(null, s.sample_answer_he.replace('{{community}}', C.community))) + '<div><button type="button" class="scn-reopen" data-sid="' + s.id + '">' + s.icon + ' פתיחת הטופס</button></div>'});
+    setTimeout(() => open(s, q), 1250);
+    window.__scnLast = q;
+  }
+  document.addEventListener('click', e => {
+    const b = e.target.closest('.scn-reopen'); if (b){ const s = D.scenarios.find(x => x.id === b.dataset.sid); open(s, window.__scnLast || ''); }
+    const c = e.target.closest('[data-scn-q]'); if (c){ const s = match(c.dataset.scnQ); if (s) say(c.dataset.scnQ, s); }
+    const t = e.target.closest('[data-scn-tile]'); if (t){ open(D.scenarios.find(x => x.id === t.dataset.scnTile), ''); }
+  });
+  // מסך ➕: כל התרחישים כאריחים
+  const grid = document.getElementById('scn-grid');
+  if (grid) grid.innerHTML = D.scenarios.map(s => '<button type="button" class="scn-tile" data-scn-tile="' + s.id + '"><span>' + s.icon + '</span>' + esc(s.name_he) + '</button>').join('');
+})();
+</script><!-- SCN:END -->
+</body>
+</html>

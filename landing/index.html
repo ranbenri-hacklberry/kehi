@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>kehi.love · קהי — אפליקציית קהילה בקוד פתוח</title>
+  <meta name="description" content="קהי היא מערכת קוד פתוח שמאפשרת לכל קהילה או כפר בישראל לבנות לעצמה מדריך מקומי ואפליקציית קהילה.">
+  <meta name="robots" content="index,follow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700&family=Noto+Serif+Hebrew:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#fbf6f1;
+      --paper:#fffaf6;
+      --ink:#2b1c22;
+      --soft:#6b4f56;
+      --faint:#a1848a;
+      --line:#ead7d1;
+      --rose:#b4454e;
+      --rose-deep:#8e2f38;
+      --blush:#f6e4e0;
+      --sand:#efe2d4;
+      --gold:#c9a070;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Assistant,Arial,sans-serif;font-size:18px;line-height:1.7}
+    h1,h2,h3,.serif{font-family:"Noto Serif Hebrew",Georgia,serif;font-weight:600;letter-spacing:-.01em;line-height:1.25}
+    a{color:var(--rose-deep)}
+    a:hover{color:var(--rose)}
+    .wrap{max-width:720px;margin:0 auto;padding:0 22px}
+    header.top{padding:calc(18px + env(safe-area-inset-top)) 0 0}
+    .mark{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink)}
+    .mark svg{flex:none}
+    .mark .name{font-family:"Noto Serif Hebrew",Georgia,serif;font-size:22px;font-weight:700}
+    .mark .name em{font-style:normal;color:var(--rose)}
+    .hero{padding:56px 0 28px;text-align:center}
+    .hero h1{font-size:clamp(36px,8vw,64px);margin:0 0 8px;font-weight:700}
+    .hero h1 .love{color:var(--rose)}
+    .tag{font-size:clamp(18px,3.2vw,24px);color:var(--soft);margin:0 auto 22px;max-width:28em;font-weight:400}
+    .lead{margin:0 auto 32px;max-width:28em;color:var(--ink)}
+    .actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+    .btn{display:inline-block;text-decoration:none;border-radius:999px;padding:12px 20px;font-weight:600;font-size:16px}
+    .btn.main{background:var(--rose);color:#fff}
+    .btn.main:hover{background:var(--rose-deep);color:#fff}
+    .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+    .btn.ghost:hover{background:var(--blush);color:var(--ink)}
+    .wave{display:block;width:100%;height:72px;margin:12px 0 0}
+    section{padding:28px 0}
+    h2{font-size:26px;margin:0 0 16px}
+    .features{display:grid;grid-template-columns:1fr 1fr;gap:12px;list-style:none;padding:0;margin:0}
+    .features li{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:16px 16px 14px}
+    .features strong{display:block;font-family:"Noto Serif Hebrew",Georgia,serif;font-size:16px;margin-bottom:2px}
+    .features span{display:block;font-size:15px;color:var(--soft);line-height:1.5}
+    @media(max-width:640px){ .features{grid-template-columns:1fr} }
+    .examples{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    @media(max-width:640px){ .examples{grid-template-columns:1fr} }
+    .card{display:block;text-decoration:none;color:inherit;background:var(--paper);border:1px solid var(--line);border-radius:22px;padding:22px 20px 20px;transition:transform .15s ease, box-shadow .15s ease}
+    .card:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(43,28,34,.08);color:inherit}
+    .card .place{font-size:13px;letter-spacing:.08em;color:var(--rose);margin:0 0 6px}
+    .card h3{margin:0 0 6px;font-size:28px}
+    .card p{margin:0;color:var(--soft);font-size:16px}
+    .card .go{margin-top:14px;font-size:15px;font-weight:600;color:var(--rose-deep)}
+    ol.steps{margin:0;padding:0;list-style:none;counter-reset:s}
+    ol.steps li{counter-increment:s;display:grid;grid-template-columns:36px 1fr;gap:12px;align-items:start;padding:10px 0;border-bottom:1px solid var(--line)}
+    ol.steps li:last-child{border-bottom:0}
+    ol.steps li::before{content:counter(s);width:36px;height:36px;border-radius:50%;background:var(--blush);color:var(--rose-deep);display:grid;place-items:center;font-family:"Noto Serif Hebrew",Georgia,serif;font-weight:700;font-size:16px}
+    .en{dir:ltr;text-align:left;background:var(--sand);border-radius:24px;padding:28px 24px;margin:12px 0 8px}
+    .en h2{font-family:"Noto Serif Hebrew",Georgia,serif}
+    .en p{margin:0 0 12px;color:var(--soft)}
+    .en p:last-child{margin:0}
+    footer{padding:28px 0 calc(40px + env(safe-area-inset-bottom));color:var(--soft);font-size:14px;text-align:center}
+    footer a{color:var(--soft)}
+    .heart-row{display:flex;justify-content:center;margin:8px 0 0;color:var(--rose)}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="top">
+      <a class="mark" href="/">
+        <svg width="36" height="36" viewBox="0 0 36 36" aria-hidden="true">
+          <circle cx="18" cy="18" r="18" fill="#f6e4e0"/>
+          <path d="M18 27s-8.2-5.2-8.2-11.1C9.8 12.4 12 10.5 14.6 10.5c1.5 0 2.8.7 3.4 1.9.6-1.2 1.9-1.9 3.4-1.9 2.6 0 4.8 1.9 4.8 5.4C26.2 21.8 18 27 18 27z" fill="#b4454e"/>
+        </svg>
+        <span class="name">kehi.<em>love</em></span>
+      </a>
+    </header>
+
+    <section class="hero">
+      <h1>kehi.<span class="love">love</span></h1>
+      <p class="tag">המערכת שמאפשרת לכל קהילה לבנות לעצמה</p>
+      <p class="lead">קהי היא מערכת קוד פתוח למדריך מקומי ואפליקציית קהילה — לכפר, ליישוב ולקהילה בישראל. המקומות והאירועים שלכם, הפרסומים של התושבות והתושבים, והניהול נשאר אצלכם.</p>
+      <div class="actions">
+        <a class="btn main" href="https://github.com/ranbenri-hacklberry/kehi">הקוד ב־GitHub</a>
+        <a class="btn ghost" href="#start">איך מתחילים</a>
+      </div>
+    </section>
+  </div>
+
+  <svg class="wave" viewBox="0 0 1440 80" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0 48 C240 80 420 8 720 40 S1200 0 1440 36 V80 H0Z" fill="#f6e4e0"/>
+    <path d="M0 62 C300 20 560 78 880 46 S1260 70 1440 52 V80 H0Z" fill="#fffaf6"/>
+  </svg>
+
+  <div class="wrap" style="background:#fffaf6;max-width:none;padding:0">
+    <div class="wrap">
+      <section>
+        <h2>מה יש בפנים</h2>
+        <ul class="features">
+          <li><strong>מדריך מקומי</strong><span>מקומות ואירועים, עם אישור ופרסום על ידי הצוות</span></li>
+          <li><strong>פרסומי תושבים</strong><span>טרמפים, נתינות, בקשות עזרה והמלצות</span></li>
+          <li><strong>קורסים וסדנאות</strong><span>מושבים, הרשמה, ויומן Google או קובץ ‎.ics</span></li>
+          <li><strong>כניסה עם Google</strong><span>שם ותמונה מהחשבון, בלי למסור מספר טלפון</span></li>
+          <li><strong>אימות תושב/ת</strong><span>בקשה קצרה, ואישור של מנהל/ת קהילה או אדמין</span></li>
+          <li><strong>מנהלות ומנהלים</strong><span>תפקיד מתחת לאדמין: לאשר תוכן ותושבים, בלי למחוק את המדריך</span></li>
+          <li><strong>תשתית פתוחה</strong><span>Supabase ו־Cloudflare Workers, עם הגדרה לכמה קהילות</span></li>
+          <li><strong>רישיון MIT</strong><span>הקוד חופשי לשימוש, להתאמה ולשיתוף</span></li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>באוויר עכשיו</h2>
+        <div class="examples">
+          <a class="card" href="https://nahat-app.ranbenri.workers.dev" rel="noopener">
+            <p class="place">מצפה רמון</p>
+            <h3>נחת</h3>
+            <p>המדריך והאפליקציה של הקהילה במצפה.</p>
+            <p class="go">לפתיחת האפליקציה ←</p>
+          </a>
+          <a class="card" href="https://klili-app.klili.workers.dev" rel="noopener">
+            <p class="place">כליל</p>
+            <h3>כלילי</h3>
+            <p>האפליקציה של הקהילה בכליל, בזהות משלה.</p>
+            <p class="go">לפתיחת האפליקציה ←</p>
+          </a>
+        </div>
+      </section>
+
+      <section id="start">
+        <h2>איך מקימים קהילה</h2>
+        <ol class="steps">
+          <li><div>יוצרים פרויקט Supabase ומריצים את המיגרציות לפי הסדר.</div></li>
+          <li><div>מעתיקים את התבנית, ממלאים קובץ הגדרות (שם הקהילה, כתובות, מפתחות).</div></li>
+          <li><div>מפעילים כניסת Google ב־Supabase, לפי מדריך ההגדרה.</div></li>
+          <li><div>מפרסמים את האפליקציה כ־Worker ב־Cloudflare.</div></li>
+          <li><div>מוסיפים אדמין, ואם צריך מנהל/ת קהילה, ומתחילים לאשר מקומות ותושבים.</div></li>
+        </ol>
+        <p style="margin:18px 0 0;text-align:center">
+          <a class="btn main" href="https://github.com/ranbenri-hacklberry/kehi">המדריך המלא והקוד ב־GitHub</a>
+        </p>
+      </section>
+
+      <section>
+        <div class="en" lang="en" dir="ltr">
+          <h2>Kehi, in English</h2>
+          <p>Kehi is an open-source system for any community or village in Israel to build its own local guide and community app: places and events, resident posts (rides, giveaways, help, recommendations), course and workshop slots, Google sign-in with staff-verified residents, community managers, and an admin approval flow. It runs on Supabase and Cloudflare Workers, and is set up per community.</p>
+          <p>Live examples: <a href="https://nahat-app.ranbenri.workers.dev">Nahat</a> in Mitzpe Ramon, and <a href="https://klili-app.klili.workers.dev">Klili</a> in Klil. The code is on <a href="https://github.com/ranbenri-hacklberry/kehi">GitHub</a>, licensed MIT.</p>
+        </div>
+      </section>
+
+      <div class="heart-row" aria-hidden="true">♥</div>
+      <footer>
+        <p>© 2026 רן בן ארי · רישיון MIT · kehi.love בקרוב, בינתיים כאן.</p>
+      </footer>
+    </div>
+  </div>
+</body>
+</html>

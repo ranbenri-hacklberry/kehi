@@ -1,0 +1,551 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>__TITLE__</title>
+<link rel="icon" href="__ICON__">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?__FONTS__&display=swap" rel="stylesheet">
+<style>
+  :root{__THEME__;--r:16px}
+  *{box-sizing:border-box}
+  html,body{max-width:100%;overflow-x:hidden}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body-font);font-size:15px;line-height:1.55}
+  h1,h2,h3{font-family:var(--head-font);font-weight:var(--head-weight);margin:0}
+  button,input,select,textarea{font:inherit;color:inherit}
+  .wrap{max-width:1100px;margin:0 auto;padding:0 16px 80px}
+  header.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0;border-bottom:1px solid var(--line);margin-bottom:16px;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:10px;font-family:var(--head-font);font-size:22px}
+  .brand img{width:32px;height:32px;border-radius:9px}
+  .brand small{font-family:var(--body-font);font-size:13px;color:var(--soft);background:var(--accent-bg);border-radius:999px;padding:2px 10px}
+  .who{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--soft)}
+  .btn{border:0;border-radius:12px;padding:9px 16px;cursor:pointer;font-weight:600;background:var(--accent);color:var(--on-accent)}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .btn.ghost{background:var(--panel);color:var(--ink);border:1px solid var(--line);font-weight:500}
+  .btn.ok{background:var(--ok)}.btn.no{background:var(--no)}.btn.sm{padding:6px 12px;font-size:14px;border-radius:10px}
+  .btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+  .login{max-width:420px;margin:8vh auto 0}
+  .login h1{font-size:26px;margin-bottom:6px}
+  .login p{color:var(--soft);margin:0 0 16px}
+  label{display:block;font-size:14px;color:var(--soft);margin:12px 0 4px}
+  input[type=email],input[type=text],input[type=search],input[type=date],input[type=datetime-local],select,textarea{width:100%;border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--field)}
+  textarea{min-height:80px;resize:vertical}
+  .code{font-size:28px;letter-spacing:.45em;text-align:center;direction:ltr;font-variant-numeric:tabular-nums}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .err{color:var(--no);font-size:14px;margin:10px 0 0;min-height:1em}
+  .hint{font-size:13px;color:var(--soft);margin:10px 0 0}
+  .tabs{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
+  .tab{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:8px 16px;cursor:pointer;white-space:nowrap}
+  .tab.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+  .tab b{font-weight:600}
+  .filters{display:grid;gap:10px;grid-template-columns:1fr;margin-bottom:12px}
+  @media(min-width:760px){.filters{grid-template-columns:2fr 1fr}}
+  .chips{display:flex;gap:6px;flex-wrap:wrap}
+  .chip{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:5px 12px;cursor:pointer;font-size:14px}
+  .chip.on{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+  .chip .n{opacity:.75;margin-inline-start:4px}
+  .bulk{position:sticky;top:0;z-index:5;display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:var(--accent-bg);border:1px solid var(--line);border-radius:14px;padding:8px 12px;margin-bottom:12px}
+  .bulk .sp{flex:1}
+  .list{display:grid;gap:12px}
+  .item{position:relative}
+  .item .hd{display:flex;gap:10px;align-items:flex-start}
+  .item .hd input{margin-top:6px;width:18px;height:18px}
+  .item h3{font-size:18px}
+  .st{display:inline-block;font-size:12px;border-radius:999px;padding:1px 10px;margin-inline-start:6px;vertical-align:middle;font-family:var(--body-font)}
+  .st.pending_publish{background:var(--pend-bg);color:var(--pend)}
+  .st.published{background:var(--ok-bg);color:var(--ok)}
+  .st.rejected{background:var(--no-bg);color:var(--no)}
+  .st.hidden{background:var(--line);color:var(--soft)}
+  .sub{font-size:13px;color:var(--soft)}
+  dl{display:grid;grid-template-columns:max-content 1fr;gap:4px 12px;margin:10px 0 0;font-size:14px}
+  dt{color:var(--soft)}dd{margin:0;overflow-wrap:anywhere}
+  dd a{color:var(--accent)}
+  .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+  .empty{text-align:center;color:var(--soft);padding:30px 0}
+  .meta-bar{font-size:13px;color:var(--soft);margin:0 0 10px}
+  dialog{border:0;border-radius:20px;padding:0;max-width:560px;width:calc(100% - 24px);background:var(--panel);color:var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.25)}
+  dialog::backdrop{background:rgba(20,20,10,.4)}
+  dialog form{padding:18px 18px 16px}
+  dialog h2{font-size:20px;margin-bottom:6px}
+  dialog .acts{justify-content:flex-start}
+  .chk{display:flex;gap:8px;align-items:center;margin-top:12px;color:var(--ink)}
+  .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);border-radius:12px;padding:10px 16px;font-size:14px;z-index:20;max-width:90vw}
+  .role-badge{font-size:12px;border-radius:999px;padding:2px 8px;background:var(--accent-bg);color:var(--accent);margin-left:8px}
+  .demo-admin{font-size:12px;text-align:center;background:var(--pend-bg);color:var(--pend);padding:6px 10px;border-radius:10px;margin-bottom:12px}
+  .mgr-row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--line)}
+  .st.open,.st.approved,.st.verified{background:var(--ok-bg);color:var(--ok)}
+  .st.pending{background:var(--pend-bg);color:var(--pend)}
+  .st.closed{background:var(--line);color:var(--soft)}
+  [hidden]{display:none!important}
+  bdi{unicode-bidi:isolate}
+
+  .kehi-credit{display:block;text-align:center;text-decoration:none;color:var(--soft);background:transparent;border-bottom:1px solid var(--line);font-size:12px;letter-spacing:.08em;padding:calc(7px + env(safe-area-inset-top)) 16px 7px}
+  .kehi-credit strong{color:var(--ink);font-weight:600;letter-spacing:.02em}
+  .kehi-credit .heart{color:var(--accent);padding:0 6px}
+</style>
+</head>
+<body>
+<script>window.KEHI_URL=window.KEHI_URL||'https://kehi.ranbenri.workers.dev';</script>
+<a class="kehi-credit" data-kehi-link target="_blank" rel="noopener noreferrer" href="https://kehi.ranbenri.workers.dev"><span class="heart" aria-hidden="true">♥</span>powered by <strong>kehi.love</strong></a>
+<script>document.querySelectorAll('[data-kehi-link]').forEach(function(a){ a.href = window.KEHI_URL; });</script>
+<div class="wrap">
+  <div class="demo-admin" id="demo-admin" hidden>הדגמה · תצוגת ניהול, לא מחוברת לשרת</div>
+  <header class="top">
+    <div class="brand"><img src="__ICON__" alt="">__BRAND__ <small>ניהול</small></div>
+    <div class="who" id="who" hidden><span id="who-role" class="role-badge" hidden></span><span id="who-email"></span><button class="btn ghost sm" id="logout" type="button">יציאה</button></div>
+  </header>
+
+  <!-- כניסה -->
+  <section id="v-login" class="login card" hidden>
+    <h1>כניסת מנהלים</h1>
+    <p>נשלח קוד בן 6 ספרות לכתובת המייל שלך. נכנסים מנהלים ומנהלי/ות קהילה רשומים.</p>
+    <form id="f-email" novalidate>
+      <label for="email">כתובת מייל</label>
+      <input id="email" type="email" autocomplete="email" inputmode="email" dir="ltr" required>
+      <div class="row" style="margin-top:14px"><button class="btn" id="send" type="submit">שליחת קוד</button></div>
+    </form>
+    <form id="f-code" novalidate hidden>
+      <label for="code">הקוד מהמייל</label>
+      <input id="code" class="code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" placeholder="••••••" required>
+      <div class="row" style="margin-top:14px">
+        <button class="btn" id="verify" type="submit">כניסה</button>
+        <button class="btn ghost" id="resend" type="button">שליחה מחדש</button>
+        <button class="btn ghost" id="change" type="button">כתובת אחרת</button>
+      </div>
+      <p class="hint" id="sent-to"></p>
+    </form>
+    <p class="err" id="login-err" role="alert"></p>
+  </section>
+
+  <!-- אין הרשאה -->
+  <section id="v-denied" class="login card" hidden>
+    <h1>אין הרשאת ניהול</h1>
+    <p>החשבון הזה מחובר, אבל הוא לא ברשימת המנהלים או מנהלי/ות הקהילה. אם זו טעות, פנו למנהל/ת.</p>
+    <button class="btn ghost" id="denied-out" type="button">יציאה</button>
+  </section>
+
+  <!-- ניהול -->
+  <section id="v-main" hidden>
+    <div class="tabs" role="tablist">
+      <button class="tab on" type="button" data-kind="places" role="tab">מקומות <b id="n-places">0</b></button>
+      <button class="tab" type="button" data-kind="events" role="tab">אירועים <b id="n-events">0</b></button>
+      <button class="tab" type="button" data-kind="posts" role="tab">פרסומים <b id="n-posts">0</b></button>
+      <button class="tab" type="button" data-kind="residents" role="tab">תושבים <b id="n-residents">0</b></button>
+      <button class="tab admin-only" type="button" data-kind="managers" role="tab">מנהלי/ות קהילה</button>
+      <button class="btn ghost sm" id="reload" type="button" style="margin-inline-start:auto">רענון</button>
+    </div>
+    <div class="filters">
+      <input id="q" type="search" placeholder="חיפוש לפי שם, כתובת, מקור או מזהה" aria-label="חיפוש">
+      <select id="cat" aria-label="קטגוריה"></select>
+    </div>
+    <div class="chips" id="status-chips" style="margin-bottom:12px"></div>
+    <div class="bulk" id="bulk">
+      <label class="chk" style="margin:0"><input type="checkbox" id="sel-all"> בחירת כל המוצגים</label>
+      <span class="sp"></span>
+      <span id="sel-n" class="sub">0 נבחרו</span>
+      <button class="btn ok sm" type="button" data-bulk="published" disabled>פרסום</button>
+      <button class="btn no sm" type="button" data-bulk="rejected" disabled>דחייה</button>
+      <button class="btn ghost sm" type="button" data-bulk="pending_publish" disabled>החזרה לממתין</button>
+    </div>
+    <p class="meta-bar" id="meta"></p>
+    <div class="list" id="list"></div>
+    <div id="managers-panel" hidden>
+      <h2 style="margin:8px 0 6px">מנהלי/ות קהילה</h2>
+      <p class="hint">רק אדמין יכול להעניק או לבטל את התפקיד. בוחרים משתמש עם פרופיל שמחובר למערכת. מנהל/ת קהילה לא יכול/ה לנהל אדמינים או מנהלים אחרים, למחוק מקומות לצמיתות, או לשנות הגדרות.</p>
+      <div id="managers-list"></div>
+      <label for="mgr-pick" style="display:block;margin-top:16px">הוספה ממשתמש עם פרופיל</label>
+      <div class="row" style="gap:8px;align-items:center;margin-top:8px">
+        <select id="mgr-pick" style="flex:1"></select>
+        <button class="btn sm" id="mgr-grant" type="button">הענקת תפקיד</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<dialog id="dlg"><form method="dialog" id="dlg-form"></form></dialog>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script id="cfg" type="application/json">__CFG__</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.2/dist/umd/supabase.js"></script>
+<script>
+(function(){
+  'use strict';
+  const CFG = JSON.parse(document.getElementById('cfg').textContent);
+  // ה־service worker של האפליקציה הציבורית לא אמור לשמור עותקים של דף הניהול.
+  try { if ('caches' in window) caches.keys().then(ks => ks.forEach(k => caches.open(k).then(c => c.keys().then(rs => rs.forEach(r => { const p = new URL(r.url); if (p.origin === location.origin && p.pathname.startsWith('/admin')) c.delete(r); }))))); } catch (e) {}
+  const sb = supabase.createClient(CFG.url, CFG.key, { auth: { storageKey: CFG.storageKey, persistSession: true, autoRefreshToken: true, detectSessionInUrl: false } });
+  const $ = id => document.getElementById(id);
+  const esc = t => String(t == null ? '' : t).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const TZ = 'Asia/Jerusalem';
+  const ST = {pending_publish:'ממתין', published:'מפורסם', rejected:'נדחה', hidden:'מוסתר', pending:'ממתין', open:'פתוח', closed:'נסגר', approved:'מאומת', verified:'מאומת'};
+  const ORDER = ['pending_publish','published','rejected','hidden'];
+  const POST_ORDER = ['pending','open','closed','hidden','rejected'];
+  const RES_ORDER = ['pending','verified','rejected'];
+  const S = {kind:'places', status:'pending_publish', cat:'', q:'', rows:{places:[], events:[], posts:[], residents:[]}, managers:[], candidates:[], sel:new Set(), email:'', role:''};
+
+  function toast(t){ const el = $('toast'); el.textContent = t; el.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => el.hidden = true, 3500); }
+  function show(v){ ['v-login','v-denied','v-main'].forEach(id => $(id).hidden = id !== v); $('who').hidden = v === 'v-login'; }
+  function fmt(ts, dateOnly){ if (!ts) return ''; const d = new Date(dateOnly ? ts + 'T12:00:00Z' : ts); if (isNaN(d)) return String(ts);
+    return dateOnly ? d.toLocaleDateString('he-IL', {timeZone:TZ}) : d.toLocaleString('he-IL', {timeZone:TZ, day:'numeric', month:'numeric', year:'numeric', hour:'2-digit', minute:'2-digit'}); }
+  function link(u){ const s = String(u || ''); return /^https?:\/\//i.test(s) ? '<a href="' + esc(s) + '" target="_blank" rel="noopener noreferrer">' + esc(s.replace(/^https?:\/\//,'').slice(0,60)) + '</a>' : esc(s); }
+  function errMsg(e){ const m = (e && (e.message || e.msg)) || String(e);
+    if (/not admin|42501|permission/i.test(m)) return 'אין הרשאה לפעולה הזו.';
+    if (/changed by someone else|40001/.test(m)) return 'הרשומה השתנתה בינתיים. רעננו ונסו שוב.';
+    if (/reason required/.test(m)) return 'צריך לכתוב סיבת דחייה.';
+    if (/JWT|expired|session/i.test(m)) return 'החיבור פג. היכנסו שוב.';
+    return 'שגיאה: ' + m; }
+
+  // ---------- כניסה בקוד מייל ----------
+  let lastSend = 0;
+  async function sendCode(){
+    const email = $('email').value.trim().toLowerCase(); $('login-err').textContent = '';
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { $('login-err').textContent = 'נא להזין כתובת מייל תקינה.'; return; }
+    const wait = 60 - Math.floor((Date.now() - lastSend) / 1000);
+    if (lastSend && wait > 0) { $('login-err').textContent = 'אפשר לבקש קוד חדש בעוד ' + wait + ' שניות.'; return; }
+    $('send').disabled = $('resend').disabled = true;
+    // 1) our own code (sent via Resend from the database); 2) fallback: built-in Supabase email code
+    let mode = 'own', r = await sb.rpc('admin_otp_request', { p_email: email });
+    let error = null;
+    if (r.error || r.data === 'not_configured') {
+      mode = 'builtin';
+      ({ error } = await sb.auth.signInWithOtp({ email, options: { shouldCreateUser: false } }));
+    } else if (r.data !== 'sent') {
+      error = { message: r.data === 'not_admin' ? 'not found' : r.data === 'wait' ? 'rate wait' : 'rate limit' };
+    }
+    $('send').disabled = $('resend').disabled = false;
+    if (error) {
+      $('login-err').textContent = /signups not allowed|otp_disabled|not found/i.test(error.message) ? 'הכתובת הזו לא רשומה כמנהל/ת.' :
+        /rate wait/.test(error.message) ? 'קוד כבר נשלח. אפשר לבקש קוד חדש בעוד דקה.' :
+        /rate|security purposes/i.test(error.message) ? 'נשלחו יותר מדי בקשות. נסו שוב מאוחר יותר.' : 'לא הצלחנו לשלוח קוד: ' + error.message;
+      return;
+    }
+    S.mode = mode;
+    lastSend = Date.now(); S.email = email;
+    $('f-email').hidden = true; $('f-code').hidden = false; $('sent-to').innerHTML = 'הקוד נשלח אל <bdi dir="ltr">' + esc(email) + '</bdi>. הוא תקף לזמן קצר.';
+    $('code').value = ''; $('code').focus();
+  }
+  $('f-email').addEventListener('submit', e => { e.preventDefault(); sendCode(); });
+  $('resend').addEventListener('click', () => { $('email').value = S.email; sendCode(); });
+  $('change').addEventListener('click', () => { $('f-code').hidden = true; $('f-email').hidden = false; $('login-err').textContent = ''; $('email').focus(); });
+  $('code').addEventListener('input', e => { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 6); });
+  $('f-code').addEventListener('submit', async e => {
+    e.preventDefault(); const token = $('code').value.trim(); $('login-err').textContent = '';
+    if (!/^\d{6}$/.test(token)) { $('login-err').textContent = 'הקוד צריך להיות 6 ספרות.'; return; }
+    $('verify').disabled = true;
+    let error = null;
+    if (S.mode === 'own') {
+      const v = await sb.rpc('admin_otp_verify', { p_email: S.email, p_code: token });
+      if (v.error) error = { message: v.error.message };
+      else if (!v.data || !v.data.ok) error = { message: v.data && v.data.error === 'expired' ? 'expired' : 'invalid', left: v.data && v.data.left };
+      else {
+        ({ error } = await sb.auth.signInWithPassword({ email: S.email, password: v.data.pw }));
+        if (!error) await sb.rpc('admin_otp_consume');
+      }
+    } else {
+      ({ error } = await sb.auth.verifyOtp({ email: S.email, token, type: 'email' }));
+    }
+    $('verify').disabled = false;
+    if (error) {
+      $('login-err').textContent = error.message === 'expired' ? 'פג תוקף הקוד או שנוצלו כל הניסיונות. בקשו קוד חדש.' :
+        /expired|invalid/i.test(error.message) ? 'הקוד שגוי' + (error.left != null ? ' (נותרו ' + error.left + ' ניסיונות).' : ' או שפג תוקפו.') : 'הכניסה נכשלה: ' + error.message;
+      return;
+    }
+    boot();
+  });
+  async function logout(){ if (!S.demo) await sb.auth.signOut(); S.rows = {places:[], events:[], posts:[], residents:[]}; S.managers=[]; S.candidates=[]; S.role=''; S.demo=false; S.sel.clear(); $('f-code').hidden = true; $('f-email').hidden = false; show('v-login'); }
+  $('logout').addEventListener('click', logout); $('denied-out').addEventListener('click', logout);
+
+  // ---------- נתונים ----------
+  function isAdmin(){ return S.role === 'admin'; }
+  function isStaff(){ return S.role === 'admin' || S.role === 'manager'; }
+  function orderFor(kind){ return kind==='posts' ? POST_ORDER : kind==='residents' ? RES_ORDER : ORDER; }
+  function defaultStatus(kind){ return kind==='posts' || kind==='residents' ? 'pending' : 'pending_publish'; }
+  function rid(r){ return r && (r.id || r.user_id); }
+  function setRoleUI(){
+    const b = $('who-role');
+    if (S.role === 'admin') { b.hidden = false; b.textContent = 'מנהל/ת'; }
+    else if (S.role === 'manager') { b.hidden = false; b.textContent = 'מנהל/ת קהילה'; }
+    else b.hidden = true;
+    document.querySelectorAll('.admin-only').forEach(el => { el.hidden = !isAdmin(); });
+    $('demo-admin').hidden = !S.demo;
+    if (S.demo) $('demo-admin').textContent = S.role === 'manager'
+      ? 'הדגמה · תצוגת מנהל/ת קהילה (מופחתת), לא מחוברת לשרת'
+      : 'הדגמה · תצוגת אדמין, לא מחוברת לשרת';
+  }
+  async function load(){
+    if (S.demo) { render(); return; }
+    $('meta').textContent = 'טוען…';
+    const [p, ev, posts, resi] = await Promise.all([
+      sb.rpc('admin_list_places'), sb.rpc('admin_list_events'),
+      sb.rpc('staff_list_posts'), sb.rpc('staff_list_residents')
+    ]);
+    if (p.error || ev.error) { $('meta').textContent = errMsg(p.error || ev.error); return; }
+    S.rows.places = p.data || []; S.rows.events = ev.data || [];
+    S.rows.posts = (posts && !posts.error) ? (posts.data || []) : [];
+    S.rows.residents = (resi && !resi.error) ? (resi.data || []) : [];
+    if (isAdmin()) {
+      const [ms, cs] = await Promise.all([sb.rpc('admin_list_managers'), sb.rpc('admin_list_manager_candidates')]);
+      if (!ms.error) S.managers = ms.data || [];
+      if (!cs.error) S.candidates = cs.data || [];
+    }
+    for (const id of [...S.sel]) if (!cur().some(r => rid(r) === id)) S.sel.delete(id);
+    render();
+  }
+  const cur = () => S.rows[S.kind] || [];
+  function text(r){
+    if (S.kind === 'places') return [r.id, r.name_he, r.name_en, r.category, r.category_group, r.address, r.note, r.source, r.badge].join(' ').toLowerCase();
+    if (S.kind === 'posts') return [r.id, r.title, r.body, r.type, r.status].join(' ').toLowerCase();
+    if (S.kind === 'residents') return [r.user_id, r.display_name, r.status].join(' ').toLowerCase();
+    return [r.id, r.title, r.venue_name, r.address, r.organizer, r.description, r.source, r.when_text].join(' ').toLowerCase();
+  }
+  function visible(){
+    const q = S.q.toLowerCase();
+    return cur().filter(r => (S.status === 'all' || r.status === S.status) && (!S.cat || (r.category_group || 'ללא קטגוריה') === S.cat) && (!q || text(r).includes(q)));
+  }
+
+  // ---------- תצוגה ----------
+  function renderManagers(){
+    const showMgr = S.kind === 'managers' && isAdmin();
+    $('managers-panel').hidden = !showMgr;
+    $('list').hidden = showMgr;
+    document.querySelector('.filters').hidden = showMgr;
+    $('status-chips').hidden = showMgr;
+    $('bulk').hidden = showMgr;
+    if (!showMgr) return;
+    $('managers-list').innerHTML = (S.managers||[]).length
+      ? S.managers.map(m => '<div class="mgr-row"><div><b>' + esc(m.display_name || 'בלי שם תצוגה') + '</b><div class="hint" dir="ltr">' + esc(m.email||'') + '</div></div><button class="btn ghost sm" type="button" data-revoke="' + esc(m.user_id) + '">ביטול תפקיד</button></div>').join('')
+      : '<p class="hint">עדיין אין מנהלי/ות קהילה.</p>';
+    const opts = (S.candidates||[]).filter(c => !c.is_manager);
+    $('mgr-pick').innerHTML = opts.length ? opts.map(c => '<option value="' + esc(c.user_id) + '">' + esc((c.display_name||'בלי שם') + ' · ' + (c.email||'')) + '</option>').join('') : '<option value="">אין משתמשים עם פרופיל</option>';
+    $('mgr-grant').disabled = !opts.length;
+  }
+  function render(){
+    $('n-places').textContent = (S.rows.places||[]).length;
+    $('n-events').textContent = (S.rows.events||[]).length;
+    $('n-posts').textContent = (S.rows.posts||[]).length;
+    $('n-residents').textContent = (S.rows.residents||[]).length;
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t.dataset.kind === S.kind));
+    renderManagers();
+    if (S.kind === 'managers') { $('meta').textContent = isAdmin() ? ((S.managers||[]).length + ' מנהלי/ות קהילה') : ''; return; }
+    const ord = orderFor(S.kind);
+    if (S.status !== 'all' && !ord.includes(S.status)) S.status = defaultStatus(S.kind);
+    const base = cur().filter(r => !S.cat || (r.category_group || 'ללא קטגוריה') === S.cat);
+    const cnt = s => base.filter(r => s === 'all' || r.status === s).length;
+    $('status-chips').innerHTML = ord.concat('all').map(s => '<button class="chip' + (S.status === s ? ' on' : '') + '" type="button" data-st="' + s + '">' + (s === 'all' ? 'הכל' : ST[s]) + '<span class="n">' + cnt(s) + '</span></button>').join('');
+    const catSel = $('cat');
+    if (S.kind === 'places') {
+      const cats = [...new Set(S.rows.places.map(r => r.category_group || 'ללא קטגוריה'))].sort((a, b) => a.localeCompare(b, 'he'));
+      catSel.innerHTML = '<option value="">כל הקטגוריות</option>' + cats.map(c => '<option' + (c === S.cat ? ' selected' : '') + '>' + esc(c) + '</option>').join('');
+      catSel.hidden = false;
+    } else { catSel.hidden = true; S.cat = ''; }
+    const bulkMap = S.kind==='posts' ? [['open','אישור'],['hidden','הסתרה'],['rejected','דחייה']] : S.kind==='residents' ? [['verified','אימות'],['rejected','דחייה'],['pending','החזרה לממתין']] : [['published','פרסום'],['rejected','דחייה'],['pending_publish','החזרה לממתין']];
+    const bulk = $('bulk');
+    [...bulk.querySelectorAll('[data-bulk]')].forEach((b,i) => {
+      const m = bulkMap[i]; if (!m) { b.hidden = true; return; }
+      b.hidden = false; b.dataset.bulk = m[0]; b.textContent = m[1];
+    });
+    const list = visible();
+    $('meta').textContent = list.length + ' מוצגים מתוך ' + cur().length;
+    $('list').innerHTML = list.length ? list.map(card).join('') : '<div class="empty card">אין רשומות שמתאימות לסינון.</div>';
+    syncSel(list);
+  }
+  function dlrow(k, v){ return (v === null || v === undefined || v === '') ? '' : '<dt>' + esc(k) + '</dt><dd>' + v + '</dd>'; }
+  function sources(arr){ if (!Array.isArray(arr) || !arr.length) return '';
+    return arr.map(s => typeof s === 'string' ? link(s) : esc([s.label || s.name || s.type || '', ''].join('')) + ' ' + link(s.url || s.href || '') ).join('<br>'); }
+
+  function staffCard(r){
+    const id = r.id || r.user_id;
+    const st = r.status;
+    let h = '<article class="card" data-id="' + esc(id) + '"><div class="row">';
+    h += '<label class="chk" style="margin:0"><input type="checkbox" data-sel="' + esc(id) + '"' + (S.sel.has(id)?' checked':'') + '></label>';
+    h += '<div style="flex:1;min-width:0"><div class="row" style="justify-content:space-between"><h3 style="margin:0">' + esc(r.title || r.display_name || 'בלי שם') + '</h3><span class="st ' + esc(st) + '">' + esc(ST[st]||st) + '</span></div>';
+    if (S.kind==='posts') h += '<div class="sub">' + esc({ride:'טרמפ',giveaway:'מסירה / יד שנייה',help:'חיפוש עזרה',recommend:'המלצה'}[r.type]||r.type||'') + (r.body ? ' · ' + esc(r.body).slice(0,80) : '') + '</div>';
+    if (S.kind==='residents') h += '<div class="sub">תושב/ת בהמתנה לאישור או בטיפול</div>';
+    h += '<div class="acts" style="margin-top:8px">';
+    if (S.kind==='posts'){
+      if (st !== 'open') h += '<button class="btn ok sm" type="button" data-act="open">אישור</button>';
+      if (st !== 'hidden') h += '<button class="btn ghost sm" type="button" data-act="hidden">הסתרה</button>';
+      if (st !== 'rejected') h += '<button class="btn no sm" type="button" data-act="rejected">דחייה</button>';
+    } else {
+      if (st !== 'verified') h += '<button class="btn ok sm" type="button" data-act="verified">אימות</button>';
+      if (st !== 'rejected') h += '<button class="btn no sm" type="button" data-act="rejected">דחייה</button>';
+      if (st !== 'pending') h += '<button class="btn ghost sm" type="button" data-act="pending">החזרה לממתין</button>';
+    }
+    h += '</div></div></div></article>';
+    return h;
+  }
+
+  function card(r){
+    if (S.kind === 'posts' || S.kind === 'residents') return staffCard(r);
+
+    const P = S.kind === 'places';
+    let h = '<article class="card item" data-id="' + esc(r.id) + '"><div class="hd"><input type="checkbox" data-sel="' + esc(r.id) + '"' + (S.sel.has(r.id) ? ' checked' : '') + ' aria-label="בחירה"><div style="flex:1;min-width:0">';
+    h += '<h3>' + esc(P ? r.name_he : r.title) + '<span class="st ' + esc(r.status) + '">' + esc(ST[r.status] || r.status) + '</span></h3>';
+    h += '<div class="sub">' + esc(P ? [r.category_group, r.category].filter(Boolean).join(' · ') : [r.venue_name, r.when_text].filter(Boolean).join(' · ')) + '</div>';
+    h += '<dl>';
+    if (P) {
+      h += dlrow('שם באנגלית', esc(r.name_en)) + dlrow('כתובת', esc(r.address)) + dlrow('טלפון', r.phone ? '<bdi dir="ltr">' + esc(r.phone) + '</bdi>' : '')
+         + dlrow('שעות', esc(r.hours)) + dlrow('מצב שעות', esc(r.hours_status)) + dlrow('אתר', link(r.website)) + dlrow('מפה', link(r.maps_url))
+         + dlrow('תיאור', esc(r.note)) + dlrow('תג', esc(r.badge)) + dlrow('חיפוש בלבד', r.search_only ? 'כן (לא מופיע ברשימות הדפדוף)' : 'לא')
+         + dlrow('מקור', esc(r.source)) + dlrow('מקורות', sources(r.sources)) + dlrow('סתירות', esc(r.conflicts))
+         + dlrow('אומת לאחרונה', fmt(r.last_verified, true));
+    } else {
+      h += dlrow('מתחיל', fmt(r.starts_at)) + dlrow('מסתיים', fmt(r.ends_at)) + dlrow('תאריך', fmt(r.start_date, true)) + dlrow('מתי', esc(r.when_text))
+         + dlrow('מקום', esc(r.venue_name)) + dlrow('כתובת', esc(r.address)) + dlrow('מחיר', esc(r.price_text)) + dlrow('מארגן', esc(r.organizer))
+         + dlrow('תיאור', esc(r.description)) + dlrow('מקור', esc(r.source)) + dlrow('נראה במקור', fmt(r.source_seen_at));
+    }
+    h += dlrow('הערת בדיקה', esc(r.review_note)) + dlrow('עודכן', fmt(r.updated_at) + ' · גרסה ' + esc(r.version)) + dlrow('מזהה', '<bdi dir="ltr">' + esc(r.id) + '</bdi>');
+    h += '</dl><div class="acts">';
+    if (r.status !== 'published') h += '<button class="btn ok sm" type="button" data-act="published">פרסום</button>';
+    if (r.status !== 'rejected') h += '<button class="btn no sm" type="button" data-act="rejected">דחייה</button>';
+    if (r.status !== 'pending_publish') h += '<button class="btn ghost sm" type="button" data-act="pending_publish">החזרה לממתין</button>';
+    h += '<button class="btn ghost sm" type="button" data-act="edit">עריכה</button>';
+    return h + '</div></div></div></article>';
+  }
+  function syncSel(list){
+    list = list || visible();
+    const n = S.sel.size; $('sel-n').textContent = n + ' נבחרו';
+    document.querySelectorAll('[data-bulk]').forEach(b => b.disabled = !n);
+    $('sel-all').checked = list.length > 0 && list.every(r => S.sel.has(rid(r)));
+  }
+
+  // ---------- דיאלוגים ----------
+  function dialog(html, onOk){
+    const d = $('dlg'), f = $('dlg-form'); f.innerHTML = html;
+    f.onsubmit = async ev => { if (ev.submitter && ev.submitter.value === 'cancel') return; ev.preventDefault();
+      const b = f.querySelector('[value=ok]'); b.disabled = true; const done = await onOk(f); b.disabled = false; if (done !== false) d.close(); };
+    d.showModal(); const first = f.querySelector('textarea,input:not([type=checkbox])'); if (first) first.focus();
+  }
+  const ACT_LABEL = {published:'פרסום', rejected:'דחייה', pending_publish:'החזרה לממתין', open:'אישור פרסום', hidden:'הסתרה', verified:'אימות תושב/ת', approved:'אימות תושב/ת', closed:'סגירה'};
+  function askStatus(ids, status){
+    const many = ids.length > 1, names = ids.map(id => (cur().find(r => rid(r) === id) || {})).map(r => r.name_he || r.title || r.display_name || '');
+    let h = '<h2>' + ACT_LABEL[status] + (many ? ' של ' + ids.length + ' רשומות' : '') + '</h2><p class="sub">' + esc(names.slice(0, 6).join(' · ')) + (names.length > 6 ? ' ועוד ' + (names.length - 6) : '') + '</p>';
+    if (status === 'published') h += '<p>הרשומות יופיעו לכולם באפליקציה.</p>';
+    if (status === 'rejected' || status === 'hidden') h += '<label for="reason">סיבה (חובה)</label><textarea id="reason" required></textarea>';
+    h += '<p class="err" id="dlg-err"></p><div class="acts"><button class="btn' + (status === 'rejected' ? ' no' : status === 'published' ? ' ok' : '') + '" value="ok">אישור</button><button class="btn ghost" value="cancel" formnovalidate>ביטול</button></div>';
+    dialog(h, async f => {
+      const needReason = status === 'rejected' || status === 'hidden';
+      const reason = needReason ? f.querySelector('#reason').value.trim() : null;
+      if (needReason && !reason) { f.querySelector('#dlg-err').textContent = 'צריך לכתוב סיבה.'; return false; }
+      let data, error;
+      if (S.demo) {
+        const key = S.kind === 'residents' ? 'user_id' : 'id';
+        (S.rows[S.kind]||[]).forEach(r => { if (ids.includes(r[key])) { r.status = status; if (reason) r.review_note = reason; } });
+        data = ids.length; error = null;
+      } else if (S.kind === 'posts') {
+        ({ data, error } = await sb.rpc('staff_set_post_status', { p_ids: ids, p_status: status, p_reason: reason }));
+      } else if (S.kind === 'residents') {
+        ({ data, error } = await sb.rpc('staff_set_resident_status', { p_ids: ids, p_status: status, p_reason: reason }));
+      } else {
+        ({ data, error } = await sb.rpc('admin_set_status', { p_kind: S.kind, p_ids: ids, p_status: status, p_reason: reason }));
+      }
+      if (error) { f.querySelector('#dlg-err').textContent = errMsg(error); return false; }
+      toast(ACT_LABEL[status] + ': ' + data + ' רשומות עודכנו'); ids.forEach(id => S.sel.delete(id)); if (S.demo) render(); else await load();
+    });
+  }
+  const PF = [['name_he','שם','text',1],['category_group','קטגוריה','text'],['category','תת־תווית','text'],['note','תיאור','area'],['hours','שעות פתיחה','text'],['phone','טלפון','text'],['website','אתר','text'],['address','כתובת','text'],['badge','תג','text'],['search_only','חיפוש בלבד (לא ברשימות הדפדוף)','check']];
+  const EF = [['title','כותרת','text',1],['when_text','מתי (טקסט)','text'],['start_date','תאריך','date'],['starts_at','מתחיל','dt'],['ends_at','מסתיים','dt'],['venue_name','מקום','text'],['address','כתובת','text'],['price_text','מחיר','text'],['organizer','מארגן','text'],['description','תיאור','area']];
+  function toLocalInput(ts){ if (!ts) return ''; const d = new Date(ts); const p = n => String(n).padStart(2, '0');
+    const parts = Object.fromEntries(new Intl.DateTimeFormat('en-CA', {timeZone:TZ, year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', hour12:false}).formatToParts(d).map(x => [x.type, x.value]));
+    return parts.year + '-' + parts.month + '-' + parts.day + 'T' + (parts.hour === '24' ? '00' : parts.hour) + ':' + parts.minute; }
+  function fromLocalInput(v){ if (!v) return ''; // ערך בשעון ישראל → ISO
+    const guess = new Date(v + ':00Z'); const off = (new Date(guess.toLocaleString('en-US', {timeZone:TZ})) - new Date(guess.toLocaleString('en-US', {timeZone:'UTC'}))); return new Date(guess - off).toISOString(); }
+  function edit(id){
+    const r = cur().find(x => rid(x) === id); if (!r) return; const P = S.kind === 'places', F = P ? PF : EF;
+    const groups = [...new Set(S.rows.places.map(x => x.category_group).filter(Boolean))];
+    let h = '<h2>עריכה</h2><p class="sub"><bdi dir="ltr">' + esc(r.id) + '</bdi></p><datalist id="dl-groups">' + groups.map(g => '<option value="' + esc(g) + '">').join('') + '</datalist>';
+    for (const [k, l, t, req] of F) {
+      const v = r[k] == null ? '' : r[k];
+      if (t === 'check') h += '<label class="chk"><input type="checkbox" name="' + k + '"' + (v ? ' checked' : '') + '> ' + esc(l) + '</label>';
+      else if (t === 'area') h += '<label>' + esc(l) + '</label><textarea name="' + k + '">' + esc(v) + '</textarea>';
+      else if (t === 'date') h += '<label>' + esc(l) + '</label><input type="date" name="' + k + '" value="' + esc(v) + '">';
+      else if (t === 'dt') h += '<label>' + esc(l) + ' (שעון ישראל)</label><input type="datetime-local" name="' + k + '" value="' + esc(toLocalInput(v)) + '">';
+      else h += '<label>' + esc(l) + '</label><input type="text" name="' + k + '" value="' + esc(v) + '"' + (req ? ' required' : '') + (k === 'category_group' ? ' list="dl-groups"' : '') + (k === 'phone' || k === 'website' ? ' dir="ltr"' : '') + '>';
+    }
+    h += '<p class="err" id="dlg-err"></p><div class="acts"><button class="btn" value="ok">שמירה</button><button class="btn ghost" value="cancel" formnovalidate>ביטול</button></div>';
+    dialog(h, async f => {
+      const patch = {};
+      for (const [k, , t] of F) {
+        const el = f.elements[k]; let v = t === 'check' ? el.checked : t === 'dt' ? fromLocalInput(el.value) : el.value.trim();
+        const old = t === 'check' ? !!r[k] : t === 'dt' ? (r[k] ? new Date(r[k]).toISOString() : '') : (r[k] == null ? '' : String(r[k]));
+        if (v !== old) patch[k] = v;
+      }
+      if (!Object.keys(patch).length) { toast('לא היו שינויים'); return; }
+      if (S.demo) { Object.assign(r, patch); toast('נשמר'); render(); return; }
+      const { error } = await sb.rpc(P ? 'admin_update_place' : 'admin_update_event', { p_id: r.id, p_patch: patch, p_version: r.version });
+      if (error) { f.querySelector('#dlg-err').textContent = errMsg(error); return false; }
+      toast('נשמר'); await load();
+    });
+  }
+
+  // ---------- אירועים בממשק ----------
+  document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => { if (t.hidden) return; S.kind = t.dataset.kind; S.sel.clear(); S.status = S.kind==='managers' ? 'all' : defaultStatus(S.kind); render(); }));
+  $('status-chips').addEventListener('click', e => { const b = e.target.closest('[data-st]'); if (!b) return; S.status = b.dataset.st; render(); });
+  $('cat').addEventListener('change', e => { S.cat = e.target.value; render(); });
+  $('q').addEventListener('input', e => { S.q = e.target.value.trim(); render(); });
+  $('reload').addEventListener('click', load);
+  $('list').addEventListener('change', e => { const id = e.target.dataset && e.target.dataset.sel; if (!id) return; e.target.checked ? S.sel.add(id) : S.sel.delete(id); syncSel(); });
+  $('sel-all').addEventListener('change', e => { const list = visible(); list.forEach(r => e.target.checked ? S.sel.add(rid(r)) : S.sel.delete(rid(r))); render(); });
+  $('list').addEventListener('click', e => { const b = e.target.closest('[data-act]'); if (!b) return; const id = b.closest('[data-id]').dataset.id;
+    b.dataset.act === 'edit' ? edit(id) : askStatus([id], b.dataset.act); });
+  document.querySelectorAll('[data-bulk]').forEach(b => b.addEventListener('click', () => { const ids = [...S.sel].filter(id => cur().some(r => rid(r) === id)); if (ids.length) askStatus(ids, b.dataset.bulk); }));
+
+  function demoSeed(role){
+    S.demo = true; S.role = role; S.email = role==='admin' ? 'admin@example.com' : 'manager@example.com';
+    S.rows.places = [{id:'ncht-demo-1', name_he:'קפה לדוגמה', category:'בית קפה', category_group:'בתי קפה', address:'רחוב הדגמה 1', status:'pending_publish', version:1, hours:'א׳–ה׳ 08:00–16:00'}];
+    S.rows.events = [{id:'evt-demo-1', title:'מפגש קהילה לדוגמה', venue_name:'המתנ״ס', status:'pending_publish', start_date:'2026-11-28', version:1}];
+    S.rows.posts = [
+      {id:'pst-demo-1', type:'ride', title:'מחפשת טרמפ מחר בבוקר לכיוון באר שבע', body:'יציאה סביב 08:00.', status:'pending', created_at:new Date().toISOString()},
+      {id:'pst-demo-2', type:'giveaway', title:'מוסר/ת כורסה במצב טוב, לאיסוף השבוע', status:'open', created_at:new Date().toISOString()}
+    ];
+    S.rows.residents = [
+      {user_id:'11111111-1111-1111-1111-111111111111', display_name:'תושב/ת א׳', status:'pending', created_at:new Date().toISOString()},
+      {user_id:'22222222-2222-2222-2222-222222222222', display_name:'תושב/ת ב׳', status:'verified', created_at:new Date().toISOString()}
+    ];
+    S.managers = role==='admin' ? [{user_id:'33333333-3333-3333-3333-333333333333', email:'manager@example.com', display_name:'מנהל/ת קהילה לדוגמה', added_at:new Date().toISOString()}] : [];
+    S.candidates = [{user_id:'22222222-2222-2222-2222-222222222222', email:'resident-b@example.com', display_name:'תושב/ת ב׳', is_manager:false}];
+    $('who-email').textContent = S.email;
+    setRoleUI(); show('v-main'); render();
+  }
+  $('mgr-grant') && $('mgr-grant').addEventListener('click', async () => {
+    const id = $('mgr-pick').value; if (!id) return;
+    if (S.demo) {
+      const c = (S.candidates||[]).find(x => x.user_id === id); if (!c) return;
+      S.managers.push({user_id:c.user_id, email:c.email, display_name:c.display_name, added_at:new Date().toISOString()});
+      c.is_manager = true; toast('התפקיד הוענק'); render(); return;
+    }
+    const { error } = await sb.rpc('admin_grant_manager', { p_user: id });
+    if (error) { toast(errMsg(error)); return; }
+    toast('התפקיד הוענק'); load();
+  });
+  document.addEventListener('click', async e => {
+    const b = e.target.closest('[data-revoke]'); if (!b) return;
+    if (!isAdmin()) return;
+    if (S.demo) { S.managers = S.managers.filter(m => m.user_id !== b.dataset.revoke); const c=(S.candidates||[]).find(x=>x.user_id===b.dataset.revoke); if (c) c.is_manager=false; toast('התפקיד בוטל'); render(); return; }
+    const { error } = await sb.rpc('admin_revoke_manager', { p_user: b.dataset.revoke });
+    if (error) { toast(errMsg(error)); return; }
+    toast('התפקיד בוטל'); load();
+  });
+  async function boot(){
+    const demo = new URLSearchParams(location.search).get('demo');
+    if (demo === 'admin' || demo === 'manager') { demoSeed(demo); return; }
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) { show('v-login'); return; }
+    $('who-email').textContent = session.user.email || '';
+    const { data, error } = await sb.rpc('admin_whoami');
+    if (error || !data || !(data.is_admin || data.is_manager)) { show('v-denied'); return; }
+    S.role = data.is_admin ? 'admin' : 'manager';
+    S.email = data.email || session.user.email || '';
+    setRoleUI(); show('v-main'); load();
+  }
+  sb.auth.onAuthStateChange((ev) => { if (ev === 'SIGNED_OUT') show('v-login'); });
+  boot();
+})();
+</script>
+</body>
+</html>

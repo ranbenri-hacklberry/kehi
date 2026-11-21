@@ -1,0 +1,20 @@
+# Local secrets and machine-specific config
+community.config.json
+supabase.config.json
+.env
+.env.*
+.sb_pub
+*.pem
+*.key
+
+# Generated workers (they embed config)
+deploy/deploy-*.js
+deploy/*-worker.js
+admin/out-*.html
+
+# Data, backups, OS
+backups/
+*.bak
+.DS_Store
+node_modules/
+.idea/

@@ -1,0 +1,17 @@
+{
+  "note": "Live examples of Kehi apps. This file holds public URLs only — no keys, project refs, or account IDs.",
+  "communities": [
+    {
+      "id": "mitzpe",
+      "brand": "נחת",
+      "place": "מצפה רמון",
+      "url": "https://nahat-app.ranbenri.workers.dev"
+    },
+    {
+      "id": "klil",
+      "brand": "כלילי",
+      "place": "כליל",
+      "url": "https://klili-app.klili.workers.dev"
+    }
+  ]
+}
