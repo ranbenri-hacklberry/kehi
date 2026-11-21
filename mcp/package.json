@@ -1,0 +1,23 @@
+{
+  "name": "kehi-admin-mcp",
+  "version": "1.0.0",
+  "description": "Admin-only remote MCP server for a Kehi community (Cloudflare Worker + Supabase Auth)",
+  "scripts": {
+    "build": "wrangler deploy --dry-run --outdir dist --minify -c",
+    "typecheck": "tsc -p ."
+  },
+  "type": "module",
+  "dependencies": {
+    "@cloudflare/workers-oauth-provider": "^1.2.4",
+    "@modelcontextprotocol/server": "^2.4.0",
+    "agents": "^0.34.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261121.1",
+    "typescript": "^7.0.2",
+    "wrangler": "^4.166.0"
+  },
+  "private": true,
+  "license": "MIT"
+}

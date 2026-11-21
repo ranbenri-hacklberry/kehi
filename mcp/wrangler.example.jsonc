@@ -1,0 +1,19 @@
+// Copy to a private path (not committed), fill in, then:
+//   npx wrangler deploy -c <your-config> --dry-run --outdir dist --minify
+//   node deploy/make-deploy.mjs <your-config> > /tmp/deploy-mcp.js   (Cloudflare API deploy function)
+// or simply: npx wrangler deploy -c <your-config>   (after creating the KV namespace)
+{
+  "name": "your-community-mcp",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-11-20",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "account_id": "YOUR_CLOUDFLARE_ACCOUNT_ID",
+  "workers_dev": true,
+  "kv_namespaces": [{ "binding": "OAUTH_KV", "id": "YOUR_KV_NAMESPACE_ID" }],
+  "vars": {
+    "SUPABASE_URL": "https://YOUR_PROJECT_REF.supabase.co",
+    "SUPABASE_ANON_KEY": "YOUR_PUBLISHABLE_OR_ANON_KEY",
+    "COMMUNITY_NAME": "שם הקהילה",
+    "PUBLIC_URL": "https://your-community-mcp.YOUR_SUBDOMAIN.workers.dev"
+  }
+}
