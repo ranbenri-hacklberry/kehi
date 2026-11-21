@@ -1,0 +1,112 @@
+/* Kehi agent pipeline: deterministic guards around the local model (and the keyword engine).
+   Pure functions, no network, no storage. Used by the app chat and by the eval scorer. */
+(function (root) {
+  const DAY = { 'א': 'ראשון', 'ב': 'שני', 'ג': 'שלישי', 'ד': 'רביעי', 'ה': 'חמישי', 'ו': 'שישי', 'ש': 'שבת' };
+  // "א-ה", "א׳–ה׳", "ו'", "יום ו:" -> full day names. Only stand-alone day letters (with optional geresh) are touched.
+  function expandDays(text) {
+    if (text == null) return text;
+    const L = "([אבגדהוש])['׳]?";
+    const B = "(^|[\\s,;:(·/|])";
+    const A = "(?=$|[\\s,;:)·/|\\d])";
+    let t = String(text);
+    t = t.replace(new RegExp(B + L + "\\s*[-–—]\\s*" + L + A, 'g'), (m, b, x, y) => b + DAY[x] + ' עד ' + DAY[y]);
+    t = t.replace(new RegExp(B + L + "\\s*[-–—]\\s*שבת", 'g'), (m, b, x) => b + DAY[x] + ' עד שבת');
+    t = t.replace(new RegExp(B + L + A, 'g'), (m, b, x) => b + DAY[x]);
+    t = t.replace(/(^|[\s,;(])שבת['׳]/g, '$1שבת');
+    return t;
+  }
+  function expandRecordDays(rec) {
+    if (!rec || typeof rec !== 'object') return rec;
+    const o = Object.assign({}, rec);
+    for (const k of ['hours', 'when_text', 'note', 'opening_hours']) if (typeof o[k] === 'string') o[k] = expandDays(o[k]);
+    return o;
+  }
+
+  // ---- sensitive details: health, children's names, IDs, entry/parcel codes ----
+  const HEALTH = /(אסתמה|סכרת|אפילפס|סרטן|כימותרפ|דיכאון|חרדה|הפרע(ה|ת)|אוטיז|ADHD|לקות|נכות|תרופ(ה|ות)|ניתוח|הריון|בהריון|מחל(ה|ת)|אשפוז|פסיכיאטר|HIV)/i;
+  const IDS = /(ת["״]ז|תעודת זהות|מספר זהות|קוד (כניסה|הכניסה|לבניין|חבילה|איסוף)|סיסמ|קוד\s*\d{3,}|\b\d{9}\b)/;
+  const CHILD = /(?:ה|ל|ש)?(?:בת|בן|ילד|ילדה|ילדים|תינוק|תינוקת|נכד|נכדה)\s+(?:שלי|שלנו)\s+([\u05d0-\u05ea]{2,})/g;
+  const NOT_NAME = new Set(['בת', 'בן', 'שיש', 'שהיא', 'שהוא', 'צריכה', 'צריך', 'אוהבת', 'אוהב', 'לומדת', 'לומד', 'ביום', 'מחר', 'היום']);
+  const ALLOW_HEALTH_FIELDS = new Set(['allergens', 'diet']); // food allergens / diet are part of the form, not private health data
+  function sensitiveScan(text) {
+    const names = [];
+    let m; const re = new RegExp(CHILD.source, 'g');
+    while ((m = re.exec(String(text || '')))) if (!NOT_NAME.has(m[1])) names.push(m[1]);
+    return { health: HEALTH.test(text || ''), ids: IDS.test(text || ''), names };
+  }
+  function stripSensitive(slots, message, flagged) {
+    const scan = sensitiveScan(message);
+    const out = {}; const removed = [];
+    for (const [k, v] of Object.entries(slots || {})) {
+      if (v == null || v === '') { out[k] = v; continue; }
+      const s = String(v);
+      const bad = (HEALTH.test(s) && !ALLOW_HEALTH_FIELDS.has(k)) || IDS.test(s) || scan.names.some(n => s.includes(n));
+      if (bad) { out[k] = null; removed.push(k); } else out[k] = v;
+    }
+    return { slots: out, removed, sensitive: !!(flagged || scan.health || scan.ids || scan.names.length || removed.length) };
+  }
+
+  // ---- variant: only the scenario's own list ----
+  const OFFER = /^(הצעה|מציע|מציעה|השאלה|מסירה|יש לי)/, ASK = /^(בקשה|מבקש|חיפוש|מחפש|צריך|בקשה להשאלה)/;
+  function restrictVariant(scn, v) {
+    if (!scn) return null;
+    const m = scn.modal || {};
+    if (m.fixed_variant) return m.fixed_variant;
+    const allowed = m.variants || [];
+    if (!allowed.length) return null;
+    if (v && allowed.includes(v)) return v;
+    if (v && ASK.test(v)) return allowed[1] || null;
+    if (v && OFFER.test(v)) return allowed[0];
+    return null;
+  }
+
+  function postprocessIntent(out, message, scenarios) {
+    const o = Object.assign({}, out || {});
+    const scn = (scenarios || []).find(s => s.id === o.intent) || null;
+    if (o.intent && o.intent !== 'emergency_redirect' && !scn) { o.intent = null; o.confidence = 0; }
+    o.variant = restrictVariant(scn, o.variant);
+    const fields = scn ? new Set(scn.fields.map(f => f.id)) : new Set();
+    const slots = {}; for (const [k, v] of Object.entries(o.slots || {})) if (fields.has(k)) slots[k] = v;
+    const st = stripSensitive(slots, message, o.sensitive_detected);
+    o.slots = st.slots; o.sensitive_detected = st.sensitive; o.stripped = st.removed;
+    if (scn) o.missing_required = scn.fields.filter(f => f.required && (o.slots[f.id] == null || o.slots[f.id] === '')).map(f => f.id);
+    return o;
+  }
+
+  // ---- reply hygiene ----
+  const LEAK = /\s*\b(has_answer|cited_ids|reply_he|intent|confidence|missing_required|sensitive_detected|slots)\b\s*[=:]\s*(\[[^\]]*\]|"[^"]*"|[^\s.,]+)[.,]?/g;
+  const W0 = '(?<![\u05d0-\u05ea])', W1 = '(?![\u05d0-\u05ea])';
+  const w = (x) => new RegExp(W0 + x + W1, 'g');
+  const NEUTRAL = [
+    [w('את יכולה'), 'אפשר'], [w('אתה יכול'), 'אפשר'], [w('תוכלי'), 'אפשר'], [w('תוכל'), 'אפשר'],
+    [w('פני'), 'פנו'], [w('שאלי'), 'שאלו'], [w('נסי'), 'נסו'], [w('בדקי'), 'בדקו'], [w('כתבי'), 'כתבו'],
+    [w('לך'), 'לכם'], [w('שלך'), 'שלכם'],
+  ];
+  function cleanReply(text) {
+    let t = String(text || '').replace(LEAK, '').replace(/```[\s\S]*?```/g, '').replace(/\{[^{}]*"[a-z_]+"\s*:[^{}]*\}/g, '');
+    for (const [re, to] of NEUTRAL) t = t.replace(re, to);
+    return t.replace(/\s{2,}/g, ' ').replace(/\s+([.,!?])/g, '$1').trim();
+  }
+  const REFUSALS = [
+    'אין לי עדיין מידע מאושר על זה. אפשר לשאול את הקהילה בלוח.',
+    'על זה עוד אין במאגר שום דבר מאושר. שווה לשאול בלוח הקהילה, אולי מישהו יודע.',
+    'לא מצאתי על זה מידע מאושר. כשמישהו יוסיף ויאושר, זה יופיע כאן.',
+    'בינתיים אין לי תשובה מאושרת לזה. אפשר לפרסם שאלה בלוח ושכנים יענו.',
+  ];
+  let rIdx = 0;
+  function refusal(seed) {
+    const i = typeof seed === 'number' ? seed : (rIdx++);
+    return REFUSALS[Math.abs(i) % REFUSALS.length];
+  }
+  function postprocessAnswer(out, contextIds) {
+    const o = Object.assign({}, out || {});
+    const ids = new Set(contextIds || []);
+    o.cited_ids = (o.cited_ids || []).filter(x => ids.has(x));
+    o.reply_he = cleanReply(o.reply_he);
+    if (o.has_answer === true && !o.cited_ids.length) o.has_answer = false;
+    if (!o.reply_he) o.reply_he = refusal();
+    return o;
+  }
+  const API = { expandDays, expandRecordDays, sensitiveScan, stripSensitive, restrictVariant, postprocessIntent, cleanReply, refusal, REFUSALS, postprocessAnswer };
+  if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.KehiPipeline = API;
+})(typeof window !== 'undefined' ? window : globalThis);

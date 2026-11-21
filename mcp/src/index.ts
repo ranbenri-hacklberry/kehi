@@ -514,6 +514,18 @@ function scoreText(hay: string, toks: string[]) {
   return s;
 }
 
+
+// Hebrew day abbreviations ("א-ה", "ו׳") -> full names, so a model reading the context cannot confuse days.
+const DAY_HE: Record<string, string> = { "א": "ראשון", "ב": "שני", "ג": "שלישי", "ד": "רביעי", "ה": "חמישי", "ו": "שישי", "ש": "שבת" };
+function expandDays(text: any) {
+  if (typeof text !== "string") return text;
+  const L = "([אבגדהוש])['׳]?", B = "(^|[\\s,;:(·/|])", A = "(?=$|[\\s,;:)·/|\\d])";
+  return text
+    .replace(new RegExp(B + L + "\\s*[-–—]\\s*" + L + A, "g"), (_m, b, x, y) => b + DAY_HE[x] + " עד " + DAY_HE[y])
+    .replace(new RegExp(B + L + "\\s*[-–—]\\s*שבת", "g"), (_m, b, x) => b + DAY_HE[x] + " עד שבת")
+    .replace(new RegExp(B + L + A, "g"), (_m, b, x) => b + DAY_HE[x])
+    .replace(/(^|[\s,;(])שבת['׳]/g, "$1שבת");
+}
 export function buildResidentServer(env: Env, caller: Caller) {
   const server = new McpServer({ name: `kehi-resident-${new URL(env.PUBLIC_URL).hostname.split(".")[0]}`, version: "1.0.0" });
   const comm = env.COMMUNITY_ID ? `&community_id=eq.${encodeURIComponent(env.COMMUNITY_ID)}` : "";
@@ -546,14 +558,14 @@ export function buildResidentServer(env: Env, caller: Caller) {
       let rows = (await places()).filter((p: any) => !a.category_group || p.category_group === a.category_group);
       if (toks.length) rows = rows.map((p: any) => ({ p, s: scoreText([p.name_he, p.name_en, p.category, p.category_group, p.address, p.note].join(" "), toks) }))
         .filter((x: any) => x.s > 0).sort((x: any, y: any) => y.s - x.s).map((x: any) => x.p);
-      return { total: rows.length, places: rows.slice(0, a.limit || 8).map((p: any) => ({ ...p, links: { google_maps: p.maps_url || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${p.name_he || ""} ${p.address || ""}`)}`, website: p.website || null } })) };
+      return { total: rows.length, places: rows.slice(0, a.limit || 8).map((p: any) => ({ ...p, hours: expandDays(p.hours), links: { google_maps: p.maps_url || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${p.name_he || ""} ${p.address || ""}`)}`, website: p.website || null } })) };
     });
   tool("get_place", "One approved place by id, with its public business calendar (opening hours / bookable slots) when the business has one.",
     z.object({ id: z.string().max(80) }), async (a) => {
       const rows = (await sbGet(env, caller.jwt, `places?select=${PCOLS}&status=eq.published&id=eq.${encodeURIComponent(a.id)}${comm}`)) || [];
       if (!rows.length || !visible(rows[0])) return { found: false };
       const cal = await rpc(env, caller.jwt || env.SUPABASE_ANON_KEY, "place_public_calendar", { p_place_id: a.id }).catch(() => null);
-      return { found: true, place: rows[0], calendar: cal };
+      return { found: true, place: { ...rows[0], hours: expandDays(rows[0].hours) }, calendar: cal };
     });
   tool("list_events", "Approved (published) community events, upcoming first. Optional free-text query (title, venue, organizer) and `days_ahead` window.",
     z.object({ query: z.string().max(200).optional(), days_ahead: z.number().int().min(1).max(365).optional(), limit: z.number().int().min(1).max(30).optional() }),
@@ -564,7 +576,7 @@ export function buildResidentServer(env: Env, caller: Caller) {
         return isNaN(t) || (t >= now - 6 * 3600e3 && t <= until);
       });
       if (toks.length) rows = rows.filter((e: any) => scoreText([e.title, e.venue_name, e.organizer, e.description, e.when_text].join(" "), toks) > 0);
-      return { total: rows.length, events: rows.slice(0, a.limit || 10) };
+      return { total: rows.length, events: rows.slice(0, a.limit || 10).map((e: any) => ({ ...e, when_text: expandDays(e.when_text) })) };
     });
   tool("list_open_posts", "Open, approved community board posts (rides, giveaways, help requests, recommendations, courses/workshops). Author ids are not returned.",
     z.object({ type: z.enum(["ride", "giveaway", "help", "recommend", "course"]).optional(), query: z.string().max(200).optional(), limit: z.number().int().min(1).max(30).optional() }),
