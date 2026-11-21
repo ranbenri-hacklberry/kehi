@@ -39,6 +39,9 @@
   .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
   .err{color:var(--no);font-size:14px;margin:10px 0 0;min-height:1em}
   .hint{font-size:13px;color:var(--soft);margin:10px 0 0}
+  #google-in{width:100%;margin-top:4px}
+  button.fallback-link{border:0;background:none;padding:0;color:var(--soft);text-decoration:underline;cursor:pointer;font:inherit}
+  button.fallback-link:hover{color:var(--ink)}
   .tabs{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
   .tab{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:8px 16px;cursor:pointer;white-space:nowrap}
   .tab.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
@@ -108,7 +111,11 @@
   <!-- כניסה -->
   <section id="v-login" class="login card" hidden>
     <h1>כניסת מנהלים</h1>
-    <p>נשלח קוד בן 6 ספרות לכתובת המייל שלך. נכנסים מנהלים ומנהלי/ות קהילה רשומים.</p>
+    <p>נכנסים עם אותו חשבון Google כמו באפליקציה. אחרי הכניסה בודקים שיש הרשאת ניהול.</p>
+    <button class="btn" id="google-in" type="button">כניסה עם Google</button>
+    <p class="hint"><button type="button" class="fallback-link" id="otp-toggle">כניסה עם קוד למייל</button></p>
+    <div id="otp-box" hidden>
+    <p class="hint">נשלח קוד בן 6 ספרות לכתובת המייל. רק מנהלים ומנהלי/ות קהילה רשומים.</p>
     <form id="f-email" novalidate>
       <label for="email">כתובת מייל</label>
       <input id="email" type="email" autocomplete="email" inputmode="email" dir="ltr" required>
@@ -124,6 +131,7 @@
       </div>
       <p class="hint" id="sent-to"></p>
     </form>
+    </div>
     <p class="err" id="login-err" role="alert"></p>
   </section>
 
@@ -184,7 +192,7 @@
   const CFG = JSON.parse(document.getElementById('cfg').textContent);
   // ה־service worker של האפליקציה הציבורית לא אמור לשמור עותקים של דף הניהול.
   try { if ('caches' in window) caches.keys().then(ks => ks.forEach(k => caches.open(k).then(c => c.keys().then(rs => rs.forEach(r => { const p = new URL(r.url); if (p.origin === location.origin && p.pathname.startsWith('/admin')) c.delete(r); }))))); } catch (e) {}
-  const sb = supabase.createClient(CFG.url, CFG.key, { auth: { storageKey: CFG.storageKey, persistSession: true, autoRefreshToken: true, detectSessionInUrl: false } });
+  const sb = supabase.createClient(CFG.url, CFG.key, { auth: { storageKey: CFG.storageKey, persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'pkce' } });
   const $ = id => document.getElementById(id);
   const esc = t => String(t == null ? '' : t).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const TZ = 'Asia/Jerusalem';
@@ -209,6 +217,39 @@
 
   // ---------- כניסה בקוד מייל ----------
   let lastSend = 0;
+  
+  function adminRedirectUrl(){
+    const u = new URL(location.href);
+    u.hash = '';
+    u.searchParams.delete('code');
+    u.searchParams.delete('state');
+    const q = u.searchParams.toString();
+    return u.origin + u.pathname + (q ? '?' + q : '');
+  }
+  async function signInGoogle(){
+    $('login-err').textContent = '';
+    $('google-in').disabled = true;
+    try {
+      const { data, error } = await sb.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: adminRedirectUrl(), skipBrowserRedirect: true }
+      });
+      if (error){ $('login-err').textContent = /provider is not enabled/i.test(error.message) ? 'כניסה עם Google עדיין לא זמינה כאן.' : 'לא הצלחנו לפתוח את Google: ' + error.message; $('google-in').disabled = false; return; }
+      const url = data && data.url;
+      if (!url){ $('login-err').textContent = 'לא הצלחנו להשלים את הפעולה. אפשר לנסות שוב.'; $('google-in').disabled = false; return; }
+      location.href = url;
+    } catch (e) {
+      $('login-err').textContent = 'לא הצלחנו לפתוח את Google.';
+      $('google-in').disabled = false;
+    }
+  }
+  $('google-in').addEventListener('click', () => { signInGoogle(); });
+  $('otp-toggle').addEventListener('click', () => {
+    const box = $('otp-box');
+    box.hidden = !box.hidden;
+    if (!box.hidden) $('email').focus();
+  });
+
   async function sendCode(){
     const email = $('email').value.trim().toLowerCase(); $('login-err').textContent = '';
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { $('login-err').textContent = 'נא להזין כתובת מייל תקינה.'; return; }
@@ -657,19 +698,30 @@
     if (error) { toast(errMsg(error)); return; }
     toast('התפקיד בוטל'); load();
   });
+  let booting = false;
+  async function afterSession(session){
+    if (!session || booting) return;
+    booting = true;
+    try {
+      $('who-email').textContent = session.user.email || '';
+      const { data, error } = await sb.rpc('admin_whoami');
+      if (error || !data || !(data.is_admin || data.is_manager)) { show('v-denied'); return; }
+      S.role = data.is_admin ? 'admin' : 'manager';
+      S.email = data.email || session.user.email || '';
+      setRoleUI(); show('v-main'); load();
+    } finally { booting = false; }
+  }
   async function boot(){
     const demo = new URLSearchParams(location.search).get('demo');
     if (demo === 'admin' || demo === 'manager') { demoSeed(demo); return; }
     const { data: { session } } = await sb.auth.getSession();
     if (!session) { show('v-login'); return; }
-    $('who-email').textContent = session.user.email || '';
-    const { data, error } = await sb.rpc('admin_whoami');
-    if (error || !data || !(data.is_admin || data.is_manager)) { show('v-denied'); return; }
-    S.role = data.is_admin ? 'admin' : 'manager';
-    S.email = data.email || session.user.email || '';
-    setRoleUI(); show('v-main'); load();
+    await afterSession(session);
   }
-  sb.auth.onAuthStateChange((ev) => { if (ev === 'SIGNED_OUT') show('v-login'); });
+  sb.auth.onAuthStateChange((ev, session) => {
+    if (ev === 'SIGNED_OUT') { show('v-login'); return; }
+    if (ev === 'SIGNED_IN' && session) afterSession(session);
+  });
   boot();
 })();
 </script>

@@ -14,6 +14,10 @@ self.addEventListener('fetch', e => {
     }).catch(() => caches.open(DATA).then(c => c.match(e.request)).then(hit => hit || Response.error())));
     return;
   }
+  if (url.origin === location.origin && (url.pathname === '/admin' || url.pathname.startsWith('/admin/'))) {
+    e.respondWith(fetch(e.request).catch(() => new Response('ניהול לא זמין במצב לא מקוון', {status:503, headers:{'content-type':'text/plain; charset=utf-8'}})));
+    return;
+  }
   e.respondWith(caches.match(e.request).then(hit => hit || fetch(e.request).then(res => {
     if (res.ok && url.origin === location.origin) { const copy = res.clone(); caches.open(CACHE).then(c => c.put(e.request, copy)); }
     return res;
