@@ -193,6 +193,31 @@
   .tab-badge{position:absolute;top:-5px;inset-inline-end:-8px;min-width:16px;height:16px;padding:0 4px;border-radius:999px;background:var(--accent);color:#fff;font-size:10px;font-weight:700;line-height:16px;text-align:center;pointer-events:none;z-index:1;box-sizing:border-box}
   .tab-badge[hidden]{display:none !important}
   .tab-badge:not([hidden]){display:flex;align-items:center;justify-content:center}
+
+  .link-btns{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 0}
+  a.link-btn{display:inline-block;padding:5px 10px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--ink);text-decoration:none;font-size:13px;font-weight:600}
+  a.link-btn:hover{background:var(--accent-bg)}
+  .sq-details{margin-top:8px}
+  .sq-details .sq-row{display:flex;gap:8px;flex-wrap:wrap;font-size:14px;margin:3px 0;line-height:1.45}
+  .sq-details .sq-row .sq-k{color:var(--soft);min-width:4.5em}
+  .sq-item{align-items:flex-start}
+  .trial-remind{background:var(--amber);color:#6b5a1f;border-radius:12px;padding:10px 12px;margin:0 0 12px;font-size:14px}
+  #onboard{position:fixed;inset:0;z-index:80;background:rgba(30,22,16,.45);display:grid;place-items:end center;padding:0}
+  #onboard[hidden]{display:none !important}
+
+  .cal-hours-grid{display:grid;gap:8px}
+  .cal-hour-row{display:grid;grid-template-columns:2.4em 1fr 1fr auto;gap:8px;align-items:center}
+  .cal-hour-row input[type=time]{min-width:0}
+  #me-notifs .notif{display:flex;gap:8px;align-items:flex-start;margin:8px 0}
+
+  .onboard-sheet{background:var(--panel);color:var(--ink);width:100%;max-width:520px;border-radius:22px 22px 0 0;padding:22px 20px calc(20px + env(safe-area-inset-bottom));max-height:88vh;overflow:auto}
+  .onboard-sheet h2{margin:0 0 8px;font-size:22px}
+  .onboard-sheet p{margin:0 0 10px}
+  .onboard-dots{display:flex;gap:6px;justify-content:center;margin:12px 0}
+  .onboard-dots span{width:7px;height:7px;border-radius:50%;background:var(--line)}
+  .onboard-dots span.on{background:var(--accent)}
+  .onboard-nav{display:flex;gap:8px;justify-content:space-between;margin-top:8px}
+
   .pay-test-banner{background:var(--amber);color:#6b5a1f;border-radius:12px;padding:8px 12px;font-size:13px;margin:0 0 12px}
 
 
@@ -343,7 +368,7 @@
     </div>
     <div class="card">
       <h3>📅 הזמנת תצפית</h3>
-      <div class="meta">מחובר ליומן גוגל של העסק · מוצגים רק זמנים פנויים</div>
+      <div class="meta">יומן פנימי של העסק · מוצגים רק זמנים פנויים (דוגמה)</div>
       <div class="slots"><button class="slot">ב׳ 20:00</button><button class="slot on">ג׳ 21:30</button><button class="slot">ד׳ 20:00</button><button class="slot">ה׳ 22:00</button></div>
     </div>
     <div class="stack">
@@ -441,6 +466,7 @@
     <header class="bar"><h1 style="margin:0;font-size:26px">האזור שלי</h1><span></span></header>
     <div id="me-account"></div>
     <div id="me-biz"></div>
+    <div id="me-notifs" hidden></div>
     <div id="staff-queue-me" class="staff-queue" hidden></div>
     <div id="me-bookings" hidden></div>
     <div id="me-legacy" hidden>
@@ -458,11 +484,21 @@
       <h3>העסק שלי</h3>
       <div class="kv" style="margin-top:8px">
         <div><div class="k">שעות פנייה</div><div>א׳–ה׳ &#x2066;10:00–17:00&#x2069;</div></div>
-        <div><div class="k">יומן גוגל</div><div>מחובר ✓</div></div>
+        <div><div class="k">יומן העסק</div><div>פנימי</div></div>
       </div>
     </div>
     <div class="card"><h3>פרטיות</h3><p class="meta" style="margin:4px 0 0">הורדת המידע שלי · מחיקת החשבון · ניהול הסכמות</p></div>
     </div>
+  </section>
+
+
+  <section class="screen" id="s-calendar">
+    <header class="bar">
+      <a class="back" href="#/me">→ האזור שלי</a>
+      <h1 style="margin:0;font-size:26px">יומן העסק</h1>
+      <span></span>
+    </header>
+    <div id="calendar-root"></div>
   </section>
 
   <section class="screen" id="s-pricing">
@@ -475,7 +511,8 @@
   </section>
 </div>
 
-<nav class="tabs" aria-label="ניווט ראשי"><div class="in">
+    <div id="onboard" hidden></div>
+  <nav class="tabs" aria-label="ניווט ראשי"><div class="in">
   <a href="#/" data-r="home"><svg class="ico" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>בית</a>
   <a href="#/cats" data-r="cats"><svg class="ico" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>קטגוריות</a>
   <a href="#/ask" data-r="ask"><svg class="ico" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>לשאול</a>
@@ -1009,6 +1046,7 @@ function isOpenNow(hours, date=new Date()){
     if (links.length) h += '<div class="pl-links">' + links.join('') + '</div>';
     { const vd = p.last_verified ? String(p.last_verified).split('-').reverse().join('.') : ''; const gm = /query_place_id=/.test(p.maps_url || ''); if (gm || vd) h += '<p class="note">' + (gm ? 'מופיע במפות גוגל' : 'מקור: המאגר של __BRAND__') + (vd ? ' · נבדק ' + esc(vd) : '') + '</p>'; }
     el.innerHTML = h;
+    if (typeof loadPlaceCalendar === 'function') try { loadPlaceCalendar(p, el); } catch (e) {}
   }
   function renderAll(){
     syncFilterFromHash();
@@ -1090,10 +1128,10 @@ function isOpenNow(hours, date=new Date()){
         if (p.status === 'pending') items.push({kind:'post', id:p.id, title:p.title || p.id, sub:({ride:'טרמפ',giveaway:'מסירה',help:'עזרה',recommend:'המלצה',course:'קורס'}[p.type]||p.type||''), created:p.created_at});
       }
       for (const p of places){
-        if (p.status === 'pending_publish') items.push({kind:'place', id:p.id, title:p.name_he || p.id, sub:p.category_group || p.category || '', created:p.updated_at, community:p.community_id});
+        if (p.status === 'pending_publish') items.push(Object.assign({kind:'place', id:p.id, title:p.name_he || p.id, sub:p.category_group || p.category || '', created:p.updated_at, community:p.community_id}, p));
       }
       for (const b of biz){
-        if (b.claim_status === 'pending') items.push({kind:'claim', id:b.user_id, title:b.business_name || b.display_name || 'עסק', sub:b.pending_place_name ? ('שיוך ל־' + b.pending_place_name) : 'ממתין לאישור שיוך', created:b.created_at});
+        if (b.claim_status === 'pending') items.push(Object.assign({kind:'claim', id:b.user_id, title:b.business_name || b.display_name || 'עסק', sub:b.pending_place_name ? ('שיוך ל־' + b.pending_place_name) : 'ממתין לאישור שיוך', created:b.created_at, name_he:b.pending_place_name || b.place_name || b.business_name}, b));
       }
       items.sort((a,b) => String(b.created||'').localeCompare(String(a.created||'')));
     } catch (e) { /* leave previous */ }
@@ -1106,6 +1144,348 @@ function isOpenNow(hours, date=new Date()){
     if (comm === 'klil') return staffRole === 'admin';
     return !!(staffRole);
   }
+
+
+  function communityTown(){
+    const id = (typeof COMMUNITY_ID === 'undefined') ? '' : COMMUNITY_ID;
+    return id === 'klil' ? 'כליל' : 'מצפה רמון';
+  }
+  function mapsSearchUrl(name, address){
+    const q = [name, address, communityTown()].filter(Boolean).join(' ');
+    return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(q);
+  }
+  function placeMapsUrl(p){
+    return (p && (p.google_maps_url || p.maps_url)) || mapsSearchUrl((p && (p.name_he || p.title || p.place_name || p.pending_place_name || p.business_name)) || '', p && p.address);
+  }
+  function httpUrlsFrom(val){
+    const out = [];
+    const add = (s) => {
+      const m = String(s || '').match(/https?:\/\/[^\s<>"']+/gi) || [];
+      m.forEach((u) => { if (!/tachlis\.co\.il/i.test(u) && out.indexOf(u) < 0) out.push(u); });
+    };
+    if (Array.isArray(val)) val.forEach((x) => {
+      if (typeof x === 'string') add(x);
+      else if (x && typeof x === 'object') add(x.url || x.href || '');
+    });
+    else add(val);
+    return out;
+  }
+  function placeSourceUrls(p){
+    if (!p) return [];
+    let urls = [];
+    if (Array.isArray(p.source_urls)) urls = urls.concat(p.source_urls);
+    urls = urls.concat(httpUrlsFrom(p.sources), httpUrlsFrom(p.source), httpUrlsFrom(p.note), httpUrlsFrom(p.website), httpUrlsFrom(p.google_maps_url || p.maps_url));
+    const seen = {}, out = [];
+    urls.forEach((u) => {
+      if (!u || /tachlis\.co\.il/i.test(u) || seen[u]) return;
+      seen[u] = 1; out.push(u);
+    });
+    return out;
+  }
+  function linkBtn(href, label){
+    if (!href) return '';
+    const u = String(href).trim();
+    if (!/^https?:\/\//i.test(u)) return '';
+    if (/tachlis\.co\.il/i.test(u)) return '';
+    return '<a class="link-btn" href="' + esc(u) + '" target="_blank" rel="noopener noreferrer">' + esc(label) + '</a>';
+  }
+  function placeLinkBtns(p){
+    if (!p) return '';
+    const web = p.website || '';
+    let h = '<div class="link-btns">';
+    h += linkBtn(placeMapsUrl(p), 'גוגל מפות');
+    if (web && !/facebook\.com|\/\/fb\.com|instagram\.com/i.test(web)) h += linkBtn(web, 'אתר');
+    const fb = p.facebook_url || (/facebook\.com|\/\/fb\.com/i.test(web) ? web : '');
+    const ig = p.instagram_url || (/instagram\.com/i.test(web) ? web : '');
+    h += linkBtn(fb, 'פייסבוק');
+    h += linkBtn(ig, 'אינסטגרם');
+    const skip = {};
+    [placeMapsUrl(p), web, fb, ig].forEach((u) => { if (u) skip[u] = 1; });
+    const src = placeSourceUrls(p).filter((u) => !skip[u]);
+    src.forEach((u, i) => { h += linkBtn(u, src.length === 1 ? 'מקור' : ('מקור ' + (i + 1))); });
+    h += '</div>';
+    return h;
+  }
+  function placeDetailBlock(p){
+    if (!p) return '';
+    const rows = [];
+    const add = (k, v) => { if (v) rows.push('<div class="sq-row"><span class="sq-k">' + esc(k) + '</span><span>' + v + '</span></div>'); };
+    add('קטגוריה', esc([p.category_group, p.category].filter(Boolean).join(' · ')));
+    add('כתובת', esc(p.address));
+    add('שעות', esc(p.hours || p.hours_status || ''));
+    if (p.phone) add('טלפון', '<bdi dir="ltr">' + esc(p.phone) + '</bdi>');
+    if (p.website && !/facebook\.com|instagram\.com/i.test(p.website)) add('אתר', esc(p.website));
+    add('תיאור', esc(p.note || p.description || ''));
+    add('מקור', esc(typeof p.source === 'string' ? p.source : ''));
+    return '<div class="sq-details">' + rows.join('') + placeLinkBtns(p) + '</div>';
+  }
+
+  const ONBOARD_ADMIN = [
+    {t:'ברוכה הבאה לניהול', b:'כאן מאשרים מקומות, מטפלים בבקשות תושבות ובשיוך עסקים, ומנהלים את חשבון העסק שלך. המסך «ממתינים לאישור» בבית וב«שלי» מציג את כל מה שמחכה להחלטה.'},
+    {t:'אישור מקומות', b:'לכל מקום ממתין יש את כל הפרטים: קטגוריה, כתובת, שעות, טלפון ואתר אם נשמרו, תיאור ומקור. יש קישור לגוגל מפות, לאתר, לפייסבוק או אינסטגרם אם יש, ולמקורות מהם הגיע התוכן. בודקים, ואז מאשרים או דוחים עם סיבה.'},
+    {t:'העסק שלך', b:'אפשר לשייך ולעדכן את דף העסק מהאזור האישי או ממסך הניהול. אם העסק עוד לא במאגר — כותבים לרן את השם והפרטים, ולא ממציאים רשומה.'},
+    {t:'פרו, בלי תשלום', b:'לאדמינים ולמנהלות קהילה יש מסלול פרו בחינם, בלי כרטיס ובלי סיום ניסיון. התשלום לא נדרש מצוות. אחרי שבועיים, בעלי עסקים רגילים יקבלו תזכורת לתשלום — זה לא חל עלייך.'},
+    {t:'שעות ויומן העסק', b:'אפשר להגדיר שעות פעילות, אירועים ותורים ביומן הפנימי. זה שלב רשות — אפשר לדלג ולחזור מ«שלי». תושבים רואים זמינות בדף העסק ומבקשים תור לאישור שלכם. «הוסף ליומן שלי» מוריד קובץ ‎.ics, בלי הרשאות לגוגל.', hours:true}
+  ];
+  const ONBOARD_TRIAL = [
+    {t:'ברוכים הבאים, הניסיון התחיל', b:'יש לך 14 ימים חינם, בלי כרטיס אשראי. עכשיו אפשר להכיר את חשבון העסק ואת הכלים במסלול. התשלום יתבקש רק בסוף תקופת הניסיון, לא עכשיו.'},
+    {t:'ניהול העסק', b:'אפשר לבקש שיוך למקום במאגר, לעדכן פרטים, ולעקוב אחרי הסטטוס ב«שלי». אחרי השיוך הצוות בודק את כל הפרטים שאישרתם, כולל קישורים לאתר ולרשתות.'},
+    {t:'מה כלול במסלול', b:'דף עסק מורחב, עדכון שעות ותמונות, והדגשה בהמלצות הקהילה. במסלולי פרו ומייסד יש גם כלים נוספים — חלקם מסומנים «בקרוב».'},
+    {t:'נזכיר לפני הסיום', b:'לקראת סוף 14 הימים תופיע תזכורת ב«שלי» עם כפתור לתשלום. עד אז אפשר להשתמש בניסיון בחופשיות, בלי חיוב.'},
+    {t:'שעות ויומן העסק', b:'אפשר כבר עכשיו להגדיר שעות פעילות ולפתוח תורים. זה שלב רשות. התושבים יראו זמינות בדף העסק ויבקשו תור, ואתם מאשרים באפליקציה. התשלום עצמו יתבקש רק בסוף הניסיון.', hours:true}
+  ];
+  let onboardState = {kind:null, step:0};
+
+  function onboardSteps(){ return onboardState.kind === 'admin' ? ONBOARD_ADMIN : ONBOARD_TRIAL; }
+
+  function renderOnboard(){
+    const root = $('onboard'); if (!root) return;
+    if (!onboardState.kind){ root.hidden = true; return; }
+    const steps = onboardSteps();
+    const i = Math.max(0, Math.min(onboardState.step, steps.length - 1));
+    const s = steps[i];
+    const dots = steps.map((_, n) => '<span' + (n === i ? ' class="on"' : '') + '></span>').join('');
+    const last = i === steps.length - 1;
+    const hours = !!(s && s.hours);
+    let nav = (i > 0 ? '<button class="btn ghost" type="button" data-onboard="prev">חזרה</button>' : '<span></span>');
+    if (last && hours) {
+      nav += '<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end"><button class="btn ghost" type="button" data-onboard="done">דלג לעכשיו</button><button class="btn main" type="button" data-onboard="hours">להגדרת שעות</button></div>';
+    } else {
+      nav += '<button class="btn main" type="button" data-onboard="' + (last ? 'done' : 'next') + '">' + (last ? 'הבנתי, מתחילים' : 'הבא') + '</button>';
+    }
+    root.innerHTML = '<div class="onboard-sheet" role="dialog" aria-labelledby="onboard-title"><h2 id="onboard-title">' + esc(s.t) + '</h2><p>' + esc(s.b) + '</p><div class="onboard-dots">' + dots + '</div><div class="onboard-nav">' + nav + '</div></div>';
+    root.hidden = false;
+  }
+
+  async function maybeStartOnboarding(){
+    if (!sessionUser || !sessionUser.token) return;
+    try {
+      const r = await fetch(AUTH_URL + '/rest/v1/rpc/my_onboarding_state', { method:'POST', headers: authHeaders(), body: '{}' });
+      if (!r.ok) return;
+      const st = await r.json();
+      window.__onboarding = st;
+      if (st && st.need_admin){ onboardState = {kind:'admin', step:0}; renderOnboard(); return; }
+      if (st && st.need_business){ onboardState = {kind:'business', step:0}; renderOnboard(); }
+    } catch (e) {}
+  }
+
+  async function finishOnboard(){
+    const kind = onboardState.kind;
+    onboardState = {kind:null, step:0};
+    renderOnboard();
+    if (!kind) return;
+    try {
+      await fetch(AUTH_URL + '/rest/v1/rpc/mark_onboarding_done', { method:'POST', headers: authHeaders(), body: JSON.stringify({ p_kind: kind }) });
+    } catch (e) {}
+  }
+
+  const CAL_DAYS = ['א׳','ב׳','ג׳','ד׳','ה׳','ו׳','ש׳'];
+
+  let calState = {data:null, loading:false};
+  let myBizBookings = [];
+  let myNotifs = {unread:0, items:[]};
+
+  function icsForRange(title, details, loc, start, end){
+    if (typeof buildIcs === 'function') return buildIcs(title, details || '', loc || '', start, end);
+    return '';
+  }
+  function addToMyCalendar(title, details, loc, start, end, filename){
+    if (typeof downloadIcs === 'function') downloadIcs(filename || 'nahat.ics', icsForRange(title, details, loc, start, end));
+  }
+
+  async function loadMyNotifications(){
+    myNotifs = {unread:0, items:[]};
+    if (!sessionUser) return;
+    try {
+      const r = await fetch(AUTH_URL + '/rest/v1/rpc/my_notifications', { method:'POST', headers: authHeaders(), body: '{}' });
+      if (r.ok){ const d = await r.json(); myNotifs = d && typeof d === 'object' ? d : myNotifs; }
+    } catch (e) {}
+  }
+  async function loadMyBizBookings(){
+    myBizBookings = [];
+    if (!sessionUser) return;
+    try {
+      const r = await fetch(AUTH_URL + '/rest/v1/rpc/list_my_business_bookings', { method:'POST', headers: authHeaders(), body: '{}' });
+      if (r.ok){ const d = await r.json(); myBizBookings = Array.isArray(d) ? d : []; }
+    } catch (e) {}
+  }
+
+  function renderMeNotifs(){
+    const el = $('me-notifs'); if (!el) return;
+    const items = (myNotifs && myNotifs.items) || [];
+    if (!sessionUser || !items.length){ el.hidden = true; el.innerHTML = ''; return; }
+    el.hidden = false;
+    const unread = Number(myNotifs.unread || 0);
+    let h = '<div class="card"><h3 style="margin:0 0 6px">התראות</h3>';
+    items.slice(0, 8).forEach(n => {
+      h += '<div class="notif"><div><div>' + esc(n.title || '') + '</div><div class="meta">' + esc(n.body || '') + (n.read_at ? '' : ' · חדש') + '</div></div></div>';
+    });
+    if (unread) h += '<button class="btn ghost sm" type="button" data-notifs-read>סימון הכל כנקרא</button>';
+    h += '</div>';
+    el.innerHTML = h;
+  }
+
+  function renderBusinessCalendar(){
+    const el = $('calendar-root'); if (!el) return;
+    if (!sessionUser){ el.innerHTML = '<div class="card"><p>צריך להיכנס כדי לנהל את יומן העסק.</p></div>'; return; }
+    const d = calState.data;
+    if (calState.loading && !d){ el.innerHTML = '<div class="card"><p class="meta">טוען את היומן…</p></div>'; return; }
+    if (!d){ el.innerHTML = '<div class="card"><p>היומן זמין למסלולים העסקיים ולפרו של אדמינים. אם התחלתם ניסיון, הוא מופיע כאן מיד.</p><p><a class="btn ghost" href="#/pricing">למסלולים</a></p></div>'; return; }
+    const st = d.settings || {};
+    const hours = Array.isArray(d.hours) ? d.hours : [];
+    const byWd = {};
+    hours.forEach(h => { byWd[h.weekday] = h; });
+    let htm = '';
+    const isPro = /pro|founder/i.test(d.tier || '') || d.is_comp;
+    if (isPro) htm += '<div class="card"><p class="note" style="margin:0">סנכרון דו-כיווני עם גוגל יומן — <span class="soon">בקרוב</span>. בינתיים היומן פנימי, ו«הוסף ליומן שלי» מוריד קובץ ‎.ics בלי הרשאות.</p></div>';
+    htm += '<div class="card"><h2 style="margin:0 0 8px">שעות פעילות</h2><p class="meta">התורים נפתחים לפי השעות האלה. תושבים מבקשים, ואתם מאשרים.</p>';
+    htm += '<div class="cal-hours-grid" id="cal-hours">';
+    for (let wd = 0; wd < 7; wd++){
+      const row = byWd[wd] || {weekday:wd, is_closed:true, start_time:'10:00', end_time:'17:00'};
+      const closed = !!row.is_closed;
+      const stt = (row.start_time || '10:00').slice(0,5);
+      const enn = (row.end_time || '17:00').slice(0,5);
+      htm += '<div class="cal-hour-row" data-wd="'+wd+'"><span>' + CAL_DAYS[wd] + '</span>';
+      htm += '<input class="f" type="time" data-cal-start '+ (closed?'disabled':'') +' value="'+esc(stt)+'">';
+      htm += '<input class="f" type="time" data-cal-end '+ (closed?'disabled':'') +' value="'+esc(enn)+'">';
+      htm += '<label class="meta"><input type="checkbox" data-cal-closed '+(closed?'checked':'')+'> סגור</label></div>';
+    }
+    htm += '</div>';
+    htm += '<div class="slot-grid" style="margin-top:10px"><label>אורך תור (דק׳)<select class="f" id="cal-mins">';
+    [30,45,60,90,120].forEach(m => { htm += '<option value="'+m+'"'+(Number(st.slot_minutes)===m?' selected':'')+'>'+m+'</option>'; });
+    htm += '</select></label><label>כמה ימים קדימה<select class="f" id="cal-horizon">';
+    [7,14,21,30].forEach(m => { htm += '<option value="'+m+'"'+(Number(st.horizon_days)===m?' selected':'')+'>'+m+'</option>'; });
+    htm += '</select></label></div>';
+    htm += '<label class="meta" style="display:block;margin:10px 0"><input type="checkbox" id="cal-accepting" '+(st.is_accepting!==false?'checked':'')+'> מקבלים בקשות לתורים</label>';
+    htm += '<button class="btn main" type="button" data-cal-save-hours>שמירת שעות</button><p class="err" id="cal-hours-err" hidden></p></div>';
+
+    const req = (d.bookings||[]).filter(b => b.status === 'requested');
+    const conf = (d.bookings||[]).filter(b => b.status === 'confirmed');
+    htm += '<div class="card"><h2 style="margin:0 0 8px">בקשות ממתינות</h2>';
+    if (!req.length) htm += '<p class="meta">אין בקשות ממתינות.</p>';
+    req.forEach(b => {
+      htm += '<div class="sq-item" style="display:flex;justify-content:space-between;gap:8px;margin:8px 0"><div><b>' + esc(fmtRange(b.starts_at,b.ends_at)) + '</b><div class="meta">' + esc(b.display_name||'תושב/ת') + (b.resident_note ? ' · ' + esc(b.resident_note) : '') + '</div></div><div class="acts"><button class="btn ok sm" type="button" data-cal-review="approved" data-id="'+esc(b.id)+'">אישור</button><button class="btn no sm" type="button" data-cal-review="rejected" data-id="'+esc(b.id)+'">דחייה</button></div></div>';
+    });
+    htm += '</div>';
+    htm += '<div class="card"><h2 style="margin:0 0 8px">תורים מאושרים</h2>';
+    if (!conf.length) htm += '<p class="meta">אין תורים מאושרים בקרוב.</p>';
+    conf.forEach(b => {
+      htm += '<div class="sq-item" style="margin:8px 0"><b>' + esc(fmtRange(b.starts_at,b.ends_at)) + '</b><div class="meta">' + esc(b.display_name||'תושב/ת') + '</div>';
+      htm += '<button class="btn ghost sm" type="button" data-ics-biz data-title="תור" data-start="'+esc(b.starts_at)+'" data-end="'+esc(b.ends_at)+'">הוסף ליומן שלי</button></div>';
+    });
+    htm += '</div>';
+
+    htm += '<div class="card"><h2 style="margin:0 0 8px">אירוע חד-פעמי</h2><p class="meta">מופיע לתושבים אם סומן ציבורי, ויכול לחסום תורים באותן שעות.</p>';
+    htm += '<label>כותרת<input class="f" id="cal-ev-title" maxlength="120"></label>';
+    htm += '<div class="slot-grid"><label>התחלה<input class="f" id="cal-ev-start" type="datetime-local"></label><label>סיום<input class="f" id="cal-ev-end" type="datetime-local"></label></div>';
+    htm += '<label class="meta"><input type="checkbox" id="cal-ev-public" checked> אירוע ציבורי</label> ';
+    htm += '<label class="meta"><input type="checkbox" id="cal-ev-block" checked> חוסם תורים</label>';
+    htm += '<p><button class="btn main" type="button" data-cal-add-event>הוספת אירוע</button></p>';
+    const evs = d.events || [];
+    if (evs.length){
+      evs.forEach(e => {
+        htm += '<div class="sq-item" style="margin:8px 0"><b>' + esc(e.title) + '</b><div class="meta">' + esc(fmtRange(e.starts_at,e.ends_at)) + (e.is_public?' · ציבורי':' · פנימי') + '</div>';
+        htm += '<button class="btn ghost sm" type="button" data-cal-del-event="'+esc(e.id)+'">מחיקה</button></div>';
+      });
+    }
+    htm += '</div>';
+    el.innerHTML = htm;
+  }
+
+  async function refreshBusinessCalendar(){
+    const el = $('calendar-root');
+    if (!sessionUser){ calState = {data:null, loading:false}; if (el) renderBusinessCalendar(); return; }
+    calState.loading = true;
+    if (el) renderBusinessCalendar();
+    try {
+      const r = await fetch(AUTH_URL + '/rest/v1/rpc/my_business_calendar', { method:'POST', headers: authHeaders(), body: '{}' });
+      const d = await r.json().catch(()=>({}));
+      if (!r.ok){ calState.data = null; }
+      else calState.data = d;
+    } catch (e) { calState.data = null; }
+    calState.loading = false;
+    renderBusinessCalendar();
+  }
+
+  function collectHoursFromForm(){
+    const rows = [...document.querySelectorAll('#cal-hours .cal-hour-row')];
+    return rows.map(row => {
+      const wd = parseInt(row.getAttribute('data-wd'), 10);
+      const closed = !!(row.querySelector('[data-cal-closed]') || {}).checked;
+      const start = ((row.querySelector('[data-cal-start]')||{}).value || '') + (closed ? '' : ':00');
+      const end = ((row.querySelector('[data-cal-end]')||{}).value || '') + (closed ? '' : ':00');
+      return { weekday: wd, is_closed: closed, start_time: closed ? null : (row.querySelector('[data-cal-start]')||{}).value, end_time: closed ? null : (row.querySelector('[data-cal-end]')||{}).value };
+    });
+  }
+
+  async function saveCalendarHours(){
+    const err = $('cal-hours-err');
+    if (err){ err.hidden = true; }
+    try {
+      const r1 = await fetch(AUTH_URL + '/rest/v1/rpc/upsert_calendar_settings', { method:'POST', headers: authHeaders(), body: JSON.stringify({
+        p_slot_minutes: parseInt(($('cal-mins')||{}).value, 10) || 60,
+        p_horizon_days: parseInt(($('cal-horizon')||{}).value, 10) || 14,
+        p_is_accepting: !!( $('cal-accepting') && $('cal-accepting').checked ),
+        p_buffer_minutes: 0
+      }) });
+      if (!r1.ok){ const b=await r1.json().catch(()=>({})); if(err){ err.hidden=false; err.textContent=authErrHe(b);} return; }
+      const r2 = await fetch(AUTH_URL + '/rest/v1/rpc/set_business_hours', { method:'POST', headers: authHeaders(), body: JSON.stringify({ p_hours: collectHoursFromForm() }) });
+      const b2 = await r2.json().catch(()=>({}));
+      if (!r2.ok){ if(err){ err.hidden=false; err.textContent=authErrHe(b2);} return; }
+      await refreshBusinessCalendar();
+    } catch (e) { if (err){ err.hidden=false; err.textContent=authErrHe(e); } }
+  }
+
+  async function loadPlaceCalendar(place, host){
+    if (!place || !place.id || !host) return;
+    try {
+      const r = await fetch(AUTH_URL + '/rest/v1/rpc/place_public_calendar', { method:'POST', headers: (sessionUser?authHeaders():{apikey:KEY,'Content-Type':'application/json',Accept:'application/json'}), body: JSON.stringify({ p_place_id: place.id }) });
+      if (!r.ok) return;
+      const d = await r.json();
+      if (!d || !d.eligible) return;
+      const box = document.createElement('div');
+      box.id = 'place-cal';
+      let h = '<div class="card"><h2 style="margin:0 0 8px">יומן ותורים</h2>';
+      const hours = d.hours || [];
+      if (hours.length){
+        h += '<p class="meta">שעות פעילות: ' + hours.map(function(x){
+          if (x.is_closed) return CAL_DAYS[x.weekday] + ' סגור';
+          return CAL_DAYS[x.weekday] + ' ' + String(x.start_time||'').slice(0,5) + '–' + String(x.end_time||'').slice(0,5);
+        }).join(' · ') + '</p>';
+      }
+      (d.events||[]).forEach(e => {
+        h += '<div class="sq-item" style="margin:8px 0"><b>' + esc(e.title) + '</b><div class="meta">' + esc(fmtRange(e.starts_at,e.ends_at)) + '</div>';
+        h += '<button class="btn ghost sm" type="button" data-ics-biz data-title="'+esc(e.title)+'" data-start="'+esc(e.starts_at)+'" data-end="'+esc(e.ends_at)+'">הוסף ליומן שלי</button></div>';
+      });
+      const mine = d.my_bookings || [];
+      if (mine.length){
+        h += '<div class="sec-title"><h2>התורים שלי כאן</h2></div>';
+        mine.forEach(b => {
+          h += '<div class="sq-item" style="margin:8px 0"><b>' + esc(fmtRange(b.starts_at,b.ends_at)) + '</b><div class="meta">' + (b.status==='confirmed'?'אושר':'ממתין לאישור') + '</div>';
+          if (b.status === 'confirmed') h += '<button class="btn ghost sm" type="button" data-ics-biz data-title="תור" data-start="'+esc(b.starts_at)+'" data-end="'+esc(b.ends_at)+'">הוסף ליומן שלי</button>';
+          h += '</div>';
+        });
+      }
+      const slots = d.open_slots || [];
+      if (!d.accepting) h += '<p class="meta">כרגע לא מקבלים בקשות לתורים.</p>';
+      else if (!slots.length) h += '<p class="meta">אין תורים פנויים בטווח הקרוב.</p>';
+      else {
+        h += '<p class="meta">בחרו מועד. הבקשה תעבור לאישור בעל/ת העסק.</p><div class="slots">';
+        slots.slice(0, 24).forEach(s => {
+          h += '<button class="slot" type="button" data-req-slot data-biz="'+esc(d.business_user_id)+'" data-start="'+esc(s.starts_at)+'" data-end="'+esc(s.ends_at)+'">' + esc(fmtRange(s.starts_at,s.ends_at)) + '</button>';
+        });
+        h += '</div>';
+      }
+      h += '</div>';
+      box.innerHTML = h;
+      host.appendChild(box);
+    } catch (e) {}
+  }
+
+  window.renderBusinessCalendar = renderBusinessCalendar;
+  window.refreshBusinessCalendar = refreshBusinessCalendar;
+  window.loadPlaceCalendar = loadPlaceCalendar;
+  window.renderMeNotifs = renderMeNotifs;
 
   function renderStaffQueue(){
     const badge = $('staff-q-badge');
@@ -1124,7 +1504,8 @@ function isOpenNow(hours, date=new Date()){
         } else {
           acts = '<div class="meta">רק אדמין מאשר מקומות בכליל</div>';
         }
-        return '<div class="sq-item"><div style="flex:1;min-width:0"><div class="sq-k">' + esc(pendingKindHe(it.kind)) + '</div><div><b>' + esc(it.title) + '</b></div>' + (it.sub ? '<div class="meta">' + esc(it.sub) + '</div>' : '') + '</div>' + acts + '</div>';
+        const detail = (it.kind === 'place' || it.kind === 'claim') ? placeDetailBlock(it) : (it.sub ? '<div class="meta">' + esc(it.sub) + '</div>' : '');
+        return '<div class="sq-item"><div style="flex:1;min-width:0"><div class="sq-k">' + esc(pendingKindHe(it.kind)) + '</div><div><b>' + esc(it.title) + '</b></div>' + detail + '</div>' + acts + '</div>';
       }).join('');
       h += '<p class="meta" style="margin:10px 0 0"><a href="/admin">למסך הניהול</a></p></div>';
       return h;
@@ -1303,9 +1684,12 @@ function isOpenNow(hours, date=new Date()){
     else staffQueue.items = [];
     authReady = true;
     if (typeof loadPosts === 'function') try { await loadMyContent(); } catch (e) {}
+    try { await loadMyNotifications(); } catch (e) {}
+    try { await loadMyBizBookings(); } catch (e) {}
     renderMe(); renderHomeExtras();
     const qs = new URLSearchParams(location.search);
     if (qs.get('after') === 'me' && !location.hash) location.hash = '#/me';
+    try { await maybeStartOnboarding(); } catch (e) {}
   }
 
   async function loadResident(){
@@ -1324,7 +1708,7 @@ function isOpenNow(hours, date=new Date()){
     if (DEMO){ myBookings = demoBookings(); return; }
     if (!sessionUser) { myPosts = []; return; }
     try {
-      const q = withCommunity('/posts?select=id,community_id,author_id,type,title,body,status,expires_at,created_at&author_id=eq.' + sessionUser.user.id + '&status=eq.open&order=created_at.desc');
+      const q = withCommunity('/posts?select=id,community_id,author_id,type,title,body,status,expires_at,created_at&author_id=eq.' + sessionUser.user.id + '&status=in.(open,pending)&order=created_at.desc');
       const r = await restGet(q, authHeaders());
       if (r.ok){ const rows = await r.json(); myPosts = Array.isArray(rows) ? rows : []; }
     } catch (e) {}
@@ -1332,6 +1716,7 @@ function isOpenNow(hours, date=new Date()){
       const r = await fetch(AUTH_URL + '/rest/v1/rpc/list_my_bookings', { method:'POST', headers: authHeaders(), body: '{}' });
       if (r.ok){ const rows = await r.json(); myBookings = Array.isArray(rows) ? rows : []; }
     } catch (e) { myBookings = []; }
+    try { if (typeof loadMyBizBookings === 'function') await loadMyBizBookings(); } catch (e) {}
     if (myPosts.some(p => p.type === 'course')) {
       for (const p of myPosts) {
         if (p.type !== 'course') continue;
@@ -1408,12 +1793,17 @@ function isOpenNow(hours, date=new Date()){
     {tier_id:'community', name_he:'קהילה', family:'community', price_ils:0, monthly_equivalent_ils:0, storage_gb:null, billing_cycle:'free', allow_bit_applepay:false, highlight_he:null, savings_ils:null, founder_limit:null, features:[
       {text:'צפייה מלאה וחיפוש חכם ב«שאלו את נחת»'},
       {text:'פרסומים קהילתיים קצרים (טרמפים, מסירות/יד שנייה, עזרה, אירועים חינמיים) ותגובות'},
-      {text:'ניהול פרסומים פתוחים מהבית'}
+      {text:'ניהול פרסומים פתוחים מהבית'},
+      {text:'הרשמה לקורסים, סדנאות ומפגשים עם מועדים בקהילה'},
+      {text:'פרסום קורס או סדנה עם מועדים (אחרי אישור צוות)'}
     ]},
     {tier_id:'business_monthly', name_he:'אהבה', family:'business', price_ils:17, monthly_equivalent_ils:17, storage_gb:null, billing_cycle:'monthly', allow_bit_applepay:false, highlight_he:null, savings_ils:null, founder_limit:null, features:[
       {text:'כל מה שבמסלול הקהילה'},
       {text:'דף עסק מלא בקטגוריות ובתשובות «שאלו את נחת»'},
       {text:'פרסום אירועים, סדנאות בתשלום ומבצעים באירועים הקרובים'},
+      {text:'פרסום קורסים וסדנאות עם מועדים, הרשמה ומקום פנוי בזמן אמת'},
+      {text:'יומן עסק פנימי: שעות פעילות, אירועים ותורים. תושבים רואים זמינות ומבקשים תור, ואתם מאשרים באפליקציה'},
+      {text:'כפתור «הוסף ליומן שלי» — קובץ ‎.ics שעובד בגוגל ובאפל, בלי הרשאות'},
       {text:'שעות פתיחה חיות ברצועת «פתוח עכשיו / קורה היום»'},
       {text:'כפתור יצירת קשר ישיר בוואטסאפ או בטלפון'}
     ]},
@@ -1421,11 +1811,15 @@ function isOpenNow(hours, date=new Date()){
       {text:'כל מה שבמסלול הקהילה'},
       {text:'דף עסק מלא בקטגוריות ובתשובות «שאלו את נחת»'},
       {text:'פרסום אירועים, סדנאות בתשלום ומבצעים באירועים הקרובים'},
+      {text:'פרסום קורסים וסדנאות עם מועדים, הרשמה ומקום פנוי בזמן אמת'},
+      {text:'יומן עסק פנימי: שעות פעילות, אירועים ותורים. תושבים רואים זמינות ומבקשים תור, ואתם מאשרים באפליקציה'},
+      {text:'כפתור «הוסף ליומן שלי» — קובץ ‎.ics שעובד בגוגל ובאפל, בלי הרשאות'},
       {text:'שעות פתיחה חיות ברצועת «פתוח עכשיו / קורה היום»'},
       {text:'כפתור יצירת קשר ישיר בוואטסאפ או בטלפון'}
     ]},
     {tier_id:'pro_monthly', name_he:'פרו', family:'pro', price_ils:73, monthly_equivalent_ils:73, storage_gb:64, billing_cycle:'monthly', allow_bit_applepay:false, highlight_he:'הכי משתלם לעסקים פעילים', savings_ils:null, founder_limit:null, features:[
       {text:'כל מה שבמסלול אהבה'},
+      {text:'סנכרון דו-כיווני עם גוגל יומן', soon:true},
       {text:'סטודיו AI לתמונות ועיצוב (Mac Studio)', soon:true},
       {text:'אחסון אישי 64GB', soon:true},
       {text:'מסנן רעש למייל עם כתובת העברה אישית בדומיין הקהילה (התראות דחופות לוואטסאפ, סיכום יומי, השתקת ניוזלטרים)', soon:true},
@@ -1535,6 +1929,14 @@ function isOpenNow(hours, date=new Date()){
       h += '<a class="btn main" href="#/pricing">למסלולים והתחלת ניסיון</a></div>';
       el.innerHTML = h; el.hidden = false; return;
     }
+    if (acc.is_comp || staffRole){
+      let c = '<div class="card biz-card"><h2 style="margin:0 0 6px">חשבון עסק</h2>';
+      c += '<div class="st verified">פרו — חינם לאדמינים</div>';
+      c += '<p class="meta" style="margin:8px 0 0">' + esc(acc.business_name || '') + '</p>';
+      if (acc.claim_status === 'pending') c += '<p class="note">בקשת השיוך לעסק ממתינה לאישור. החשבון פעיל בלי תשלום.</p>';
+      c += '<p style="margin:12px 0 0"><a class="btn main sm" href="#/calendar">יומן העסק</a> <a class="btn ghost sm" href="#/pricing">כל המסלולים</a></p></div>';
+      el.innerHTML = c; el.hidden = false; return;
+    }
     const plan = planById(acc.subscription_tier) || {name_he: acc.subscription_tier};
     const st = acc.status || '';
     const days = daysLeft(acc.trial_ends_at);
@@ -1543,7 +1945,11 @@ function isOpenNow(hours, date=new Date()){
     if (acc.claim_status === 'pending') h += '<p class="note">בקשת השיוך לעסק ממתינה לאישור מנהל/ת. הניסיון כבר פעיל.</p>';
     if (acc.claim_status === 'rejected') h += '<p class="note">שיוך העסק לא אושר' + (acc.claim_review_note ? ': ' + esc(acc.claim_review_note) : '') + '.</p>';
     if (st === 'trial'){
-      h += '<p class="days">נותרו ' + (days == null ? '—' : days) + ' ימים לניסיון החינם. לא נדרש כרטיס.</p>';
+      h += '<p class="days">נותרו ' + (days == null ? '—' : days) + ' ימים לניסיון החינם. לא נדרש כרטיס. התשלום יתבקש רק בסוף התקופה.</p>';
+      if (days != null && days <= 3){
+        h += '<div class="trial-remind">הניסיון החינם מסתיים בקרוב. אפשר לעבור לתשלום כדי להמשיך בלי הפסקה.</div>';
+        h += '<button class="btn main" type="button" data-pay-soon>לתשלום</button>';
+      }
     } else if (st === 'expired'){
       h += '<p class="note">תקופת הניסיון הסתיימה. 13 ₪ לחודש בחיוב שנתי — התשלום יופעל בקרוב.</p>';
       h += '<button class="btn main" type="button" data-pay-soon>לתשלום</button>';
@@ -1551,7 +1957,8 @@ function isOpenNow(hours, date=new Date()){
       h += '<p class="note">אפשר לעבור לחיוב שנתי ב-13 ₪ לחודש ולחסוך 48 ₪ בשנה. התשלום יופעל בקרוב.</p>';
       h += '<a class="btn ghost" href="#/pricing">למסלול השנתי</a>';
     }
-    h += '<p style="margin:12px 0 0"><a class="btn ghost sm" href="#/pricing">כל המסלולים</a></p></div>';
+    if (st === 'trial' || st === 'active') h += '<p style="margin:12px 0 0"><a class="btn main sm" href="#/calendar">יומן העסק</a> <a class="btn ghost sm" href="#/pricing">כל המסלולים</a></p></div>';
+    else h += '<p style="margin:12px 0 0"><a class="btn ghost sm" href="#/pricing">כל המסלולים</a></p></div>';
     el.innerHTML = h; el.hidden = false;
   }
 
@@ -1588,17 +1995,22 @@ function isOpenNow(hours, date=new Date()){
       h += featureList(feats);
       if (p.allow_bit_applepay && p.billing_cycle === 'yearly') h += '<p class="pay-methods">אפשרות לתשלום בכרטיס, בביט וב-Apple Pay (כשהסליקה תופעל).</p>';
       else if (p.billing_cycle === 'monthly') h += '<p class="pay-methods">תשלום בכרטיס או בהוראת קבע (כשהסליקה תופעל).</p>';
-      if (p.billing_cycle !== 'free'){
+      if (staffRole){
+        if (p.family === 'pro' || p.tier_id === 'pro_monthly') h += '<p class="note">פרו — חינם לאדמינים. אין תשלום לצוות.</p>';
+      } else if (p.billing_cycle !== 'free'){
         const full = opts.slots && opts.slots.remaining <= 0;
         if (full) h += '<p class="note">מסלול המייסד מלא בקהילה הזו.</p>';
         else h += '<button class="btn main" type="button" data-start-trial="' + esc(p.tier_id) + '">התחל שבועיים חינם</button> ';
-        h += '<button class="btn ghost" type="button" data-pay-soon>לתשלום</button>';
+        const soon = window.__onboarding && window.__onboarding.trial_ending_soon;
+        const expired = businessAccount && businessAccount.status === 'expired';
+        if (soon || expired) h += '<button class="btn ghost" type="button" data-pay-soon>לתשלום</button>';
+        else h += '<p class="meta">התשלום יתבקש רק בסוף 14 ימי הניסיון.</p>';
       }
       h += '</div>';
       return h;
     }
 
-    let h = (staffRole && window.PAY_TEST_URL && (typeof COMMUNITY_ID==='undefined' || COMMUNITY_ID==='mitzpe') ? '<div class="pay-test-banner">מצב בדיקה — לא יחויב כסף</div>' : '') + '<p class="pay-note">המחירים כוללים מע״מ. במסלולים בתשלום יש שבועיים ניסיון חינם, בלי כרטיס אשראי. ' + ((staffRole && window.PAY_TEST_URL && (typeof COMMUNITY_ID==='undefined' || COMMUNITY_ID==='mitzpe')) ? 'צוות יכול לבדוק תשלום במסוף הבדיקות.' : 'התשלום עצמו ייפתח בקרוב.') + '</p>';
+    let h = (staffRole && window.PAY_TEST_URL && (typeof COMMUNITY_ID==='undefined' || COMMUNITY_ID==='mitzpe') ? '<div class="pay-test-banner">מצב בדיקה — לא יחויב כסף</div>' : '') + '<p class="pay-note">המחירים כוללים מע״מ. במסלולים בתשלום יש שבועיים ניסיון חינם, בלי כרטיס אשראי. ' + ((staffRole) ? 'לאדמינים יש פרו בחינם, בלי תשלום.' : 'במסלולים בתשלום הניסיון מתחיל מיד, ל-14 יום, בלי כרטיס. התשלום יתבקש רק בסוף התקופה.') + '</p>';
     h += '<div class="pay-toggle" role="tablist" aria-label="מחזור חיוב">';
     h += '<button type="button" data-pay-cycle="yearly"' + (cycle==='yearly'?' class="on"':'') + '>חיוב שנתי</button>';
     h += '<button type="button" data-pay-cycle="monthly"' + (cycle==='monthly'?' class="on"':'') + '>חיוב חודשי</button>';
@@ -1669,6 +2081,7 @@ function isOpenNow(hours, date=new Date()){
       if (msg){ msg.hidden = true; }
       renderMe();
       location.hash = '#/me';
+      try { await maybeStartOnboarding(); } catch (e) {}
     } catch (e) {
       if (msg){ msg.hidden = false; msg.textContent = 'לא הצלחנו להתחיל את הניסיון.'; }
     } finally { pricingState.trialBusy = false; }
@@ -1720,6 +2133,7 @@ function isOpenNow(hours, date=new Date()){
     el.innerHTML = banner + '<div class="card me-card"><div class="me-row">' + avHtml + '<div style="flex:1;min-width:0"><h2 style="margin:0">' + esc(googleName()) + '</h2><div class="st ' + esc(stClass) + '">' + esc(stLabel) + '</div></div></div>' + form + '<div style="margin-top:12px">' + actions + '</div><p class="err" id="auth-msg" hidden></p><p class="meta" style="margin:16px 0 0"><a href="https://kehi.ranbenri.workers.dev/privacy" target="_blank" rel="noopener">מדיניות פרטיות</a></p></div>';
     const rest = $('me-legacy'); if (rest) rest.hidden = true;
     try { renderMyBookingsList(); } catch (e) {}
+    try { if (typeof renderMeNotifs==='function') renderMeNotifs(); } catch (e) {}
     try { if (typeof renderMeBiz === 'function') renderMeBiz(); } catch (e) {}
     try { if (typeof renderStaffQueue === 'function') renderStaffQueue(); } catch (e) {}
   }
@@ -1828,11 +2242,12 @@ function isOpenNow(hours, date=new Date()){
       } else if (mine) {
         const cal = calendarLinks(post, s);
         h += '<div class="cal-acts"><span class="note">נרשמת למועד הזה.</span>';
-        h += '<a class="btn main sm" href="' + esc(cal.url) + '" target="_blank" rel="noopener noreferrer">הוסף ליומן Google</a>';
-        h += '<button class="btn ghost sm" type="button" data-ics>הורדת .ics</button>';
+        h += '<button class="btn main sm" type="button" data-ics>הוסף ליומן שלי</button>';
         h += '<button class="btn ghost sm" type="button" data-cancel-slot="' + esc(s.id) + '">ביטול הרשמה</button></div>';
       } else if (full) {
         h += '<div class="st pending" style="margin-top:8px">מלא</div>';
+      } else if (post.status && post.status !== 'open') {
+        h += '<div class="st pending" style="margin-top:8px">ההרשמה תיפתח אחרי אישור</div>';
       } else {
         h += '<button class="btn main sm" type="button" style="margin-top:10px" data-book-slot="' + esc(s.id) + '">הרשמה</button>';
       }
@@ -1852,8 +2267,7 @@ function isOpenNow(hours, date=new Date()){
     if (lastBooked && lastBooked.post && lastBooked.post.id === post.id && lastBooked.slot){
       const cal = calendarLinks(lastBooked.post, lastBooked.slot);
       h += '<div class="card" id="book-confirm"><h3 style="margin:0 0 6px">נרשמת בהצלחה</h3><p class="meta">' + esc(fmtRange(lastBooked.slot.starts_at, lastBooked.slot.ends_at)) + (lastBooked.slot.location ? ' · ' + esc(lastBooked.slot.location) : '') + '</p>';
-      h += '<div class="cal-acts"><a class="btn main" href="' + esc(cal.url) + '" target="_blank" rel="noopener noreferrer">הוסף ליומן Google</a>';
-      h += '<button class="btn ghost" type="button" data-ics-confirm>הורדת .ics ליומן אחר</button></div></div>';
+      h += '<div class="cal-acts"><button class="btn main" type="button" data-ics-confirm>הוסף ליומן שלי</button></div></div>';
     }
     return h;
   }
@@ -1861,11 +2275,19 @@ function isOpenNow(hours, date=new Date()){
   function renderMyBookingsList(){
     const el = $('me-bookings'); if (!el) return;
     const list = DEMO ? demoBookings() : myBookings.filter(b => b.status === 'booked');
-    if (!isAuthed() || !list.length){ el.hidden = true; el.innerHTML = ''; return; }
+    const biz = (!DEMO && typeof myBizBookings !== 'undefined') ? myBizBookings : [];
+    if (!isAuthed() || (!list.length && !biz.length)){ el.hidden = true; el.innerHTML = ''; return; }
     el.hidden = false;
-    el.innerHTML = '<div class="sec-title"><h2>ההרשמות שלי</h2></div>' + list.map(b => {
+    let html = '';
+    if (list.length) html += '<div class="sec-title"><h2>ההרשמות שלי</h2></div>' + list.map(b => {
       return '<a class="card" href="#/post/' + encodeURIComponent(b.post_id) + '"><h3 style="margin:0">' + esc(b.title||'קורס/סדנה') + '</h3><div class="meta">' + esc(fmtRange(b.starts_at,b.ends_at)) + (b.location ? ' · ' + esc(b.location) : '') + '</div></a>';
     }).join('');
+    if (biz.length){
+      html += '<div class="sec-title"><h2>התורים שלי</h2></div>' + biz.map(b => {
+        return '<div class="card"><h3 style="margin:0">' + esc(b.business_name || 'עסק') + '</h3><div class="meta">' + esc(fmtRange(b.starts_at,b.ends_at)) + ' · ' + (b.status==='confirmed'?'אושר':'ממתין לאישור') + '</div>' + (b.status==='confirmed' ? '<button class="btn ghost sm" type="button" data-ics-biz data-title="תור" data-start="'+esc(b.starts_at)+'" data-end="'+esc(b.ends_at)+'">הוסף ליומן שלי</button>' : '') + '</div>';
+      }).join('');
+    }
+    el.innerHTML = html;
   }
 
   const _renderPostThreadBase = renderPostThread;
@@ -1882,11 +2304,26 @@ function isOpenNow(hours, date=new Date()){
       el.innerHTML = h;
       return;
     }
+    let all = DEMO ? demoData().pulse.concat(demoData().mine) : pulsePosts.concat(myPosts);
+    let p = all.find(x => x.id === id);
+    if (!p && !DEMO && id) {
+      try {
+        const r = await restGet(withCommunity('/posts?select=id,community_id,author_id,type,title,body,status,expires_at,created_at&id=eq.' + encodeURIComponent(id)), sessionUser ? authHeaders() : {apikey: KEY, Accept: 'application/json'});
+        if (r.ok) {
+          const rows = await r.json();
+          p = Array.isArray(rows) ? rows[0] : rows;
+          if (p && p.id && !myPosts.some(function(x){ return x.id === p.id; })) myPosts.unshift(p);
+        }
+      } catch (e) {}
+    }
+    if (p && !all.find(x => x.id === id)) all = pulsePosts.concat(myPosts);
     _renderPostThreadBase(id);
     const el = $('post-body'); if (!el) return;
-    const all = DEMO ? demoData().pulse.concat(demoData().mine) : pulsePosts.concat(myPosts);
-    const p = all.find(x => x.id === id);
+    p = p || (pulsePosts.concat(myPosts).find(x => x.id === id));
     if (!p) return;
+    if (p.status === 'pending') {
+      el.insertAdjacentHTML('beforeend', '<div class="card"><p class="note" style="margin:0">הפרסום ממתין לאישור הצוות. ההרשמה למועדים תיפתח אחרי האישור.</p></div>');
+    }
     if (p.type === 'course') {
       let slots = p.slots;
       if (!DEMO) {
@@ -1997,6 +2434,7 @@ function isOpenNow(hours, date=new Date()){
           body: JSON.stringify({ p_title:title, p_body:body||null, p_slots: slots }) });
         const data = await r.json().catch(()=>({}));
         if (!r.ok){ const e=$('cpost-err'); if(e){ e.hidden=false; e.textContent=authErrHe(data); } return; }
+        if (data && data.id && !myPosts.some(function(p){ return p.id === data.id; })) myPosts.unshift(data);
         location.hash = '#/post/' + encodeURIComponent(data.id);
       } catch (e) { const el=$('cpost-err'); if(el){ el.hidden=false; el.textContent=authErrHe(e); } }
       return;
@@ -2050,6 +2488,79 @@ function isOpenNow(hours, date=new Date()){
     }
     if (ev.target.closest('[data-sq-approve]')){ ev.preventDefault(); const v=ev.target.closest('[data-sq-approve]').getAttribute('data-sq-approve').split(':'); if (typeof staffDecide==='function') staffDecide(v[0], v.slice(1).join(':'), true); }
     if (ev.target.closest('[data-sq-reject]')){ ev.preventDefault(); const v=ev.target.closest('[data-sq-reject]').getAttribute('data-sq-reject').split(':'); if (typeof staffDecide==='function') staffDecide(v[0], v.slice(1).join(':'), false); }
+    if (ev.target.closest('[data-onboard]')){
+      ev.preventDefault();
+      const a = ev.target.closest('[data-onboard]').getAttribute('data-onboard');
+      if (a === 'next'){ onboardState.step += 1; renderOnboard(); }
+      else if (a === 'prev'){ onboardState.step = Math.max(0, onboardState.step - 1); renderOnboard(); }
+      else if (a === 'done'){ finishOnboard(); }
+      else if (a === 'hours'){ finishOnboard(); location.hash = '#/calendar'; }
+    }
+    if (ev.target.closest('[data-cal-closed]')){
+      const row = ev.target.closest('.cal-hour-row');
+      if (row){ const on = ev.target.closest('[data-cal-closed]').checked; row.querySelectorAll('[data-cal-start],[data-cal-end]').forEach(i => { i.disabled = on; }); }
+    }
+    if (ev.target.closest('[data-cal-save-hours]')){ ev.preventDefault(); saveCalendarHours(); }
+    if (ev.target.closest('[data-cal-review]')){
+      ev.preventDefault();
+      const btn = ev.target.closest('[data-cal-review]');
+      const dec = btn.getAttribute('data-cal-review');
+      const id = btn.getAttribute('data-id');
+      (async function(){
+        const r = await fetch(AUTH_URL + '/rest/v1/rpc/review_business_booking', { method:'POST', headers: authHeaders(), body: JSON.stringify({ p_id:id, p_decision:dec, p_note:null }) });
+        if (!r.ok){ const b=await r.json().catch(()=>({})); alert(authErrHe(b)); return; }
+        await refreshBusinessCalendar();
+        try { await loadMyNotifications(); renderMeNotifs(); } catch(e) {}
+      })();
+    }
+    if (ev.target.closest('[data-cal-add-event]')){
+      ev.preventDefault();
+      const title = (($('cal-ev-title')||{}).value||'').trim();
+      const s = ($('cal-ev-start')||{}).value; const evn = ($('cal-ev-end')||{}).value;
+      if (!title || !s || !evn){ alert('חסרים כותרת וזמנים.'); return; }
+      (async function(){
+        const r = await fetch(AUTH_URL + '/rest/v1/rpc/upsert_business_event', { method:'POST', headers: authHeaders(), body: JSON.stringify({ p_id:null, p_title:title, p_description:null, p_starts_at:new Date(s).toISOString(), p_ends_at:new Date(evn).toISOString(), p_is_public: !!( $('cal-ev-public') && $('cal-ev-public').checked ), p_blocks: !!( $('cal-ev-block') && $('cal-ev-block').checked ) }) });
+        if (!r.ok){ const b=await r.json().catch(()=>({})); alert(authErrHe(b)); return; }
+        await refreshBusinessCalendar();
+      })();
+    }
+    if (ev.target.closest('[data-cal-del-event]')){
+      ev.preventDefault();
+      const id = ev.target.closest('[data-cal-del-event]').getAttribute('data-cal-del-event');
+      (async function(){
+        const r = await fetch(AUTH_URL + '/rest/v1/rpc/delete_business_event', { method:'POST', headers: authHeaders(), body: JSON.stringify({ p_id:id }) });
+        if (!r.ok){ const b=await r.json().catch(()=>({})); alert(authErrHe(b)); return; }
+        await refreshBusinessCalendar();
+      })();
+    }
+    if (ev.target.closest('[data-ics-biz]')){
+      ev.preventDefault();
+      const b = ev.target.closest('[data-ics-biz]');
+      addToMyCalendar(b.getAttribute('data-title')||'תור', '', '', b.getAttribute('data-start'), b.getAttribute('data-end'), 'nahat-calendar.ics');
+    }
+    if (ev.target.closest('[data-req-slot]')){
+      ev.preventDefault();
+      const b = ev.target.closest('[data-req-slot]');
+      if (!requireVerified('לבקש תור')) return;
+      (async function(){
+        const r = await fetch(AUTH_URL + '/rest/v1/rpc/request_business_slot', { method:'POST', headers: authHeaders(), body: JSON.stringify({ p_business_user_id:b.getAttribute('data-biz'), p_starts_at:b.getAttribute('data-start'), p_ends_at:b.getAttribute('data-end'), p_note:null }) });
+        const body = await r.json().catch(()=>({}));
+        if (!r.ok){ alert(authErrHe(body)); return; }
+        alert('הבקשה נשלחה. תקבלו עדכון אחרי שאישרו או דחו אותה.');
+        const host = $('place-body');
+        if (host && window.NAHAT_renderPlace) window.NAHAT_renderPlace(decodeURIComponent((location.hash.split('/')[2]||'')));
+        try { await loadMyBizBookings(); renderMyBookingsList(); } catch(e) {}
+      })();
+    }
+    if (ev.target.closest('[data-notifs-read]')){
+      ev.preventDefault();
+      (async function(){
+        await fetch(AUTH_URL + '/rest/v1/rpc/mark_notifications_read', { method:'POST', headers: authHeaders(), body: JSON.stringify({ p_ids: null }) });
+        await loadMyNotifications(); renderMeNotifs();
+      })();
+    }
+
+
     if (ev.target.closest('[data-confirm-trial]')){ ev.preventDefault(); confirmTrial(); }
     if (ev.target.closest('[data-pick-place]')){
       ev.preventDefault();
@@ -2098,7 +2609,7 @@ function isOpenNow(hours, date=new Date()){
 
 </script><!-- DATA:END -->
 <script>
-  const routes = {'':'home','cats':'cats','cat':'home','item':'item','ask':'ask','add':'add','me':'me','events':'events','place':'place','post':'post','pricing':'pricing'};
+  const routes = {'':'home','cats':'cats','cat':'home','item':'item','ask':'ask','add':'add','me':'me','events':'events','place':'place','post':'post','pricing':'pricing','calendar':'calendar'};
 
   function go(){
     const r = routes[location.hash.replace(/^#\/?/,'').split('/')[0]] || 'home';
@@ -2106,8 +2617,9 @@ function isOpenNow(hours, date=new Date()){
     if (r === 'post') { const id = decodeURIComponent(location.hash.split('/')[2] || ''); try { if (window.renderPostThread) window.renderPostThread(id); } catch (e) {} }
     if (r === 'me' && window.renderMe) { try { window.renderMe(); } catch (e) {} }
     if (r === 'pricing') { const lp = window.loadPricingPlans; Promise.resolve(lp ? lp() : null).then(function(){ if (window.renderPricing) window.renderPricing(); }); }
+    if (r === 'calendar') { const fn = window.refreshBusinessCalendar; Promise.resolve(fn ? fn() : null); }
     document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === 's-' + r));
-    document.querySelectorAll('nav.tabs a').forEach(a => a.classList.toggle('on', a.dataset.r === r || ((r==='item'||r==='place'||r==='events') && a.dataset.r==='home') || (r==='pricing' && a.dataset.r==='me')));
+    document.querySelectorAll('nav.tabs a').forEach(a => a.classList.toggle('on', a.dataset.r === r || ((r==='item'||r==='place'||r==='events') && a.dataset.r==='home') || ( (r==='pricing'||r==='calendar') && a.dataset.r==='me')));
     document.getElementById('composer').style.display = r === 'ask' ? '' : 'none';
     window.scrollTo(0,0);
   }

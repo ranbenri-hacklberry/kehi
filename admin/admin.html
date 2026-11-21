@@ -66,6 +66,11 @@
   dt{color:var(--soft)}dd{margin:0;overflow-wrap:anywhere}
   dd a{color:var(--accent)}
   .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+
+  .link-btns{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 0}
+  a.link-btn{display:inline-block;padding:5px 10px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--ink);text-decoration:none;font-size:13px;font-weight:600}
+  a.link-btn:hover{background:var(--accent-bg)}
+
   .empty{text-align:center;color:var(--soft);padding:30px 0}
   .meta-bar{font-size:13px;color:var(--soft);margin:0 0 10px}
   dialog{border:0;border-radius:20px;padding:0;max-width:560px;width:calc(100% - 24px);background:var(--panel);color:var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.25)}
@@ -366,6 +371,59 @@
     $('list').innerHTML = list.length ? list.map(card).join('') : '<div class="empty card">אין רשומות שמתאימות לסינון.</div>';
     syncSel(list);
   }
+  
+  function communityTown(){ return (CFG && /klili/i.test(CFG.storageKey || '')) ? 'כליל' : 'מצפה רמון'; }
+  function mapsSearchUrl(name, address){
+    const q = [name, address, communityTown()].filter(Boolean).join(' ');
+    return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(q);
+  }
+  function placeMapsUrl(p){
+    return (p && (p.google_maps_url || p.maps_url)) || mapsSearchUrl((p && (p.name_he || p.pending_place_name || p.place_name || p.business_name)) || '', p && p.address);
+  }
+  function httpUrlsFrom(val){
+    const out = [];
+    const add = (s) => {
+      const m = String(s || '').match(/https?:\/\/[^\s<>"']+/gi) || [];
+      m.forEach((u) => { if (!/tachlis\.co\.il/i.test(u) && out.indexOf(u) < 0) out.push(u); });
+    };
+    if (Array.isArray(val)) val.forEach((x) => {
+      if (typeof x === 'string') add(x);
+      else if (x && typeof x === 'object') add(x.url || x.href || '');
+    });
+    else add(val);
+    return out;
+  }
+  function placeSourceUrls(p){
+    if (!p) return [];
+    let urls = [];
+    if (Array.isArray(p.source_urls)) urls = urls.concat(p.source_urls);
+    urls = urls.concat(httpUrlsFrom(p.sources), httpUrlsFrom(p.source), httpUrlsFrom(p.note), httpUrlsFrom(p.website), httpUrlsFrom(p.google_maps_url || p.maps_url));
+    const seen = {}, out = [];
+    urls.forEach((u) => { if (u && !/tachlis\.co\.il/i.test(u) && !seen[u]) { seen[u] = 1; out.push(u); } });
+    return out;
+  }
+  function linkBtn(href, label){
+    if (!href) return '';
+    const u = String(href).trim();
+    if (!/^https?:\/\//i.test(u) || /tachlis\.co\.il/i.test(u)) return '';
+    return '<a class="link-btn" href="' + esc(u) + '" target="_blank" rel="noopener noreferrer">' + esc(label) + '</a>';
+  }
+  function placeLinkBtns(p){
+    if (!p) return '';
+    const web = p.website || '';
+    let h = '<div class="link-btns">';
+    h += linkBtn(placeMapsUrl(p), 'גוגל מפות');
+    if (web && !/facebook\.com|\/\/fb\.com|instagram\.com/i.test(web)) h += linkBtn(web, 'אתר');
+    const fb = p.facebook_url || (/facebook\.com|\/\/fb\.com/i.test(web) ? web : '');
+    const ig = p.instagram_url || (/instagram\.com/i.test(web) ? web : '');
+    h += linkBtn(fb, 'פייסבוק');
+    h += linkBtn(ig, 'אינסטגרם');
+    const skip = {};
+    [placeMapsUrl(p), web, fb, ig].forEach((u) => { if (u) skip[u] = 1; });
+    placeSourceUrls(p).filter((u) => !skip[u]).forEach((u, i, src) => { h += linkBtn(u, src.length === 1 ? 'מקור' : ('מקור ' + (i + 1))); });
+    h += '</div>';
+    return h;
+  }
   function dlrow(k, v){ return (v === null || v === undefined || v === '') ? '' : '<dt>' + esc(k) + '</dt><dd>' + v + '</dd>'; }
   function sources(arr){ if (!Array.isArray(arr) || !arr.length) return '';
     return arr.map(s => typeof s === 'string' ? link(s) : esc([s.label || s.name || s.type || '', ''].join('')) + ' ' + link(s.url || s.href || '') ).join('<br>'); }
@@ -406,6 +464,20 @@
     if (r.trial_ends_at && st === 'trial') h += '<div class="sub">הניסיון עד ' + esc(fmt(r.trial_ends_at)) + '</div>';
     if (r.subscription_expires_at && st === 'active') h += '<div class="sub">בתוקף עד ' + esc(fmt(r.subscription_expires_at)) + '</div>';
     if (r.claim_review_note) h += '<div class="sub">' + esc(r.claim_review_note) + '</div>';
+    h += '<dl>';
+    if (r.is_comp) h += dlrow('מנוי', 'פרו — חינם לאדמינים');
+    h += dlrow('קטגוריה', esc([r.category_group, r.category].filter(Boolean).join(' · ')))
+       + dlrow('כתובת', esc(r.address)) + dlrow('שעות', esc(r.hours))
+       + dlrow('טלפון', r.phone ? '<bdi dir="ltr">' + esc(r.phone) + '</bdi>' : '')
+       + dlrow('אתר', link(r.website)) + dlrow('תיאור', esc(r.note))
+       + dlrow('מקור', esc(r.source));
+    h += '</dl>';
+    h += placeLinkBtns({
+      name_he: r.pending_place_name || r.place_name || r.business_name,
+      address: r.address, website: r.website, maps_url: r.maps_url,
+      google_maps_url: r.google_maps_url, facebook_url: r.facebook_url,
+      instagram_url: r.instagram_url, source: r.source, source_urls: r.source_urls, sources: r.sources, note: r.note
+    });
     h += '<div class="acts" style="margin-top:8px">';
     if (claim === 'pending'){
       h += '<button class="btn ok sm" type="button" data-claim="approved" data-user="' + esc(r.user_id) + '">אישור שיוך</button>';
@@ -429,6 +501,9 @@
          + dlrow('שעות', esc(r.hours)) + dlrow('מצב שעות', esc(r.hours_status)) + dlrow('אתר', link(r.website)) + dlrow('מפה', link(r.maps_url))
          + dlrow('תיאור', esc(r.note)) + dlrow('תג', esc(r.badge)) + dlrow('חיפוש בלבד', r.search_only ? 'כן (לא מופיע ברשימות הדפדוף)' : 'לא')
          + dlrow('מקור', esc(r.source)) + dlrow('מקורות', sources(r.sources)) + dlrow('סתירות', esc(r.conflicts))
+         + dlrow('פייסבוק', link(r.facebook_url)) + dlrow('אינסטגרם', link(r.instagram_url))
+         + dlrow('גוגל מפות', link(r.google_maps_url || r.maps_url))
+         + dlrow('קישורי מקור', (Array.isArray(r.source_urls) && r.source_urls.length) ? r.source_urls.map(function(u){ return link(u); }).join('<br>') : '')
          + dlrow('אומת לאחרונה', fmt(r.last_verified, true));
     } else {
       h += dlrow('מתחיל', fmt(r.starts_at)) + dlrow('מסתיים', fmt(r.ends_at)) + dlrow('תאריך', fmt(r.start_date, true)) + dlrow('מתי', esc(r.when_text))
@@ -436,7 +511,7 @@
          + dlrow('תיאור', esc(r.description)) + dlrow('מקור', esc(r.source)) + dlrow('נראה במקור', fmt(r.source_seen_at));
     }
     h += dlrow('הערת בדיקה', esc(r.review_note)) + dlrow('עודכן', fmt(r.updated_at) + ' · גרסה ' + esc(r.version)) + dlrow('מזהה', '<bdi dir="ltr">' + esc(r.id) + '</bdi>');
-    h += '</dl><div class="acts">';
+    h += '</dl>' + (P ? placeLinkBtns(r) : '') + '<div class="acts">';
     if (r.status !== 'published') h += '<button class="btn ok sm" type="button" data-act="published">פרסום</button>';
     if (r.status !== 'rejected') h += '<button class="btn no sm" type="button" data-act="rejected">דחייה</button>';
     if (r.status !== 'pending_publish') h += '<button class="btn ghost sm" type="button" data-act="pending_publish">החזרה לממתין</button>';
