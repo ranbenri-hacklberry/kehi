@@ -76,7 +76,7 @@
 
   .empty{text-align:center;color:var(--soft);padding:30px 0}
   .meta-bar{font-size:13px;color:var(--soft);margin:0 0 10px}
-  dialog{border:0;border-radius:20px;padding:0;max-width:560px;width:calc(100% - 24px);background:var(--panel);color:var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.25)}
+  dialog{border:0;border-radius:20px;padding:0;max-width:560px;width:calc(100% - 24px);max-height:min(90vh, 760px);overflow:auto;background:var(--panel);color:var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.25)}
   dialog::backdrop{background:rgba(20,20,10,.4)}
   dialog form{padding:18px 18px 16px}
   dialog h2{font-size:20px;margin-bottom:6px}
@@ -496,7 +496,7 @@
     const st = r.status || '';
     const claim = r.claim_status || '';
     const tier = ({business_monthly:'אהבה חודשי', business_yearly:'אהבה שנתי', pro_monthly:'פרו', founder_yearly:'מייסד'}[r.subscription_tier] || r.subscription_tier || '');
-    let h = '<article class="card"><div class="row" style="justify-content:space-between"><h3 style="margin:0">' + esc(r.business_name || r.display_name || 'בלי שם') + '</h3><span class="st ' + esc(claim === 'pending' ? 'pending' : st) + '">' + esc(claim === 'pending' ? (ST.claim_pending) : (ST[st]||st)) + '</span></div>';
+    let h = '<article class="card" data-id="' + esc(r.user_id) + '"><div class="row" style="justify-content:space-between"><h3 style="margin:0">' + esc(r.business_name || r.display_name || 'בלי שם') + '</h3><span class="st ' + esc(claim === 'pending' ? 'pending' : st) + '">' + esc(claim === 'pending' ? (ST.claim_pending) : (ST[st]||st)) + '</span></div>';
     h += '<div class="sub">' + esc((r.display_name || '') + (tier ? ' · ' + tier : '') + (r.billing_cycle === 'yearly' ? ' · שנתי' : r.billing_cycle === 'monthly' ? ' · חודשי' : '')) + '</div>';
     const place = r.place_name || '';
     const pending = r.pending_place_name || '';
@@ -524,6 +524,7 @@
       h += '<button class="btn ok sm" type="button" data-claim="approved" data-user="' + esc(r.user_id) + '">אישור שיוך</button>';
       h += '<button class="btn no sm" type="button" data-claim="rejected" data-user="' + esc(r.user_id) + '">דחיית שיוך</button>';
     }
+    if (r.pending_place_id || r.place_id) h += '<button class="btn ghost sm" type="button" data-act="edit">עריכה</button>';
     h += '</div></article>';
     return h;
   }
@@ -569,8 +570,16 @@
   // ---------- דיאלוגים ----------
   function dialog(html, onOk){
     const d = $('dlg'), f = $('dlg-form'); f.innerHTML = html;
-    f.onsubmit = async ev => { if (ev.submitter && ev.submitter.value === 'cancel') return; ev.preventDefault();
-      const b = f.querySelector('[value=ok]'); b.disabled = true; const done = await onOk(f); b.disabled = false; if (done !== false) d.close(); };
+    f.onsubmit = async ev => {
+      if (ev.submitter && ev.submitter.value === 'cancel') return;
+      ev.preventDefault();
+      const buttons = [...f.querySelectorAll('button')];
+      buttons.forEach(b => { b.disabled = true; });
+      let done;
+      try { done = await onOk(f, ev.submitter); }
+      finally { buttons.forEach(b => { b.disabled = false; }); }
+      if (done !== false) d.close();
+    };
     d.showModal(); const first = f.querySelector('textarea,input:not([type=checkbox])'); if (first) first.focus();
   }
   const ACT_LABEL = {published:'פרסום', rejected:'דחייה', pending_publish:'החזרה לממתין', open:'אישור פרסום', hidden:'הסתרה', verified:'אימות תושב/ת', approved:'אימות תושב/ת', closed:'סגירה'};
@@ -600,38 +609,94 @@
       toast(ACT_LABEL[status] + ': ' + data + ' רשומות עודכנו'); ids.forEach(id => S.sel.delete(id)); if (S.demo) render(); else await load();
     });
   }
-  const PF = [['name_he','שם','text',1],['category_group','קטגוריה','text'],['category','תת־תווית','text'],['note','תיאור','area'],['hours','שעות פתיחה','text'],['phone','טלפון','text'],['website','אתר','text'],['address','כתובת','text'],['badge','תג','text'],['search_only','חיפוש בלבד (לא ברשימות הדפדוף)','check']];
+  const PF = [['name_he','שם','text',1],['category_group','קטגוריה','text'],['category','תת־תווית','text'],['address','כתובת','text'],['hours','שעות פתיחה','text'],['phone','טלפון','text'],['website','אתר','url'],['note','תיאור','area'],['google_maps_url','גוגל מפות','url'],['facebook_url','פייסבוק','url'],['instagram_url','אינסטגרם','url'],['source_urls','קישורי מקור (שורה לכל קישור)','sources'],['badge','תג','text'],['search_only','חיפוש בלבד (לא ברשימות הדפדוף)','check']];
   const EF = [['title','כותרת','text',1],['when_text','מתי (טקסט)','text'],['start_date','תאריך','date'],['starts_at','מתחיל','dt'],['ends_at','מסתיים','dt'],['venue_name','מקום','text'],['address','כתובת','text'],['price_text','מחיר','text'],['organizer','מארגן','text'],['description','תיאור','area']];
   function toLocalInput(ts){ if (!ts) return ''; const d = new Date(ts); const p = n => String(n).padStart(2, '0');
     const parts = Object.fromEntries(new Intl.DateTimeFormat('en-CA', {timeZone:TZ, year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', hour12:false}).formatToParts(d).map(x => [x.type, x.value]));
     return parts.year + '-' + parts.month + '-' + parts.day + 'T' + (parts.hour === '24' ? '00' : parts.hour) + ':' + parts.minute; }
   function fromLocalInput(v){ if (!v) return ''; // ערך בשעון ישראל → ISO
     const guess = new Date(v + ':00Z'); const off = (new Date(guess.toLocaleString('en-US', {timeZone:TZ})) - new Date(guess.toLocaleString('en-US', {timeZone:'UTC'}))); return new Date(guess - off).toISOString(); }
+  function sourceLines(v){
+    if (Array.isArray(v)) return v.map(x => typeof x === 'string' ? x : (x && (x.url || x.href) || '')).filter(Boolean).join('\n');
+    return v == null ? '' : String(v);
+  }
+  function parseSources(s){
+    return String(s || '').split(/[\s,]+/).map(x => x.trim()).filter(Boolean);
+  }
+  function badSourceUrl(u){
+    if (!u) return '';
+    if (/tachlis\.co\.il/i.test(u)) return 'לא שומרים קישורים מ-tachlis.co.il';
+    if (!/^https?:\/\/\S+$/i.test(u)) return 'כתובת קישור לא תקינה';
+    return '';
+  }
   function edit(id){
-    const r = cur().find(x => rid(x) === id); if (!r) return; const P = S.kind === 'places', F = P ? PF : EF;
-    const groups = [...new Set(S.rows.places.map(x => x.category_group).filter(Boolean))];
-    let h = '<h2>עריכה</h2><p class="sub"><bdi dir="ltr">' + esc(r.id) + '</bdi></p><datalist id="dl-groups">' + groups.map(g => '<option value="' + esc(g) + '">').join('') + '</datalist>';
-    for (const [k, l, t, req] of F) {
-      const v = r[k] == null ? '' : r[k];
-      if (t === 'check') h += '<label class="chk"><input type="checkbox" name="' + k + '"' + (v ? ' checked' : '') + '> ' + esc(l) + '</label>';
-      else if (t === 'area') h += '<label>' + esc(l) + '</label><textarea name="' + k + '">' + esc(v) + '</textarea>';
-      else if (t === 'date') h += '<label>' + esc(l) + '</label><input type="date" name="' + k + '" value="' + esc(v) + '">';
-      else if (t === 'dt') h += '<label>' + esc(l) + ' (שעון ישראל)</label><input type="datetime-local" name="' + k + '" value="' + esc(toLocalInput(v)) + '">';
-      else h += '<label>' + esc(l) + '</label><input type="text" name="' + k + '" value="' + esc(v) + '"' + (req ? ' required' : '') + (k === 'category_group' ? ' list="dl-groups"' : '') + (k === 'phone' || k === 'website' ? ' dir="ltr"' : '') + '>';
+    const r = cur().find(x => rid(x) === id); if (!r) return;
+    const isBiz = S.kind === 'business';
+    const P = S.kind === 'places' || isBiz;
+    const placeId = isBiz ? (r.pending_place_id || r.place_id) : r.id;
+    if (isBiz && !placeId) { toast('אין מקום משויך שאפשר לערוך'); return; }
+    const F = P ? PF : EF;
+    const groups = [...new Set((S.rows.places || []).map(x => x.category_group).filter(Boolean))];
+    const canApprove = isBiz ? (r.claim_status === 'pending') : (r.status && r.status !== 'published');
+    let h = '<h2>עריכה</h2><p class="sub"><bdi dir="ltr">' + esc(placeId || r.id) + '</bdi></p><datalist id="dl-groups">' + groups.map(g => '<option value="' + esc(g) + '">').join('') + '</datalist>';
+    for (const [k, l, typ, req] of F) {
+      const v = typ === 'sources' ? sourceLines(r[k]) : (r[k] == null ? '' : r[k]);
+      if (typ === 'check') h += '<label class="chk"><input type="checkbox" name="' + k + '"' + (v ? ' checked' : '') + '> ' + esc(l) + '</label>';
+      else if (typ === 'area' || typ === 'sources') h += '<label>' + esc(l) + '</label><textarea name="' + k + '"' + (typ === 'sources' ? ' dir="ltr"' : '') + '>' + esc(v) + '</textarea>';
+      else if (typ === 'date') h += '<label>' + esc(l) + '</label><input type="date" name="' + k + '" value="' + esc(v) + '">';
+      else if (typ === 'dt') h += '<label>' + esc(l) + ' (שעון ישראל)</label><input type="datetime-local" name="' + k + '" value="' + esc(toLocalInput(v)) + '">';
+      else h += '<label>' + esc(l) + '</label><input type="' + (typ === 'url' ? 'url' : 'text') + '" name="' + k + '" value="' + esc(v) + '"' + (req ? ' required' : '') + (k === 'category_group' ? ' list="dl-groups"' : '') + (typ === 'url' || k === 'phone' ? ' dir="ltr"' : '') + '>';
     }
-    h += '<p class="err" id="dlg-err"></p><div class="acts"><button class="btn" value="ok">שמירה</button><button class="btn ghost" value="cancel" formnovalidate>ביטול</button></div>';
-    dialog(h, async f => {
+    h += '<p class="err" id="dlg-err"></p><div class="acts"><button class="btn" value="ok">שמירה</button>';
+    if (canApprove) h += '<button class="btn ok" value="approve">שמירה ואישור</button>';
+    h += '<button class="btn ghost" value="cancel" formnovalidate>ביטול</button></div>';
+    dialog(h, async (f, submitter) => {
+      const approve = !!(submitter && submitter.value === 'approve');
       const patch = {};
-      for (const [k, , t] of F) {
-        const el = f.elements[k]; let v = t === 'check' ? el.checked : t === 'dt' ? fromLocalInput(el.value) : el.value.trim();
-        const old = t === 'check' ? !!r[k] : t === 'dt' ? (r[k] ? new Date(r[k]).toISOString() : '') : (r[k] == null ? '' : String(r[k]));
+      for (const [k, , typ] of F) {
+        const el = f.elements[k];
+        let v, old;
+        if (typ === 'check') { v = el.checked; old = !!r[k]; }
+        else if (typ === 'dt') { v = fromLocalInput(el.value); old = r[k] ? new Date(r[k]).toISOString() : ''; }
+        else if (typ === 'sources') { v = parseSources(el.value); old = parseSources(sourceLines(r[k])); if (v.join('\n') === old.join('\n')) continue; patch[k] = v; continue; }
+        else { v = el.value.trim(); old = r[k] == null ? '' : String(r[k]); }
         if (v !== old) patch[k] = v;
       }
-      if (!Object.keys(patch).length) { toast('לא היו שינויים'); return; }
-      if (S.demo) { Object.assign(r, patch); toast('נשמר'); render(); return; }
-      const { error } = await sb.rpc(P ? 'admin_update_place' : 'admin_update_event', { p_id: r.id, p_patch: patch, p_version: r.version });
-      if (error) { f.querySelector('#dlg-err').textContent = errMsg(error); return false; }
-      toast('נשמר'); await load();
+      const urlKeys = ['website','google_maps_url','facebook_url','instagram_url','maps_url'];
+      for (const k of urlKeys) {
+        const err = badSourceUrl(patch[k] || '');
+        if (err) { f.querySelector('#dlg-err').textContent = err; return false; }
+      }
+      if (patch.source_urls) {
+        for (const u of patch.source_urls) {
+          const err = badSourceUrl(u);
+          if (err) { f.querySelector('#dlg-err').textContent = err; return false; }
+        }
+      }
+      if (!Object.keys(patch).length && !approve) { toast('לא היו שינויים'); return; }
+      if (S.demo) {
+        Object.assign(r, patch);
+        if (approve) {
+          if (isBiz) r.claim_status = 'approved';
+          else r.status = 'published';
+        }
+        toast(approve ? 'נשמר ואושר' : 'נשמר');
+        render();
+        return;
+      }
+      if (P) {
+        const { error } = await sb.rpc('admin_update_place', { p_id: placeId, p_patch: patch, p_version: isBiz ? null : r.version, p_approve: !!approve });
+        if (error) { f.querySelector('#dlg-err').textContent = errMsg(error); return false; }
+        if (isBiz && approve && r.claim_status === 'pending') {
+          const { error: e2 } = await sb.rpc('staff_review_business_claim', { p_user: r.user_id, p_decision: 'approved', p_note: null });
+          if (e2) { f.querySelector('#dlg-err').textContent = errMsg(e2); return false; }
+        }
+      } else {
+        const { error } = await sb.rpc('admin_update_event', { p_id: r.id, p_patch: patch, p_version: r.version, p_approve: !!approve });
+        if (error) { f.querySelector('#dlg-err').textContent = errMsg(error); return false; }
+      }
+      toast(approve ? 'נשמר ואושר' : 'נשמר');
+      await load();
     });
   }
 
@@ -649,7 +714,7 @@
 
   function demoSeed(role){
     S.demo = true; S.role = role; S.email = role==='admin' ? 'admin@example.com' : 'manager@example.com';
-    S.rows.places = [{id:'ncht-demo-1', name_he:'קפה לדוגמה', category:'בית קפה', category_group:'בתי קפה', address:'רחוב הדגמה 1', status:'pending_publish', version:1, hours:'א׳–ה׳ 08:00–16:00'}];
+    S.rows.places = [{id:'ncht-demo-1', name_he:'קפה לדוגמה', category:'בית קפה', category_group:'בתי קפה', address:'רחוב הדגמה 1', status:'pending_publish', version:1, hours:'א׳–ה׳ 08:00–16:00', phone:'08-1234567', website:'https://example.com', note:'בית קפה שכונתי, קפה ומאפים.', google_maps_url:'https://www.google.com/maps/search/?api=1&query=קפה+לדוגמה', facebook_url:'https://www.facebook.com/example', instagram_url:'https://www.instagram.com/example', source_urls:['https://example.com/about']}];
     S.rows.events = [{id:'evt-demo-1', title:'מפגש קהילה לדוגמה', venue_name:'המתנ״ס', status:'pending_publish', start_date:'2026-11-28', version:1}];
     S.rows.posts = [
       {id:'pst-demo-1', type:'ride', title:'מחפשת טרמפ מחר בבוקר לכיוון באר שבע', body:'יציאה סביב 08:00.', status:'pending', created_at:new Date().toISOString()},

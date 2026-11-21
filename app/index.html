@@ -188,6 +188,17 @@
   .staff-queue .sq-item:first-of-type{border-top:0}
   .staff-queue .sq-acts{display:flex;gap:6px;flex:none}
   .staff-queue .sq-k{font-size:12px;color:var(--soft)}
+  .staff-queue .btn.ok,.sq-edit .btn.ok{background:#2e7d32;color:#fff}
+  .staff-queue .btn.no,.sq-edit .btn.no{background:#c62828;color:#fff}
+  .sq-edit-overlay{position:fixed;inset:0;z-index:60;background:rgba(30,24,18,.38);display:flex;align-items:flex-end;justify-content:center}
+  .sq-edit-sheet{width:100%;max-width:520px;max-height:90vh;overflow:auto;background:var(--panel);border-radius:26px 26px 0 0;padding:18px 20px calc(22px + env(safe-area-inset-bottom));box-shadow:0 -10px 40px rgba(0,0,0,.12)}
+  @media(min-width:700px){.sq-edit-overlay{align-items:center}.sq-edit-sheet{border-radius:26px}}
+  .sq-edit-sheet h2{margin:0 0 6px;font-size:20px}
+  .sq-edit-sheet label{display:block;margin:10px 0 4px;font-size:13px;color:var(--soft)}
+  .sq-edit-sheet input,.sq-edit-sheet textarea{width:100%;border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--bg);font:inherit;color:inherit}
+  .sq-edit-sheet textarea{min-height:72px;resize:vertical}
+  .sq-edit-acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+  .sq-edit-err{color:#c62828;font-size:13px;margin:8px 0 0;min-height:1em}
   nav.tabs a{position:relative}
   .tab-ico-wrap{position:relative;display:inline-flex;align-items:center;justify-content:center}
   .tab-badge{position:absolute;top:-5px;inset-inline-end:-8px;min-width:16px;height:16px;padding:0 4px;border-radius:999px;background:var(--accent);color:#fff;font-size:10px;font-weight:700;line-height:16px;text-align:center;pointer-events:none;z-index:1;box-sizing:border-box}
@@ -1101,7 +1112,7 @@ function isOpenNow(hours, date=new Date()){
   let staffQueue = {items:[], loading:false};
 
   function pendingKindHe(k){
-    return {resident:'תושב/ת', post:'פרסום', place:'עסק/מקום', claim:'שיוך עסק'}[k] || k;
+    return {resident:'תושב/ת', post:'פרסום', place:'עסק/מקום', claim:'שיוך עסק', event:'אירוע'}[k] || k;
   }
 
   async function loadStaffQueue(){
@@ -1115,11 +1126,12 @@ function isOpenNow(hours, date=new Date()){
       return Array.isArray(d) ? d : (d && d.user_id ? [d] : []);
     }
     try {
-      const [resi, posts, places, biz] = await Promise.all([
+      const [resi, posts, places, biz, evs] = await Promise.all([
         rpc('staff_list_residents'),
         rpc('staff_list_posts'),
         rpc('admin_list_places'),
-        rpc('staff_list_business_accounts')
+        rpc('staff_list_business_accounts'),
+        rpc('admin_list_events')
       ]);
       for (const r of resi){
         if (r.status === 'pending') items.push({kind:'resident', id:r.user_id, title:r.display_name || 'תושב/ת', sub:r.request_note || '', created:r.created_at});
@@ -1132,6 +1144,9 @@ function isOpenNow(hours, date=new Date()){
       }
       for (const b of biz){
         if (b.claim_status === 'pending') items.push(Object.assign({kind:'claim', id:b.user_id, title:b.business_name || b.display_name || 'עסק', sub:b.pending_place_name ? ('שיוך ל־' + b.pending_place_name) : 'ממתין לאישור שיוך', created:b.created_at, name_he:b.pending_place_name || b.place_name || b.business_name}, b));
+      }
+      for (const ev of evs){
+        if (ev.status === 'pending_publish') items.push(Object.assign({kind:'event', id:ev.id, title:ev.title || ev.id, sub:[ev.venue_name, ev.when_text].filter(Boolean).join(' · '), created:ev.updated_at || ev.starts_at || ev.created_at, community:ev.community_id}, ev));
       }
       items.sort((a,b) => String(b.created||'').localeCompare(String(a.created||'')));
     } catch (e) { /* leave previous */ }
@@ -1487,6 +1502,20 @@ function isOpenNow(hours, date=new Date()){
   window.loadPlaceCalendar = loadPlaceCalendar;
   window.renderMeNotifs = renderMeNotifs;
 
+
+  function eventDetailBlock(e){
+    if (!e) return '';
+    const rows = [];
+    const add = (k, v) => { if (v) rows.push('<div class="sq-row"><span class="sq-k">' + esc(k) + '</span><span>' + v + '</span></div>'); };
+    add('מתי', esc(e.when_text || e.start_date || ''));
+    add('מקום', esc(e.venue_name));
+    add('כתובת', esc(e.address));
+    add('מחיר', esc(e.price_text));
+    add('מארגן', esc(e.organizer));
+    add('תיאור', esc(e.description));
+    return rows.length ? '<div class="sq-detail">' + rows.join('') + '</div>' : (e.sub ? '<div class="meta">' + esc(e.sub) + '</div>' : '');
+  }
+
   function renderStaffQueue(){
     const badge = $('staff-q-badge');
     const n = (staffRole && staffQueue.items) ? staffQueue.items.length : 0;
@@ -1500,11 +1529,13 @@ function isOpenNow(hours, date=new Date()){
         const allow = canApprovePlace(it);
         let acts = '';
         if (allow){
-          acts = '<div class="sq-acts"><button class="btn ok sm" type="button" data-sq-approve="' + esc(it.kind) + ':' + esc(it.id) + '">אישור</button><button class="btn no sm" type="button" data-sq-reject="' + esc(it.kind) + ':' + esc(it.id) + '">דחייה</button></div>';
+          acts = '<div class="sq-acts"><button class="btn ok sm" type="button" data-sq-approve="' + esc(it.kind) + ':' + esc(it.id) + '">אישור</button><button class="btn no sm" type="button" data-sq-reject="' + esc(it.kind) + ':' + esc(it.id) + '">דחייה</button>';
+          if (it.kind === 'place' || it.kind === 'claim' || it.kind === 'event') acts += '<button class="btn ghost sm" type="button" data-sq-edit="' + esc(it.kind) + ':' + esc(it.id) + '">עריכה</button>';
+          acts += '</div>';
         } else {
           acts = '<div class="meta">רק אדמין מאשר מקומות בכליל</div>';
         }
-        const detail = (it.kind === 'place' || it.kind === 'claim') ? placeDetailBlock(it) : (it.sub ? '<div class="meta">' + esc(it.sub) + '</div>' : '');
+        const detail = (it.kind === 'place' || it.kind === 'claim') ? placeDetailBlock(it) : (it.kind === 'event' ? eventDetailBlock(it) : (it.sub ? '<div class="meta">' + esc(it.sub) + '</div>' : ''));
         return '<div class="sq-item"><div style="flex:1;min-width:0"><div class="sq-k">' + esc(pendingKindHe(it.kind)) + '</div><div><b>' + esc(it.title) + '</b></div>' + detail + '</div>' + acts + '</div>';
       }).join('');
       h += '<p class="meta" style="margin:10px 0 0"><a href="/admin">למסך הניהול</a></p></div>';
@@ -1514,6 +1545,110 @@ function isOpenNow(hours, date=new Date()){
     if (home){ const h = htmlFor(false); home.innerHTML = h; home.hidden = !h; }
     const me = $('staff-queue-me');
     if (me){ const h = htmlFor(true); me.innerHTML = staffRole ? h : ''; me.hidden = !staffRole; }
+  }
+
+
+  function staffCloseEdit(){
+    const el = document.getElementById('sq-edit-overlay');
+    if (el) el.remove();
+  }
+  function sourceLines(v){
+    if (Array.isArray(v)) return v.map(x => typeof x === 'string' ? x : (x && (x.url || x.href) || '')).filter(Boolean).join('\n');
+    return v == null ? '' : String(v);
+  }
+  function parseSources(s){ return String(s || '').split(/[\s,]+/).map(x => x.trim()).filter(Boolean); }
+  function badSourceUrl(u){
+    if (!u) return '';
+    if (/tachlis\.co\.il/i.test(u)) return 'לא שומרים קישורים מ-tachlis.co.il';
+    if (!/^https?:\/\/\S+$/i.test(u)) return 'כתובת קישור לא תקינה';
+    return '';
+  }
+  function staffOpenEdit(kind, id){
+    const it = (staffQueue.items || []).find(x => x.kind === kind && String(x.id) === String(id));
+    if (!it) return;
+    if ((kind === 'place' || kind === 'event' || kind === 'claim') && !canApprovePlace(it)) return;
+    const isEvent = kind === 'event';
+    const placeId = kind === 'claim' ? (it.pending_place_id || it.place_id) : it.id;
+    if (kind === 'claim' && !placeId){ alert('אין מקום משויך שאפשר לערוך'); return; }
+    const fields = isEvent
+      ? [['title','כותרת','text'],['when_text','מתי','text'],['venue_name','מקום','text'],['address','כתובת','text'],['price_text','מחיר','text'],['organizer','מארגן','text'],['description','תיאור','area']]
+      : [['name_he','שם','text'],['category_group','קטגוריה','text'],['category','תת־תווית','text'],['address','כתובת','text'],['hours','שעות פתיחה','text'],['phone','טלפון','text'],['website','אתר','url'],['note','תיאור','area'],['google_maps_url','גוגל מפות','url'],['facebook_url','פייסבוק','url'],['instagram_url','אינסטגרם','url'],['source_urls','קישורי מקור (שורה לכל קישור)','sources']];
+    staffCloseEdit();
+    const ov = document.createElement('div');
+    ov.id = 'sq-edit-overlay';
+    ov.className = 'sq-edit-overlay';
+    ov.setAttribute('role','dialog');
+    ov.setAttribute('aria-modal','true');
+    let h = '<form class="sq-edit-sheet sq-edit" dir="rtl"><h2>עריכה</h2><p class="meta">' + esc(it.title || '') + '</p>';
+    fields.forEach(([k,l,typ]) => {
+      const raw = typ === 'sources' ? sourceLines(it[k]) : (it[k] == null ? '' : String(it[k]));
+      h += '<label for="sqe-' + k + '">' + esc(l) + '</label>';
+      if (typ === 'area' || typ === 'sources') h += '<textarea id="sqe-' + k + '" name="' + k + '"' + (typ === 'sources' || typ === 'url' ? ' dir="ltr"' : '') + '>' + esc(raw) + '</textarea>';
+      else h += '<input id="sqe-' + k + '" name="' + k + '" type="' + (typ === 'url' ? 'url' : 'text') + '" value="' + esc(raw) + '"' + (typ === 'url' || k === 'phone' ? ' dir="ltr"' : '') + '>';
+    });
+    h += '<p class="sq-edit-err" id="sq-edit-err"></p><div class="sq-edit-acts"><button class="btn main sm" type="submit" data-save="save">שמירה</button><button class="btn ok sm" type="submit" data-save="approve">שמירה ואישור</button><button class="btn ghost sm" type="button" data-edit-cancel>ביטול</button></div></form>';
+    ov.innerHTML = h;
+    document.body.appendChild(ov);
+    const form = ov.querySelector('form');
+    let intent = 'save';
+    ov.addEventListener('click', ev => { if (ev.target === ov || ev.target.closest('[data-edit-cancel]')) staffCloseEdit(); });
+    form.querySelectorAll('[data-save]').forEach(b => b.addEventListener('click', () => { intent = b.getAttribute('data-save'); }));
+    form.addEventListener('submit', async ev => {
+      ev.preventDefault();
+      const errEl = form.querySelector('#sq-edit-err');
+      errEl.textContent = '';
+      const patch = {};
+      for (const [k,,typ] of fields){
+        const el = form.elements[k];
+        if (typ === 'sources'){
+          const v = parseSources(el.value);
+          const old = parseSources(sourceLines(it[k]));
+          if (v.join('\n') !== old.join('\n')) patch[k] = v;
+        } else {
+          const v = el.value.trim();
+          const old = it[k] == null ? '' : String(it[k]);
+          if (v !== old) patch[k] = v;
+        }
+      }
+      const urlKeys = ['website','google_maps_url','facebook_url','instagram_url'];
+      for (const k of urlKeys){
+        const err = badSourceUrl(patch[k] || '');
+        if (err){ errEl.textContent = err; return; }
+      }
+      if (patch.source_urls){
+        for (const u of patch.source_urls){ const err = badSourceUrl(u); if (err){ errEl.textContent = err; return; } }
+      }
+      const approve = intent === 'approve';
+      if (!Object.keys(patch).length && !approve){ errEl.textContent = 'לא היו שינויים'; return; }
+      const buttons = [...form.querySelectorAll('button')];
+      buttons.forEach(b => { b.disabled = true; });
+      try {
+        const H = authHeaders();
+        if (kind === 'place' || kind === 'claim'){
+          const r = await fetch(AUTH_URL + '/rest/v1/rpc/admin_update_place', { method:'POST', headers:H, body: JSON.stringify({ p_id: placeId, p_patch: patch, p_version: it.version || null, p_approve: !!approve }) });
+          const body = await r.json().catch(()=>({}));
+          if (!r.ok){ errEl.textContent = authErrHe(body); return; }
+          if (kind === 'claim' && approve){
+            const r2 = await fetch(AUTH_URL + '/rest/v1/rpc/staff_review_business_claim', { method:'POST', headers:H, body: JSON.stringify({ p_user: it.id, p_decision: 'approved', p_note: null }) });
+            const b2 = await r2.json().catch(()=>({}));
+            if (!r2.ok){ errEl.textContent = authErrHe(b2); return; }
+          }
+        } else if (kind === 'event'){
+          const r = await fetch(AUTH_URL + '/rest/v1/rpc/admin_update_event', { method:'POST', headers:H, body: JSON.stringify({ p_id: it.id, p_patch: patch, p_version: it.version || null, p_approve: !!approve }) });
+          const body = await r.json().catch(()=>({}));
+          if (!r.ok){ errEl.textContent = authErrHe(body); return; }
+        }
+        staffCloseEdit();
+        await loadStaffQueue();
+        renderStaffQueue();
+      } catch (e) {
+        errEl.textContent = 'לא הצלחנו לשמור.';
+      } finally {
+        buttons.forEach(b => { b.disabled = false; });
+      }
+    });
+    const first = form.querySelector('input,textarea');
+    if (first) first.focus();
   }
 
   async function staffDecide(kind, id, approve){
@@ -1535,6 +1670,8 @@ function isOpenNow(hours, date=new Date()){
         r = await fetch(AUTH_URL + '/rest/v1/rpc/admin_set_status', { method:'POST', headers:H, body: JSON.stringify({ p_kind:'places', p_ids:[id], p_status: approve ? 'published' : 'rejected', p_reason: reason }) });
       } else if (kind === 'claim'){
         r = await fetch(AUTH_URL + '/rest/v1/rpc/staff_review_business_claim', { method:'POST', headers:H, body: JSON.stringify({ p_user:id, p_decision: approve ? 'approved' : 'rejected', p_note: reason }) });
+      } else if (kind === 'event'){
+        r = await fetch(AUTH_URL + '/rest/v1/rpc/admin_set_status', { method:'POST', headers:H, body: JSON.stringify({ p_kind:'events', p_ids:[id], p_status: approve ? 'published' : 'rejected', p_reason: reason }) });
       } else return;
       body = await r.json().catch(()=>({}));
       if (!r.ok){ alert(authErrHe(body)); return; }
@@ -2488,6 +2625,7 @@ function isOpenNow(hours, date=new Date()){
     }
     if (ev.target.closest('[data-sq-approve]')){ ev.preventDefault(); const v=ev.target.closest('[data-sq-approve]').getAttribute('data-sq-approve').split(':'); if (typeof staffDecide==='function') staffDecide(v[0], v.slice(1).join(':'), true); }
     if (ev.target.closest('[data-sq-reject]')){ ev.preventDefault(); const v=ev.target.closest('[data-sq-reject]').getAttribute('data-sq-reject').split(':'); if (typeof staffDecide==='function') staffDecide(v[0], v.slice(1).join(':'), false); }
+    if (ev.target.closest('[data-sq-edit]')){ ev.preventDefault(); const v=ev.target.closest('[data-sq-edit]').getAttribute('data-sq-edit').split(':'); if (typeof staffOpenEdit==='function') staffOpenEdit(v[0], v.slice(1).join(':')); }
     if (ev.target.closest('[data-onboard]')){
       ev.preventDefault();
       const a = ev.target.closest('[data-onboard]').getAttribute('data-onboard');
