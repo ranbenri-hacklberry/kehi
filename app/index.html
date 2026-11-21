@@ -188,7 +188,11 @@
   .staff-queue .sq-item:first-of-type{border-top:0}
   .staff-queue .sq-acts{display:flex;gap:6px;flex:none}
   .staff-queue .sq-k{font-size:12px;color:var(--soft)}
-  .tab-badge{display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 5px;margin-inline-start:4px;border-radius:999px;background:var(--accent);color:#fff;font-size:11px;font-weight:700;vertical-align:middle}
+  nav.tabs a{position:relative}
+  .tab-ico-wrap{position:relative;display:inline-flex;align-items:center;justify-content:center}
+  .tab-badge{position:absolute;top:-5px;inset-inline-end:-8px;min-width:16px;height:16px;padding:0 4px;border-radius:999px;background:var(--accent);color:#fff;font-size:10px;font-weight:700;line-height:16px;text-align:center;pointer-events:none;z-index:1;box-sizing:border-box}
+  .tab-badge[hidden]{display:none !important}
+  .tab-badge:not([hidden]){display:flex;align-items:center;justify-content:center}
   .pay-test-banner{background:var(--amber);color:#6b5a1f;border-radius:12px;padding:8px 12px;font-size:13px;margin:0 0 12px}
 
 
@@ -476,7 +480,7 @@
   <a href="#/cats" data-r="cats"><svg class="ico" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>קטגוריות</a>
   <a href="#/ask" data-r="ask"><svg class="ico" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>לשאול</a>
   <a href="#/add" data-r="add"><svg class="ico" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg>להוסיף</a>
-  <a href="#/me" data-r="me"><svg class="ico" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>שלי<span id="staff-q-badge" class="tab-badge" hidden></span></a>
+  <a href="#/me" data-r="me"><span class="tab-ico-wrap"><svg class="ico" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span id="staff-q-badge" class="tab-badge" hidden></span></span>שלי</a>
 </div></nav>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.2/dist/umd/supabase.js"></script>
@@ -831,11 +835,11 @@ function isOpenNow(hours, date=new Date()){
   }
 
   function renderHomeExtras(){
-    applyGreeting();
-    renderMyPosts();
-    renderOpenNow();
-    renderPulse();
-    if (typeof renderStaffQueue === 'function') renderStaffQueue();
+    try { applyGreeting(); } catch (e) {}
+    try { renderMyPosts(); } catch (e) {}
+    try { renderOpenNow(); } catch (e) {}
+    try { renderPulse(); } catch (e) {}
+    try { if (typeof renderStaffQueue === 'function') renderStaffQueue(); } catch (e) {}
   }
 
   const _demoOrig = demoData;
@@ -1056,6 +1060,129 @@ function isOpenNow(hours, date=new Date()){
   let resident = null; // {status, request_note, review_note} | null  (null + session = none)
   let staffRole = null; // admin | manager | null
   let businessAccount = null;
+  let staffQueue = {items:[], loading:false};
+
+  function pendingKindHe(k){
+    return {resident:'תושב/ת', post:'פרסום', place:'עסק/מקום', claim:'שיוך עסק'}[k] || k;
+  }
+
+  async function loadStaffQueue(){
+    if (!staffRole || !sessionUser) { staffQueue.items = []; return; }
+    const H = authHeaders();
+    const items = [];
+    async function rpc(name, body){
+      const r = await fetch(AUTH_URL + '/rest/v1/rpc/' + name, { method:'POST', headers:H, body: body || '{}' });
+      if (!r.ok) return [];
+      const d = await r.json().catch(()=>[]);
+      return Array.isArray(d) ? d : (d && d.user_id ? [d] : []);
+    }
+    try {
+      const [resi, posts, places, biz] = await Promise.all([
+        rpc('staff_list_residents'),
+        rpc('staff_list_posts'),
+        rpc('admin_list_places'),
+        rpc('staff_list_business_accounts')
+      ]);
+      for (const r of resi){
+        if (r.status === 'pending') items.push({kind:'resident', id:r.user_id, title:r.display_name || 'תושב/ת', sub:r.request_note || '', created:r.created_at});
+      }
+      for (const p of posts){
+        if (p.status === 'pending') items.push({kind:'post', id:p.id, title:p.title || p.id, sub:({ride:'טרמפ',giveaway:'מסירה',help:'עזרה',recommend:'המלצה',course:'קורס'}[p.type]||p.type||''), created:p.created_at});
+      }
+      for (const p of places){
+        if (p.status === 'pending_publish') items.push({kind:'place', id:p.id, title:p.name_he || p.id, sub:p.category_group || p.category || '', created:p.updated_at, community:p.community_id});
+      }
+      for (const b of biz){
+        if (b.claim_status === 'pending') items.push({kind:'claim', id:b.user_id, title:b.business_name || b.display_name || 'עסק', sub:b.pending_place_name ? ('שיוך ל־' + b.pending_place_name) : 'ממתין לאישור שיוך', created:b.created_at});
+      }
+      items.sort((a,b) => String(b.created||'').localeCompare(String(a.created||'')));
+    } catch (e) { /* leave previous */ }
+    staffQueue.items = items;
+  }
+
+  function canApprovePlace(it){
+    if (it.kind !== 'place') return true;
+    const comm = it.community || (typeof COMMUNITY_ID !== 'undefined' ? COMMUNITY_ID : '');
+    if (comm === 'klil') return staffRole === 'admin';
+    return !!(staffRole);
+  }
+
+  function renderStaffQueue(){
+    const badge = $('staff-q-badge');
+    const n = (staffRole && staffQueue.items) ? staffQueue.items.length : 0;
+    if (badge){ if (!n){ badge.hidden = true; badge.textContent = ''; } else { badge.textContent = n > 99 ? '99+' : String(n); badge.hidden = false; } }
+    const htmlFor = (emptyOk) => {
+      if (!staffRole) return '';
+      const items = staffQueue.items || [];
+      let h = '<div class="card staff-queue-card"><div class="sq-head"><h2>ממתינים לאישור</h2><span class="meta">' + items.length + '</span></div>';
+      if (!items.length) return emptyOk ? h + '<p class="meta" style="margin:0">אין פריטים ממתינים.</p></div>' : '';
+      h += items.map(it => {
+        const allow = canApprovePlace(it);
+        let acts = '';
+        if (allow){
+          acts = '<div class="sq-acts"><button class="btn ok sm" type="button" data-sq-approve="' + esc(it.kind) + ':' + esc(it.id) + '">אישור</button><button class="btn no sm" type="button" data-sq-reject="' + esc(it.kind) + ':' + esc(it.id) + '">דחייה</button></div>';
+        } else {
+          acts = '<div class="meta">רק אדמין מאשר מקומות בכליל</div>';
+        }
+        return '<div class="sq-item"><div style="flex:1;min-width:0"><div class="sq-k">' + esc(pendingKindHe(it.kind)) + '</div><div><b>' + esc(it.title) + '</b></div>' + (it.sub ? '<div class="meta">' + esc(it.sub) + '</div>' : '') + '</div>' + acts + '</div>';
+      }).join('');
+      h += '<p class="meta" style="margin:10px 0 0"><a href="/admin">למסך הניהול</a></p></div>';
+      return h;
+    };
+    const home = $('staff-queue-home');
+    if (home){ const h = htmlFor(false); home.innerHTML = h; home.hidden = !h; }
+    const me = $('staff-queue-me');
+    if (me){ const h = htmlFor(true); me.innerHTML = staffRole ? h : ''; me.hidden = !staffRole; }
+  }
+
+  async function staffDecide(kind, id, approve){
+    if (!staffRole) return;
+    let reason = null;
+    if (!approve){
+      reason = window.prompt('סיבה לדחייה (חובה)') || '';
+      reason = reason.trim();
+      if (!reason){ alert('צריך סיבה כדי לדחות.'); return; }
+    }
+    const H = authHeaders();
+    let r, body;
+    try {
+      if (kind === 'resident'){
+        r = await fetch(AUTH_URL + '/rest/v1/rpc/staff_set_resident_status', { method:'POST', headers:H, body: JSON.stringify({ p_ids:[id], p_status: approve ? 'verified' : 'rejected', p_reason: reason }) });
+      } else if (kind === 'post'){
+        r = await fetch(AUTH_URL + '/rest/v1/rpc/staff_set_post_status', { method:'POST', headers:H, body: JSON.stringify({ p_ids:[id], p_status: approve ? 'open' : 'rejected', p_reason: reason }) });
+      } else if (kind === 'place'){
+        r = await fetch(AUTH_URL + '/rest/v1/rpc/admin_set_status', { method:'POST', headers:H, body: JSON.stringify({ p_kind:'places', p_ids:[id], p_status: approve ? 'published' : 'rejected', p_reason: reason }) });
+      } else if (kind === 'claim'){
+        r = await fetch(AUTH_URL + '/rest/v1/rpc/staff_review_business_claim', { method:'POST', headers:H, body: JSON.stringify({ p_user:id, p_decision: approve ? 'approved' : 'rejected', p_note: reason }) });
+      } else return;
+      body = await r.json().catch(()=>({}));
+      if (!r.ok){ alert(authErrHe(body)); return; }
+      await loadStaffQueue();
+      renderStaffQueue();
+    } catch (e) { alert('לא הצלחנו לעדכן.'); }
+  }
+
+  async function startTestCheckout(tierId){
+    const plan = planById(tierId);
+    if (!plan || !sessionUser || !window.PAY_TEST_URL) return;
+    try {
+      const r = await fetch(window.PAY_TEST_URL + '/pay/create', {
+        method:'POST',
+        headers: { 'content-type':'application/json', authorization: 'Bearer ' + sessionUser.token },
+        body: JSON.stringify({
+          tier_id: plan.tier_id,
+          billing_cycle: plan.billing_cycle,
+          amount_ils: plan.price_ils,
+          product_name: plan.name_he
+        })
+      });
+      const d = await r.json().catch(()=>({}));
+      if (!r.ok || !d.url){ alert((d && (d.message || d.description)) || 'לא הצלחנו לפתוח דף תשלום בדיקה.'); return; }
+      location.href = d.url;
+    } catch (e) { alert('לא הצלחנו לפתוח דף תשלום בדיקה.'); }
+  }
+
+
   let myBookings = [];
   let authReady = false;
   let lastBooked = null; // {slot, post} after a successful book, for calendar buttons
@@ -1296,8 +1423,8 @@ function isOpenNow(hours, date=new Date()){
       el.innerHTML = banner + '<div class="card me-card"><h2 style="margin:0 0 8px">האזור שלי</h2><p class="meta">נכנסים עם Google. רואים את השם והתמונה מהחשבון, בלי למסור מספר טלפון. פרסום, תגובה והרשמה לקורס פתוחים לתושבות/ים אחרי אימות קצר.</p><button class="btn main" type="button" data-google-signin>כניסה עם Google</button><p class="err" id="auth-msg" hidden></p><p class="meta" style="margin:16px 0 0"><a href="https://kehi.ranbenri.workers.dev/privacy" target="_blank" rel="noopener">מדיניות פרטיות</a></p></div>';
       const rest = $('me-legacy'); if (rest) rest.hidden = true;
       const book = $('me-bookings'); if (book) book.hidden = true;
-      if (typeof renderMeBiz === 'function') renderMeBiz();
-      if (typeof renderStaffQueue === 'function') renderStaffQueue();
+      try { if (typeof renderMeBiz === 'function') renderMeBiz(); } catch (e) {}
+      try { if (typeof renderStaffQueue === 'function') renderStaffQueue(); } catch (e) {}
       return;
     }
     const av = googleAvatar();
@@ -1322,9 +1449,9 @@ function isOpenNow(hours, date=new Date()){
     }
     el.innerHTML = banner + '<div class="card me-card"><div class="me-row">' + avHtml + '<div style="flex:1;min-width:0"><h2 style="margin:0">' + esc(googleName()) + '</h2><div class="st ' + esc(stClass) + '">' + esc(stLabel) + '</div></div></div>' + form + '<div style="margin-top:12px">' + actions + '</div><p class="err" id="auth-msg" hidden></p><p class="meta" style="margin:16px 0 0"><a href="https://kehi.ranbenri.workers.dev/privacy" target="_blank" rel="noopener">מדיניות פרטיות</a></p></div>';
     const rest = $('me-legacy'); if (rest) rest.hidden = true;
-    renderMyBookingsList();
-    if (typeof renderMeBiz === 'function') renderMeBiz();
-      if (typeof renderStaffQueue === 'function') renderStaffQueue();
+    try { renderMyBookingsList(); } catch (e) {}
+    try { if (typeof renderMeBiz === 'function') renderMeBiz(); } catch (e) {}
+    try { if (typeof renderStaffQueue === 'function') renderStaffQueue(); } catch (e) {}
   }
   function demoCourse(){
     const a = (d,h,m) => new Date(2026, 10, d, h, m).toISOString();
@@ -1639,7 +1766,20 @@ function isOpenNow(hours, date=new Date()){
 
     if (ev.target.closest('[data-pay-cycle]')){ ev.preventDefault(); pricingState.cycle = ev.target.closest('[data-pay-cycle]').getAttribute('data-pay-cycle'); renderPricing(); }
     if (ev.target.closest('[data-start-trial]')){ ev.preventDefault(); pricingState.pick = ev.target.closest('[data-start-trial]').getAttribute('data-start-trial'); renderPricing(); const f=$('trial-form'); if (f) f.scrollIntoView({behavior:'smooth', block:'start'}); }
-    if (ev.target.closest('[data-pay-soon]')){ ev.preventDefault(); const n=$('trial-msg')||$('auth-msg'); alert('התשלום ייפתח בקרוב'); }
+    if (ev.target.closest('[data-pay-soon]')){
+      ev.preventDefault();
+      const staffPay = !!(staffRole && window.PAY_TEST_URL && (typeof COMMUNITY_ID==='undefined' || COMMUNITY_ID==='mitzpe'));
+      if (staffPay){
+        const card = ev.target.closest('[data-tier]');
+        const tid = card && card.getAttribute('data-tier');
+        if (tid && tid !== 'community' && typeof startTestCheckout === 'function') startTestCheckout(tid);
+        else alert('בחרו מסלול בתשלום.');
+      } else {
+        alert('התשלום ייפתח בקרוב');
+      }
+    }
+    if (ev.target.closest('[data-sq-approve]')){ ev.preventDefault(); const v=ev.target.closest('[data-sq-approve]').getAttribute('data-sq-approve').split(':'); if (typeof staffDecide==='function') staffDecide(v[0], v.slice(1).join(':'), true); }
+    if (ev.target.closest('[data-sq-reject]')){ ev.preventDefault(); const v=ev.target.closest('[data-sq-reject]').getAttribute('data-sq-reject').split(':'); if (typeof staffDecide==='function') staffDecide(v[0], v.slice(1).join(':'), false); }
     if (ev.target.closest('[data-confirm-trial]')){ ev.preventDefault(); confirmTrial(); }
     if (ev.target.closest('[data-pick-place]')){
       ev.preventDefault();
@@ -1674,6 +1814,7 @@ function isOpenNow(hours, date=new Date()){
   window.renderPostThread = renderPostThread;
   window.bootAuth = bootAuth;
   window.renderMe = renderMe;
+  window.renderStaffQueue = renderStaffQueue;
   window.requireVerified = requireVerified;
 
   window.renderPostThread = renderPostThread;
@@ -1925,133 +2066,11 @@ function isOpenNow(hours, date=new Date()){
   }
 
 
-  let staffQueue = {items:[], loading:false};
-
-  function pendingKindHe(k){
-    return {resident:'תושב/ת', post:'פרסום', place:'עסק/מקום', claim:'שיוך עסק'}[k] || k;
-  }
-
-  async function loadStaffQueue(){
-    if (!staffRole || !sessionUser) { staffQueue.items = []; return; }
-    const H = authHeaders();
-    const items = [];
-    async function rpc(name, body){
-      const r = await fetch(AUTH_URL + '/rest/v1/rpc/' + name, { method:'POST', headers:H, body: body || '{}' });
-      if (!r.ok) return [];
-      const d = await r.json().catch(()=>[]);
-      return Array.isArray(d) ? d : (d && d.user_id ? [d] : []);
-    }
-    try {
-      const [resi, posts, places, biz] = await Promise.all([
-        rpc('staff_list_residents'),
-        rpc('staff_list_posts'),
-        rpc('admin_list_places'),
-        rpc('staff_list_business_accounts')
-      ]);
-      for (const r of resi){
-        if (r.status === 'pending') items.push({kind:'resident', id:r.user_id, title:r.display_name || 'תושב/ת', sub:r.request_note || '', created:r.created_at});
-      }
-      for (const p of posts){
-        if (p.status === 'pending') items.push({kind:'post', id:p.id, title:p.title || p.id, sub:({ride:'טרמפ',giveaway:'מסירה',help:'עזרה',recommend:'המלצה',course:'קורס'}[p.type]||p.type||''), created:p.created_at});
-      }
-      for (const p of places){
-        if (p.status === 'pending_publish') items.push({kind:'place', id:p.id, title:p.name_he || p.id, sub:p.category_group || p.category || '', created:p.updated_at, community:p.community_id});
-      }
-      for (const b of biz){
-        if (b.claim_status === 'pending') items.push({kind:'claim', id:b.user_id, title:b.business_name || b.display_name || 'עסק', sub:b.pending_place_name ? ('שיוך ל־' + b.pending_place_name) : 'ממתין לאישור שיוך', created:b.created_at});
-      }
-      items.sort((a,b) => String(b.created||'').localeCompare(String(a.created||'')));
-    } catch (e) { /* leave previous */ }
-    staffQueue.items = items;
-  }
-
-  function canApprovePlace(it){
-    if (it.kind !== 'place') return true;
-    const comm = it.community || (typeof COMMUNITY_ID !== 'undefined' ? COMMUNITY_ID : '');
-    if (comm === 'klil') return staffRole === 'admin';
-    return !!(staffRole);
-  }
-
-  function renderStaffQueue(){
-    const badge = $('staff-q-badge');
-    const n = (staffRole && staffQueue.items) ? staffQueue.items.length : 0;
-    if (badge){ badge.hidden = !n; badge.textContent = n > 99 ? '99+' : String(n); }
-    const htmlFor = (emptyOk) => {
-      if (!staffRole) return '';
-      const items = staffQueue.items || [];
-      let h = '<div class="card staff-queue-card"><div class="sq-head"><h2>ממתינים לאישור</h2><span class="meta">' + items.length + '</span></div>';
-      if (!items.length) return emptyOk ? h + '<p class="meta" style="margin:0">אין פריטים ממתינים.</p></div>' : '';
-      h += items.map(it => {
-        const allow = canApprovePlace(it);
-        let acts = '';
-        if (allow){
-          acts = '<div class="sq-acts"><button class="btn ok sm" type="button" data-sq-approve="' + esc(it.kind) + ':' + esc(it.id) + '">אישור</button><button class="btn no sm" type="button" data-sq-reject="' + esc(it.kind) + ':' + esc(it.id) + '">דחייה</button></div>';
-        } else {
-          acts = '<div class="meta">רק אדמין מאשר מקומות בכליל</div>';
-        }
-        return '<div class="sq-item"><div style="flex:1;min-width:0"><div class="sq-k">' + esc(pendingKindHe(it.kind)) + '</div><div><b>' + esc(it.title) + '</b></div>' + (it.sub ? '<div class="meta">' + esc(it.sub) + '</div>' : '') + '</div>' + acts + '</div>';
-      }).join('');
-      h += '<p class="meta" style="margin:10px 0 0"><a href="/admin">למסך הניהול</a></p></div>';
-      return h;
-    };
-    const home = $('staff-queue-home');
-    if (home){ const h = htmlFor(false); home.innerHTML = h; home.hidden = !h; }
-    const me = $('staff-queue-me');
-    if (me){ const h = htmlFor(true); me.innerHTML = staffRole ? h : ''; me.hidden = !staffRole; }
-  }
-
-  async function staffDecide(kind, id, approve){
-    if (!staffRole) return;
-    let reason = null;
-    if (!approve){
-      reason = window.prompt('סיבה לדחייה (חובה)') || '';
-      reason = reason.trim();
-      if (!reason){ alert('צריך סיבה כדי לדחות.'); return; }
-    }
-    const H = authHeaders();
-    let r, body;
-    try {
-      if (kind === 'resident'){
-        r = await fetch(AUTH_URL + '/rest/v1/rpc/staff_set_resident_status', { method:'POST', headers:H, body: JSON.stringify({ p_ids:[id], p_status: approve ? 'verified' : 'rejected', p_reason: reason }) });
-      } else if (kind === 'post'){
-        r = await fetch(AUTH_URL + '/rest/v1/rpc/staff_set_post_status', { method:'POST', headers:H, body: JSON.stringify({ p_ids:[id], p_status: approve ? 'open' : 'rejected', p_reason: reason }) });
-      } else if (kind === 'place'){
-        r = await fetch(AUTH_URL + '/rest/v1/rpc/admin_set_status', { method:'POST', headers:H, body: JSON.stringify({ p_kind:'places', p_ids:[id], p_status: approve ? 'published' : 'rejected', p_reason: reason }) });
-      } else if (kind === 'claim'){
-        r = await fetch(AUTH_URL + '/rest/v1/rpc/staff_review_business_claim', { method:'POST', headers:H, body: JSON.stringify({ p_user:id, p_decision: approve ? 'approved' : 'rejected', p_note: reason }) });
-      } else return;
-      body = await r.json().catch(()=>({}));
-      if (!r.ok){ alert(authErrHe(body)); return; }
-      await loadStaffQueue();
-      renderStaffQueue();
-    } catch (e) { alert('לא הצלחנו לעדכן.'); }
-  }
-
-  async function startTestCheckout(tierId){
-    const plan = planById(tierId);
-    if (!plan || !sessionUser || !window.PAY_TEST_URL) return;
-    try {
-      const r = await fetch(window.PAY_TEST_URL + '/pay/create', {
-        method:'POST',
-        headers: { 'content-type':'application/json', authorization: 'Bearer ' + sessionUser.token },
-        body: JSON.stringify({
-          tier_id: plan.tier_id,
-          billing_cycle: plan.billing_cycle,
-          amount_ils: plan.price_ils,
-          product_name: plan.name_he
-        })
-      });
-      const d = await r.json().catch(()=>({}));
-      if (!r.ok || !d.url){ alert((d && (d.message || d.description)) || 'לא הצלחנו לפתוח דף תשלום בדיקה.'); return; }
-      location.href = d.url;
-    } catch (e) { alert('לא הצלחנו לפתוח דף תשלום בדיקה.'); }
-  }
-
   function go(){
     const r = routes[location.hash.replace(/^#\/?/,'').split('/')[0]] || 'home';
-    if (r === 'place' && window.NAHAT_renderPlace) window.NAHAT_renderPlace(decodeURIComponent(location.hash.split('/')[2] || ''));
-    if (r === 'post') { const id = decodeURIComponent(location.hash.split('/')[2] || ''); if (window.renderPostThread) window.renderPostThread(id); }
-    if (r === 'me' && window.renderMe) window.renderMe();
+    if (r === 'place' && window.NAHAT_renderPlace) { try { window.NAHAT_renderPlace(decodeURIComponent(location.hash.split('/')[2] || '')); } catch (e) {} }
+    if (r === 'post') { const id = decodeURIComponent(location.hash.split('/')[2] || ''); try { if (window.renderPostThread) window.renderPostThread(id); } catch (e) {} }
+    if (r === 'me' && window.renderMe) { try { window.renderMe(); } catch (e) {} }
     if (r === 'pricing') { loadPricingPlans().then(function(){ if (window.renderPricing) window.renderPricing(); }); }
     document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === 's-' + r));
     document.querySelectorAll('nav.tabs a').forEach(a => a.classList.toggle('on', a.dataset.r === r || ((r==='item'||r==='place'||r==='events') && a.dataset.r==='home') || (r==='pricing' && a.dataset.r==='me')));
