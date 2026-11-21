@@ -1,3 +1,4 @@
+// NOTE: do not put service_role in any worker. See test-worker.js (kehi-pay-test) for the webhook-secret hash pattern.
 // Cardcom v11 LowProfile — NOT DEPLOYED.
 // Env names only. Never put terminal numbers, API names, or passwords in this file.
 //

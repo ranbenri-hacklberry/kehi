@@ -35,3 +35,14 @@ Swagger: https://secure.cardcom.solutions/Api/v11/Docs
 - `POST /pay/webhook` — קורא `GetLpResult`, ורק אם `ResponseCode === 0` קורא ל-`private.apply_cardcom_payment` עם מפתח השירות. אם השרת לא מחזיר 200, Cardcom מנסה שוב.
 
 אל תדביקו ערכים של משתנים כאן או בקוד.
+
+## מצב בדיקה (kehi-pay-test)
+
+Worker נפרד לחשבון Cloudflare של רן (`e2943893ae2e448e959b620f46faabec`), מסוף הדמו הציבורי של Cardcom בלבד:
+`TerminalNumber=1000`, `ApiName=cardtest26` (מתוך תיעוד v11 הרשמי). **אין** להעתיק טרמינלים מ-Studio / ResortOS / Mialis.
+
+אין `service_role` ב-Worker. האימות ל-webhook הוא סוד אקראי (`PAY_WEBHOOK_SECRET`) שה-SHA-256 שלו שמור ב-`private.pay_webhook_config`, וה-RPC `public.apply_cardcom_test_payment` (מוענק ל-anon) מאמת את ההאש ואז רושם תשלום. אין חשבוניות / מיילים במצב בדיקה.
+
+פריסה: `wrangler deploy` מתוך תיקייה זו + `wrangler secret put PAY_WEBHOOK_SECRET` (בלי להדפיס את הסוד). באפליקציית נחת, כפתור «לתשלום» פתוח לצוות בלבד עם באנר «מצב בדיקה — לא יחויב כסף».
+
+בדיקה ב-21.11.2026: `cardtest26` (שם המשתמש הרשמי במאמר התמיכה) החזיר ResponseCode 605 — המשתמש חסום ודורש איפוס סיסמה אצל Cardcom. `Cardcomtest26` מהדוגמה ב-v11 החזיר 603 (שם משתמש/סיסמה שגויים). ה-Worker פרוס עם TerminalNumber=1000 ו-ApiName=cardtest26; יצירת דף תשלום תחכה לשיחרור המשתמש ע״י התמיכה של Cardcom. לא נעשה שימוש במסופים מ-Studio.

@@ -1,0 +1,12 @@
+name = "kehi-pay-test"
+main = "test-worker.js"
+compatibility_date = "2024-11-01"
+account_id = "e2943893ae2e448e959b620f46faabec"
+
+[vars]
+CARDCOM_TERMINAL = "1000"
+CARDCOM_API_NAME = "cardtest26"
+SUPABASE_URL = "https://ozyzdzmlybppxiopgbfk.supabase.co"
+PAYMENT_SUCCESS_URL = "https://nahat-app.ranbenri.workers.dev/#/me"
+PAYMENT_FAILED_URL = "https://nahat-app.ranbenri.workers.dev/#/pricing"
+CARDCOM_WEBHOOK_PUBLIC_URL = "https://kehi-pay-test.ranbenri.workers.dev/pay/webhook"

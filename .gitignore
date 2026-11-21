@@ -18,3 +18,5 @@ backups/
 .DS_Store
 node_modules/
 .idea/
+.webhook_secret
+**/.webhook_secret
