@@ -150,6 +150,7 @@
       <button class="tab" type="button" data-kind="posts" role="tab">פרסומים <b id="n-posts">0</b></button>
       <button class="tab" type="button" data-kind="residents" role="tab">תושבים <b id="n-residents">0</b></button>
       <button class="tab" type="button" data-kind="business" role="tab">חשבונות עסק <b id="n-business">0</b></button>
+      <button class="tab admin-only" type="button" data-kind="qa" role="tab">שאלות ותשובות <b id="n-qa">0</b></button>
       <button class="tab admin-only" type="button" data-kind="managers" role="tab">מנהלי/ות קהילה</button>
       <button class="btn ghost sm" id="reload" type="button" style="margin-inline-start:auto">רענון</button>
     </div>
@@ -196,12 +197,13 @@
   const $ = id => document.getElementById(id);
   const esc = t => String(t == null ? '' : t).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const TZ = 'Asia/Jerusalem';
-  const ST = {pending_publish:'ממתין', published:'מפורסם', rejected:'נדחה', hidden:'מוסתר', pending:'ממתין', open:'פתוח', closed:'נסגר', approved:'מאומת', verified:'מאומת', trial:'ניסיון', active:'פעיל', expired:'פג', cancelled:'בוטל', claim_pending:'ממתין לשיוך'};
+  const ST = {pending_publish:'ממתין', published:'מפורסם', rejected:'נדחה', hidden:'מוסתר', pending:'ממתין', open:'פתוח', closed:'נסגר', approved:'מאומת', verified:'מאומת', trial:'ניסיון', active:'פעיל', expired:'פג', cancelled:'בוטל', claim_pending:'ממתין לשיוך', flagged:'רק מסומנות כלא טובות', ok:'תקין'};
+  const QA_SRC = {model:'מודל', fallback:'חיפוש (בלי מודל)', refusal:'סירוב / אין מידע'};
   const ORDER = ['pending_publish','published','rejected','hidden'];
   const POST_ORDER = ['pending','open','closed','hidden','rejected'];
   const RES_ORDER = ['pending','verified','rejected'];
   const BIZ_ORDER = ['claim_pending','trial','active','expired','cancelled'];
-  const S = {kind:'places', status:'pending_publish', cat:'', q:'', rows:{places:[], events:[], posts:[], residents:[], business:[]}, managers:[], candidates:[], sel:new Set(), email:'', role:''};
+  const S = {kind:'places', status:'pending_publish', cat:'', q:'', rows:{places:[], events:[], posts:[], residents:[], business:[], qa:[]}, managers:[], candidates:[], sel:new Set(), email:'', role:''};
 
   function toast(t){ const el = $('toast'); el.textContent = t; el.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => el.hidden = true, 3500); }
   function show(v){ ['v-login','v-denied','v-main'].forEach(id => $(id).hidden = id !== v); $('who').hidden = v === 'v-login'; }
@@ -305,14 +307,14 @@
     }
     boot();
   });
-  async function logout(){ if (!S.demo) await sb.auth.signOut(); S.rows = {places:[], events:[], posts:[], residents:[]}; S.managers=[]; S.candidates=[]; S.role=''; S.demo=false; S.sel.clear(); $('f-code').hidden = true; $('f-email').hidden = false; show('v-login'); }
+  async function logout(){ if (!S.demo) await sb.auth.signOut(); S.rows = {places:[], events:[], posts:[], residents:[], business:[], qa:[]}; S.managers=[]; S.candidates=[]; S.role=''; S.demo=false; S.sel.clear(); $('f-code').hidden = true; $('f-email').hidden = false; show('v-login'); }
   $('logout').addEventListener('click', logout); $('denied-out').addEventListener('click', logout);
 
   // ---------- נתונים ----------
   function isAdmin(){ return S.role === 'admin'; }
   function isStaff(){ return S.role === 'admin' || S.role === 'manager'; }
-  function orderFor(kind){ return kind==='posts' ? POST_ORDER : kind==='residents' ? RES_ORDER : kind==='business' ? BIZ_ORDER : ORDER; }
-  function defaultStatus(kind){ return kind==='business' ? 'claim_pending' : (kind==='posts' || kind==='residents' ? 'pending' : 'pending_publish'); }
+  function orderFor(kind){ return kind==='qa' ? ['flagged'] : kind==='posts' ? POST_ORDER : kind==='residents' ? RES_ORDER : kind==='business' ? BIZ_ORDER : ORDER; }
+  function defaultStatus(kind){ return kind==='qa' ? 'all' : kind==='business' ? 'claim_pending' : (kind==='posts' || kind==='residents' ? 'pending' : 'pending_publish'); }
   function rid(r){ return r && (r.id || r.user_id); }
   function setRoleUI(){
     const b = $('who-role');
@@ -342,6 +344,9 @@
       const [ms, cs] = await Promise.all([sb.rpc('admin_list_managers'), sb.rpc('admin_list_manager_candidates')]);
       if (!ms.error) S.managers = ms.data || [];
       if (!cs.error) S.candidates = cs.data || [];
+      // שאלות ותשובות מהצ'אט: בלי פרטים מזהים, נמחקות אחרי 30 יום. קריאה לאדמינים בלבד.
+      const qa = await sb.rpc('admin_list_chat_qa', {p_only_flagged: false, p_limit: 500});
+      S.rows.qa = (!qa.error ? (qa.data || []) : []).map(r => Object.assign({}, r, {status: r.flagged ? 'flagged' : 'ok'}));
     }
     for (const id of [...S.sel]) if (!cur().some(r => rid(r) === id)) S.sel.delete(id);
     render();
@@ -349,6 +354,7 @@
   const cur = () => S.rows[S.kind] || [];
   function text(r){
     if (S.kind === 'places') return [r.id, r.name_he, r.name_en, r.category, r.category_group, r.address, r.note, r.source, r.badge].join(' ').toLowerCase();
+    if (S.kind === 'qa') return [r.question, r.answer, QA_SRC[r.source] || r.source].join(' ').toLowerCase();
     if (S.kind === 'posts') return [r.id, r.title, r.body, r.type, r.status].join(' ').toLowerCase();
     if (S.kind === 'residents') return [r.user_id, r.display_name, r.status].join(' ').toLowerCase();
     if (S.kind === 'business') return [r.user_id, r.display_name, r.business_name, r.place_name, r.pending_place_name, r.status, r.claim_status, r.subscription_tier].join(' ').toLowerCase();
@@ -386,6 +392,7 @@
     $('n-posts').textContent = (S.rows.posts||[]).length;
     $('n-residents').textContent = (S.rows.residents||[]).length;
     if ($('n-business')) $('n-business').textContent = (S.rows.business||[]).length;
+    if ($('n-qa')) $('n-qa').textContent = (S.rows.qa||[]).length;
     document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t.dataset.kind === S.kind));
     renderManagers();
     if (S.kind === 'managers') { $('meta').textContent = isAdmin() ? ((S.managers||[]).length + ' מנהלי/ות קהילה') : ''; return; }
@@ -400,7 +407,7 @@
       catSel.innerHTML = '<option value="">כל הקטגוריות</option>' + cats.map(c => '<option' + (c === S.cat ? ' selected' : '') + '>' + esc(c) + '</option>').join('');
       catSel.hidden = false;
     } else { catSel.hidden = true; S.cat = ''; }
-    const bulkMap = S.kind==='posts' ? [['open','אישור'],['hidden','הסתרה'],['rejected','דחייה']] : S.kind==='residents' ? [['verified','אימות'],['rejected','דחייה'],['pending','החזרה לממתין']] : S.kind==='business' ? [] : [['published','פרסום'],['rejected','דחייה'],['pending_publish','החזרה לממתין']];
+    const bulkMap = S.kind==='posts' ? [['open','אישור'],['hidden','הסתרה'],['rejected','דחייה']] : S.kind==='residents' ? [['verified','אימות'],['rejected','דחייה'],['pending','החזרה לממתין']] : (S.kind==='business' || S.kind==='qa') ? [] : [['published','פרסום'],['rejected','דחייה'],['pending_publish','החזרה לממתין']];
     const bulk = $('bulk');
     [...bulk.querySelectorAll('[data-bulk]')].forEach((b,i) => {
       const m = bulkMap[i]; if (!m) { b.hidden = true; return; }
@@ -408,7 +415,8 @@
     });
     const list = visible();
     $('meta').textContent = list.length + ' מוצגים מתוך ' + cur().length;
-    $('bulk').style.display = S.kind === 'business' ? 'none' : '';
+    $('bulk').style.display = (S.kind === 'business' || S.kind === 'qa') ? 'none' : '';
+    if (S.kind === 'qa') $('meta').textContent = list.length + ' מוצגים מתוך ' + cur().length + ' · החדשות קודם · נשמרות 30 יום ללא פרטים מזהים';
     $('list').innerHTML = list.length ? list.map(card).join('') : '<div class="empty card">אין רשומות שמתאימות לסינון.</div>';
     syncSel(list);
   }
@@ -529,7 +537,16 @@
     return h;
   }
 
+  function qaCard(r){
+    let h = '<article class="card item" data-qa="' + esc(r.id) + '"><div style="flex:1;min-width:0">';
+    h += '<h3 style="font-size:16px">' + esc(r.question) + (r.flagged ? '<span class="st rejected">תשובה לא טובה</span>' : '') + '</h3>';
+    h += '<div class="sub">' + esc(fmt(r.created_at)) + ' · ' + esc(QA_SRC[r.source] || r.source) + (r.latency_ms != null ? ' · ' + esc((r.latency_ms / 1000).toFixed(1)) + ' שנ׳' : '') + '</div>';
+    h += '<dl>' + dlrow('תשובה', esc(r.answer)) + dlrow('רשומות', (r.record_ids || []).length ? '<bdi dir="ltr">' + esc(r.record_ids.join(', ')) + '</bdi>' : '')
+       + dlrow('סומנה', r.flagged_at ? esc(fmt(r.flagged_at)) : '') + dlrow('הוסרו פרטים רגישים', r.scrubbed ? 'כן' : '') + '</dl>';
+    return h + '</div></article>';
+  }
   function card(r){
+    if (S.kind === 'qa') return qaCard(r);
     if (S.kind === 'business') return businessCard(r);
     if (S.kind === 'posts' || S.kind === 'residents') return staffCard(r);
 
