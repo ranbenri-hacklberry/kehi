@@ -46,6 +46,29 @@
     return { slots: out, removed, sensitive: !!(flagged || scan.health || scan.ids || scan.names.length || removed.length) };
   }
 
+
+  // ---- grounding: a slot value must come from the message; filler like "לא צוין" becomes null ----
+  const FILLER = /^(לא צוין|לא צויין|לא ידוע|לא רלוונטי|לא נאמר|לא הוזכר|ללא פרטים|אין פרטים|אנא|נא ל|יש לציין|n\/a|none|null|unknown|-+|\?+)/i;
+  const PFX = /^[ובהלמשכ]{1,2}(?=[\u05d0-\u05ea]{2,})/;
+  function grounded(value, message) {
+    const v = String(value).trim(); if (!v) return false;
+    if (FILLER.test(v)) return false;
+    const msg = String(message || '').replace(/[״"׳']/g, '');
+    const toks = v.replace(/[״"׳'.,!?;:()\[\]]/g, ' ').split(/\s+/).filter(t => t.length >= 2 || /\d/.test(t));
+    if (!toks.length) return false;
+    let hit = 0;
+    for (const t of toks) { const b = t.replace(PFX, ''); if (msg.includes(t) || msg.includes(b) || (b.length >= 4 && msg.includes(b.slice(0, -1)))) hit++; }
+    return hit / toks.length >= 0.6;
+  }
+  function groundSlots(slots, message) {
+    const out = {}; const dropped = [];
+    for (const [k, v] of Object.entries(slots || {})) {
+      if (v == null || v === '') { out[k] = v; continue; }
+      if (grounded(v, message)) out[k] = v; else { out[k] = null; dropped.push(k); }
+    }
+    return { slots: out, dropped };
+  }
+
   // ---- variant: only the scenario's own list ----
   const OFFER = /^(הצעה|מציע|מציעה|השאלה|מסירה|יש לי)/, ASK = /^(בקשה|מבקש|חיפוש|מחפש|צריך|בקשה להשאלה)/;
   function restrictVariant(scn, v) {
@@ -58,6 +81,17 @@
     if (v && ASK.test(v)) return allowed[1] || null;
     if (v && OFFER.test(v)) return allowed[0];
     return null;
+  }
+
+
+  // Message cues decide offer vs ask when they are unambiguous (small models often get this wrong).
+  const ASK_CUE = /(?<![\u05d0-\u05ea])(מחפש|מחפשת|מחפשים|צריך|צריכה|צריכים|מבקש|מבקשת|מבקשים|מי יכול|מי יכולה|יש למישהו|למישהו יש|מישהו נוסע|מישהי נוסעת|דרוש|דרושה|דרושים)(?![\u05d0-\u05ea])/;
+  const OFFER_CUE = /(?<![\u05d0-\u05ea])(מציע|מציעה|מציעים|יש לי|יש לנו|מתפנה|מתפנית|להשכרה|פנוי|פנויה|פנויים|אשמח לעזור|אשמח להסיע|משאיל|משאילה|נוסע ל|נוסעת ל|יוצא|יוצאת)(?![\u05d0-\u05ea])/;
+  function cueVariant(scn, message) {
+    const v = (scn && scn.modal && scn.modal.variants) || [];
+    if (v.length !== 2 || (scn.modal && scn.modal.fixed_variant)) return undefined;
+    const m = String(message || ''); const a = ASK_CUE.test(m), o = OFFER_CUE.test(m);
+    if (a && !o) return v[1]; if (o && !a) return v[0]; return undefined;
   }
 
   // Deterministic overrides (model-independent): emergencies always go to emergency_redirect; prompt-injection gets no intent.
@@ -76,9 +110,11 @@
     const scn = (scenarios || []).find(s => s.id === o.intent) || null;
     if (o.intent && o.intent !== 'emergency_redirect' && !scn) { o.intent = null; o.confidence = 0; }
     o.variant = restrictVariant(scn, o.variant);
+    const cv = cueVariant(scn, message); if (cv !== undefined && cv !== o.variant) { o.variant = cv; o.variant_by = 'cue'; }
     const fields = scn ? new Set(scn.fields.map(f => f.id)) : new Set();
     const slots = {}; for (const [k, v] of Object.entries(o.slots || {})) if (fields.has(k)) slots[k] = v;
-    const st = stripSensitive(slots, message, o.sensitive_detected);
+    const gr = groundSlots(slots, message); o.ungrounded = gr.dropped;
+    const st = stripSensitive(gr.slots, message, o.sensitive_detected);
     o.slots = st.slots; o.sensitive_detected = st.sensitive; o.stripped = st.removed;
     if (scn) o.missing_required = scn.fields.filter(f => f.required && (o.slots[f.id] == null || o.slots[f.id] === '')).map(f => f.id);
     return o;
@@ -128,6 +164,6 @@
     else if (o.has_answer === false) o.reply_he = varyRefusal(o.reply_he);
     return o;
   }
-  const API = { varyRefusal, expandDays, expandRecordDays, sensitiveScan, stripSensitive, restrictVariant, postprocessIntent, cleanReply, refusal, REFUSALS, postprocessAnswer };
+  const API = { groundSlots, cueVariant, varyRefusal, expandDays, expandRecordDays, sensitiveScan, stripSensitive, restrictVariant, postprocessIntent, cleanReply, refusal, REFUSALS, postprocessAnswer };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.KehiPipeline = API;
 })(typeof window !== 'undefined' ? window : globalThis);
