@@ -6,9 +6,7 @@
   <title>kehi.love · קהי — אפליקציית קהילה בקוד פתוח</title>
   <meta name="description" content="קהי היא מערכת קוד פתוח שמאפשרת לכל קהילה או כפר בישראל לבנות לעצמה מדריך מקומי ואפליקציית קהילה.">
   <meta name="robots" content="index,follow">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700&family=Noto+Serif+Hebrew:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/fonts/fonts.css">
   <style>
     :root{
       --bg:#fbf6f1;
@@ -25,14 +23,14 @@
     }
     *{box-sizing:border-box}
     html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Assistant,Arial,sans-serif;font-size:18px;line-height:1.7}
-    h1,h2,h3,.serif{font-family:"Noto Serif Hebrew",Georgia,serif;font-weight:600;letter-spacing:-.01em;line-height:1.25}
+    h1,h2,h3,.serif{font-family:"Frank Ruhl Libre",Georgia,serif;font-weight:600;letter-spacing:-.01em;line-height:1.25}
     a{color:var(--rose-deep)}
     a:hover{color:var(--rose)}
     .wrap{max-width:720px;margin:0 auto;padding:0 22px}
     header.top{padding:calc(18px + env(safe-area-inset-top)) 0 0}
     .mark{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink)}
     .mark svg{flex:none}
-    .mark .name{font-family:"Noto Serif Hebrew",Georgia,serif;font-size:22px;font-weight:700}
+    .mark .name{font-family:"Frank Ruhl Libre",Georgia,serif;font-size:22px;font-weight:700}
     .mark .name em{font-style:normal;color:var(--rose)}
     .hero{padding:56px 0 28px;text-align:center}
     .hero h1{font-size:clamp(36px,8vw,64px);margin:0 0 8px;font-weight:700}
@@ -50,7 +48,7 @@
     h2{font-size:26px;margin:0 0 16px}
     .features{display:grid;grid-template-columns:1fr 1fr;gap:12px;list-style:none;padding:0;margin:0}
     .features li{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:16px 16px 14px}
-    .features strong{display:block;font-family:"Noto Serif Hebrew",Georgia,serif;font-size:16px;margin-bottom:2px}
+    .features strong{display:block;font-family:"Frank Ruhl Libre",Georgia,serif;font-size:16px;margin-bottom:2px}
     .features span{display:block;font-size:15px;color:var(--soft);line-height:1.5}
     @media(max-width:640px){ .features{grid-template-columns:1fr} }
     .examples{display:grid;grid-template-columns:1fr 1fr;gap:14px}
@@ -64,9 +62,9 @@
     ol.steps{margin:0;padding:0;list-style:none;counter-reset:s}
     ol.steps li{counter-increment:s;display:grid;grid-template-columns:36px 1fr;gap:12px;align-items:start;padding:10px 0;border-bottom:1px solid var(--line)}
     ol.steps li:last-child{border-bottom:0}
-    ol.steps li::before{content:counter(s);width:36px;height:36px;border-radius:50%;background:var(--blush);color:var(--rose-deep);display:grid;place-items:center;font-family:"Noto Serif Hebrew",Georgia,serif;font-weight:700;font-size:16px}
+    ol.steps li::before{content:counter(s);width:36px;height:36px;border-radius:50%;background:var(--blush);color:var(--rose-deep);display:grid;place-items:center;font-family:"Frank Ruhl Libre",Georgia,serif;font-weight:700;font-size:16px}
     .en{dir:ltr;text-align:left;background:var(--sand);border-radius:24px;padding:28px 24px;margin:12px 0 8px}
-    .en h2{font-family:"Noto Serif Hebrew",Georgia,serif}
+    .en h2{font-family:"Frank Ruhl Libre",Georgia,serif}
     .en p{margin:0 0 12px;color:var(--soft)}
     .en p:last-child{margin:0}
     footer{padding:28px 0 calc(40px + env(safe-area-inset-bottom));color:var(--soft);font-size:14px;text-align:center}
@@ -78,6 +76,38 @@
     footer .links a{display:inline-flex;align-items:center;gap:6px;text-decoration:none}
     footer .links a svg{width:14px;height:14px;flex:none}
     .heart-row{display:flex;justify-content:center;margin:8px 0 0;color:var(--rose)}
+    .pilot{background:var(--blush);border-radius:22px;padding:22px 20px;margin:0 0 18px}
+    .pilot p{margin:0 0 14px;font-size:19px}
+    .pilot strong{color:var(--rose-deep)}
+    .principles{display:grid;grid-template-columns:1fr;gap:12px}
+    @media(min-width:700px){ .principles{grid-template-columns:1fr 1fr} }
+    .principles article{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:18px}
+    .principles h3{font-size:18px;margin:0 0 6px}
+    .principles p{margin:0;font-size:16px;color:var(--ink);line-height:1.6}
+    .principles .ic{color:var(--rose);display:block;margin-bottom:8px}
+    .sub{color:var(--soft);margin:-6px 0 18px}
+    .notice{border-right:4px solid var(--rose);background:var(--paper);padding:14px 16px;border-radius:12px;margin:14px 0 0;font-size:16px}
+    .callout{background:var(--ink);color:var(--bg);border-radius:24px;padding:28px 22px}
+    .callout h2{color:var(--bg)}
+    .callout p{margin:0;opacity:.92}
+    /* FAQ: native details/summary, RTL: question right-aligned, chevron on the left (down closed, up open) */
+    .faq details{border-bottom:1px solid var(--line);direction:rtl;text-align:right}
+    .faq summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:14px;padding:16px 2px;font-weight:600;font-size:18px;line-height:1.45;text-align:right}
+    .faq summary::-webkit-details-marker{display:none}
+    .faq summary .qt{flex:1 1 auto;min-width:0;text-align:right}
+    .faq summary::after{content:"";flex:none;width:10px;height:10px;margin:0 6px 4px 4px;border-right:2px solid var(--soft);border-bottom:2px solid var(--soft);transform:rotate(45deg);transition:transform .2s}
+    .faq details[open] summary::after{transform:rotate(-135deg);margin-bottom:-4px}
+    .faq summary:focus-visible{outline:3px solid var(--rose);outline-offset:2px;border-radius:8px}
+    .faq details p{margin:0 0 16px;color:var(--soft);text-align:right}
+    .price{background:var(--paper);border:1px solid var(--line);border-radius:24px;padding:24px 20px;text-align:right}
+    .price .big{font-family:"Frank Ruhl Libre",Georgia,serif;font-size:clamp(34px,9vw,46px);font-weight:700;color:var(--rose-deep);line-height:1.1;margin:0 0 6px}
+    .price .how{margin:0 0 16px;color:var(--soft)}
+    .price ul{list-style:none;margin:0;padding:0}
+    .price li{display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start;padding:10px 0;border-top:1px solid var(--line)}
+    .price li svg{color:var(--rose);margin-top:3px}
+    .price li strong{display:block}
+    .price li span{color:var(--soft);font-size:16px;line-height:1.55}
+    .price .cta{margin:18px 0 0;font-weight:600}
   </style>
 </head>
 <body>
@@ -101,7 +131,8 @@
           <svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
           הקוד בגיטהאב
         </a>
-        <a class="btn ghost" href="#start">איך מתחילים</a>
+        <a class="btn ghost" href="#pilot">הפיילוט בכליל ובמצפה רמון</a>
+        <a class="btn ghost" href="#privacy">איך הפרטיות עובדת</a>
       </div>
     </section>
   </div>
@@ -127,21 +158,68 @@
         </ul>
       </section>
 
-      <section>
-        <h2>באוויר עכשיו</h2>
+      <section id="pilot">
+        <h2>פיילוט ראשון</h2>
+        <div class="pilot">
+          <p><strong>אנחנו מתחילים עכשיו פיילוט ראשון בכליל ובמצפה רמון.</strong> לכל קהילה אפליקציה משלה, בשם ובזהות משלה, על אותה מערכת פתוחה.</p>
+        </div>
         <div class="examples">
-          <a class="card" href="https://nahat-app.ranbenri.workers.dev" rel="noopener">
+          <a class="card" href="https://nahat-app.ranbenri.workers.dev/welcome" rel="noopener">
             <p class="place">מצפה רמון</p>
-            <h3>נחת</h3>
+            <h3>המצפאייה · מצפה רמון</h3>
             <p>המדריך והאפליקציה של הקהילה במצפה.</p>
-            <p class="go">לפתיחת האפליקציה ←</p>
+            <p class="go">לדף של המצפאייה ←</p>
           </a>
-          <a class="card" href="https://klili-app.klili.workers.dev" rel="noopener">
+          <a class="card" href="https://klili-app.klili.workers.dev/welcome" rel="noopener">
             <p class="place">כליל</p>
-            <h3>כלילי</h3>
+            <h3>כלילי · כליל</h3>
             <p>האפליקציה של הקהילה בכליל, בזהות משלה.</p>
-            <p class="go">לפתיחת האפליקציה ←</p>
+            <p class="go">לדף של כלילי ←</p>
           </a>
+        </div>
+      </section>
+
+      <section id="privacy">
+        <h2>איך הפרטיות עובדת</h2>
+        <p class="sub">בלי אותיות קטנות. ככה זה עובד בפועל בקהילות שבפיילוט:</p>
+        <div class="principles">
+          <article><svg class="ic" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5h13V10"/><path d="M10 19.5v-5h4v5"/></svg><h3>המידע הפרטי אצל הקהילה, לא אצל תאגידי ענק</h3><p>המטרה: כל קהילה מחזיקה את המידע הפרטי שלה, ואם יש לה מודל שפה, גם אותו, על מחשב שלה. במצפה רמון זה כבר כך: התשובות בצ׳אט נכתבות על מחשב מקומי בקהילה, ושם נשמרים גם דיווחים על תשובות והערות של המנהלים. בכליל המחשב הקהילתי עוד לא מחובר, אז כרגע אין שם מודל שפה, והמידע הפרטי עדיין בשרת הענן. המידע הציבורי (עסקים, אירועים ומודעות שאושרו) יושב בשרת ענן (Supabase ו־Cloudflare) כדי שהאתר יהיה מהיר. גם פרטי ההתחברות והאימות נמצאים עדיין שם, ובתהליך מעבר. שום דבר לא נמכר ולא משמש לאימון מודלים של חברות.</p></article>
+          <article><svg class="ic" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="10.5" width="14" height="9.5" rx="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/><path d="M12 14.5v2"/></svg><h3>השיחות בצ׳אט לא נשמרות</h3><p>מה ששואלים בצ׳אט לא נשמר ולא נאגר, ואף מנהל, מפתח או שכן לא רואה מה חיפשתם. השאלה עוברת בשרתי האתר רק כדי לחפש במידע המאושר.</p></article>
+          <article><svg class="ic" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5 9 17.5 20 6.5"/></svg><h3>שום דבר לא עולה בלי האישור שלכם</h3><p>כשמפרסמים טרמפ או מודעה, האפליקציה רק עוזרת לסדר את הפרטים בטופס. אתם עוברים עליו ולוחצים ״פרסם״, ומנהלי הקהילה מאשרים לפני שזה עולה ללוח. פרטים רגישים, כמו מידע רפואי או קודי כניסה, נמחקים אוטומטית.</p></article>
+          <article><svg class="ic" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5 19 6v5.5c0 4.3-3 7.8-7 9-4-1.2-7-4.7-7-9V6z"/><path d="m9 12 2 2 4-4"/></svg><h3>אפס המצאות</h3><p>התשובות מגיעות רק ממידע מאושר של עסקים ואירועים בקהילה. אם אין מידע מאומת, האפליקציה אומרת ״אין לי מידע״ ומציעה לשאול את הקהילה.</p></article>
+        </div>
+        <p class="notice"><strong>החריג היחיד:</strong> אם תלחצו ״👎 תשובה לא טובה״, ייפתח חלון שמראה את השאלה והתשובה. רק אם תאשרו ״לשלוח למנהלים״, הן נשלחות למנהלי הקהילה, בלי שם, טלפון או פרטים מזהים, ונמחקות אחרי 30 יום. ״ביטול״ לא שומר כלום.</p>
+      </section>
+
+      <section>
+        <div class="callout">
+          <h2>אתם לא המוצר.</h2>
+          <p>אין פרסומות, אין אלגוריתם שמנסה להשאיר אתכם דבוקים למסך, ואין איסוף פרופילים או כלי מעקב. השימוש לתושבים חופשי, והקוד פתוח לכולם ברישיון MIT. התכנון הוא שכל קהילה תתוחזק מדמי מנוי סמליים של עסקים מקומיים ותושבים שרוצים לתמוך, כדי שהיא תישאר נקייה ושל הקהילה.</p>
+        </div>
+      </section>
+
+      <section class="faq" id="faq">
+        <h2>שאלות נפוצות</h2>
+        <details><summary><span class="qt">צריך להירשם כדי להשתמש?</span></summary><p>לא. קריאה, חיפוש ושאלות בצ׳אט פתוחים לכולם בלי הרשמה. התחברות עם Google נדרשת רק כדי לפרסם, ובטרמפים ובמודעות גם אימות תושב/ת על ידי מנהלי הקהילה, כדי שמאחורי כל פרסום יעמוד אדם אמיתי מהקהילה.</p></details>
+        <details><summary><span class="qt">יש פה בינה מלאכותית?</span></summary><p>במצפה רמון כן: מודל קטן שרץ על מחשב מקומי בקהילה, עונה רק מתוך מידע מאושר ולא אוסף מידע. בכליל עדיין לא: כרגע כלילי רק מחפשת במידע המאושר ומציגה אותו, ובהמשך יתווסף מודל קטן שירוץ על מחשב בכליל.</p></details>
+        <details><summary><span class="qt">מה נשמר עליי?</span></summary><p>אם מתחברים כדי לפרסם: השם, כתובת הדוא״ל ותמונת הפרופיל מחשבון Google, בקשת אימות התושב/ת והפרסומים שלכם. שיחות בצ׳אט לא נשמרות, אלא אם דיווחתם על תשובה ואישרתם את השליחה. הפירוט המלא ב<a href="/privacy">מדיניות הפרטיות</a>.</p></details>
+        <details><summary><span class="qt">איך עסקים ואירועים מופיעים?</span></summary><p>רק עסקים ואירועים שמנהלי הקהילה אישרו ידנית. כל בעל עסק או תושב יכול לבקש להוסיף, לעדכן או להסיר פרטים.</p></details>
+        <details><summary><span class="qt">איך קהילה אחרת יכולה להצטרף?</span></summary><p>הקוד פתוח וחופשי. אפשר להקים אפליקציה לקהילה שלכם לפי השלבים כאן למטה והמדריך בגיטהאב.</p></details>
+      </section>
+
+      <section id="operators">
+        <h2>למפעילי קהילות עצמאיים</h2>
+        <p class="sub">רוצים להפעיל אפליקציה כזו בקהילה שלכם? המודל פשוט.</p>
+        <div class="price">
+          <p class="big">20% מההכנסות</p>
+          <p class="how">מכל ההכנסות שלכם מהקהילה, 20% עוברים אלינו. בתמורה תקבלו:</p>
+          <ul>
+            <li><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5 9 17.5 20 6.5"/></svg><div><strong>תמיכה שוטפת</strong><span>אנחנו איתכם לאורך הדרך: הקמה, תקלות, שאלות ושיפורים.</span></div></li>
+            <li><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5 9 17.5 20 6.5"/></svg><div><strong>שרתים מקומיים אצלכם</strong><span>המחשב של הקהילה יושב אצלכם, והמידע הפרטי של התושבים נשאר אצלכם.</span></div></li>
+            <li><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5 9 17.5 20 6.5"/></svg><div><strong>שדרוגי חומרה ותוכנה תכופים</strong><span>מתעדכנים כל הזמן, כדי שהקהילה שלכם תמיד תהיה מעודכנת ולא תרוץ על טכנולוגיה בת שלוש שנים.</span></div></li>
+          </ul>
+          <p class="cta">רוצים להפעיל קהילה? דברו איתנו.</p>
+          <!--OPERATOR_CONTACT-->
         </div>
       </section>
 
@@ -166,7 +244,7 @@
         <div class="en" lang="en" dir="ltr">
           <h2>Kehi, in English</h2>
           <p>Kehi is an open-source system for any community or village in Israel to build its own local guide and community app: places and events, resident posts (rides, giveaways, help, recommendations), course and workshop slots, Google sign-in with staff-verified residents, community managers, and an admin approval flow. It runs on Supabase and Cloudflare Workers, and is set up per community.</p>
-          <p>Live examples: <a href="https://nahat-app.ranbenri.workers.dev">Nahat</a> in Mitzpe Ramon, and <a href="https://klili-app.klili.workers.dev">Klili</a> in Klil. The code is on <a href="https://github.com/ranbenri-hacklberry/kehi">GitHub</a>, licensed MIT. <a href="/privacy">Privacy policy</a> · <a href="/terms">Terms of use</a>.</p>
+          <p>First pilot, starting now: <a href="https://nahat-app.ranbenri.workers.dev/welcome">HaMitzpaiya</a> in Mitzpe Ramon and <a href="https://klili-app.klili.workers.dev/welcome">Klili</a> in Klil. Chat conversations are not stored; a question and answer are sent to the community admins only if the user reports a bad answer and confirms. Private records live on a machine the community owns (already in Mitzpe Ramon; Klil is still on the cloud until its machine is connected). The code is on <a href="https://github.com/ranbenri-hacklberry/kehi">GitHub</a>, licensed MIT. <a href="/privacy">Privacy policy</a> · <a href="/terms">Terms of use</a>.</p>
         </div>
       </section>
 

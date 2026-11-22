@@ -20,3 +20,4 @@ node_modules/
 .idea/
 .webhook_secret
 **/.webhook_secret
+landing/site.config.json

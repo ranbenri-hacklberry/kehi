@@ -11,9 +11,22 @@ if (!account) { console.error("Set CLOUDFLARE_ACCOUNT_ID"); process.exit(1); }
 function read(file) {
   return fs.readFileSync(path.join(dir, file), "utf8");
 }
-const index = read("index.html");
+// Optional site.config.json (gitignored-safe to keep local): {"operator_contact": {"label": "…", "href": "https://wa.me/… or mailto:…"}}
+// While it is missing or null, the operators section shows only the soft line "רוצים להפעיל קהילה? דברו איתנו."
+const SITE = fs.existsSync(path.join(dir, "site.config.json")) ? JSON.parse(read("site.config.json")) : {};
+const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const oc = SITE.operator_contact;
+const index = read("index.html").replace("<!--OPERATOR_CONTACT-->",
+  oc && oc.label && /^(https:\/\/wa\.me\/|mailto:)/.test(oc.href || "") ? `<a class="btn main" href="${esc(oc.href)}" rel="noopener">${esc(oc.label)}</a>` : "");
 const privacy = read("privacy.html");
 const terms = read("terms.html");
+// Self-hosted fonts (no third-party requests).
+const FONTS = {};
+for (const f of fs.readdirSync(path.join(dir, "fonts"))) {
+  const buf = fs.readFileSync(path.join(dir, "fonts", f));
+  if (f.endsWith(".woff2")) FONTS["/fonts/" + f] = { b64: buf.toString("base64"), type: "font/woff2" };
+  else if (f.endsWith(".css")) FONTS["/fonts/" + f] = { body: buf.toString("utf8"), type: "text/css; charset=utf-8" };
+}
 
 const worker = `const PAGES = {
   "/": ${JSON.stringify(index)},
@@ -25,12 +38,18 @@ const worker = `const PAGES = {
   "/terms/": ${JSON.stringify(terms)},
   "/terms.html": ${JSON.stringify(terms)},
 };
+const FONTS = ${JSON.stringify(FONTS)};
 export default { async fetch(req) {
   const u = new URL(req.url);
   const h = {"x-content-type-options":"nosniff","referrer-policy":"strict-origin-when-cross-origin","cache-control":"no-cache"};
   const page = PAGES[u.pathname];
   if (page) {
     return new Response(page, {headers:{...h,"content-type":"text/html; charset=utf-8"}});
+  }
+  const f = FONTS[u.pathname];
+  if (f) {
+    const body = f.b64 ? Uint8Array.from(atob(f.b64), c => c.charCodeAt(0)) : f.body;
+    return new Response(body, {headers:{...h,"content-type":f.type,"cache-control":"public, max-age=604800"}});
   }
   if (u.pathname === "/robots.txt") {
     return new Response("User-agent: *\\nAllow: /\\n", {headers:{...h,"content-type":"text/plain; charset=utf-8"}});
