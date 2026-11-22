@@ -148,6 +148,7 @@
       <button class="tab" type="button" data-kind="residents" role="tab">תושבים <b id="n-residents">0</b></button>
       <button class="tab" type="button" data-kind="business" role="tab">חשבונות עסק <b id="n-business">0</b></button>
       <button class="tab admin-only" type="button" data-kind="qa" role="tab">שאלות ותשובות <b id="n-qa">0</b></button>
+      <button class="tab admin-only" type="button" data-kind="feedback" role="tab">הערות ובקשות <b id="n-feedback">0</b></button>
       <button class="tab admin-only" type="button" data-kind="managers" role="tab">מנהלי/ות קהילה</button>
       <button class="btn ghost sm" id="reload" type="button" style="margin-inline-start:auto">רענון</button>
     </div>
@@ -200,7 +201,7 @@
   const POST_ORDER = ['pending','open','closed','hidden','rejected'];
   const RES_ORDER = ['pending','verified','rejected'];
   const BIZ_ORDER = ['claim_pending','trial','active','expired','cancelled'];
-  const S = {kind:'places', status:'pending_publish', cat:'', q:'', rows:{places:[], events:[], posts:[], residents:[], business:[], qa:[]}, managers:[], candidates:[], sel:new Set(), email:'', role:''};
+  const S = {kind:'places', status:'pending_publish', cat:'', q:'', rows:{places:[], events:[], posts:[], residents:[], business:[], qa:[], feedback:[]}, storeErr:'', managers:[], candidates:[], sel:new Set(), email:'', role:''};
 
   function toast(t){ const el = $('toast'); el.textContent = t; el.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => el.hidden = true, 3500); }
   function show(v){ ['v-login','v-denied','v-main'].forEach(id => $(id).hidden = id !== v); $('who').hidden = v === 'v-login'; }
@@ -304,14 +305,14 @@
     }
     boot();
   });
-  async function logout(){ if (!S.demo) await sb.auth.signOut(); S.rows = {places:[], events:[], posts:[], residents:[], business:[], qa:[]}; S.managers=[]; S.candidates=[]; S.role=''; S.demo=false; S.sel.clear(); $('f-code').hidden = true; $('f-email').hidden = false; show('v-login'); }
+  async function logout(){ if (!S.demo) await sb.auth.signOut(); S.rows = {places:[], events:[], posts:[], residents:[], business:[], qa:[], feedback:[]}; S.managers=[]; S.candidates=[]; S.role=''; S.demo=false; S.sel.clear(); $('f-code').hidden = true; $('f-email').hidden = false; show('v-login'); }
   $('logout').addEventListener('click', logout); $('denied-out').addEventListener('click', logout);
 
   // ---------- נתונים ----------
   function isAdmin(){ return S.role === 'admin'; }
   function isStaff(){ return S.role === 'admin' || S.role === 'manager'; }
-  function orderFor(kind){ return kind==='qa' ? ['flagged'] : kind==='posts' ? POST_ORDER : kind==='residents' ? RES_ORDER : kind==='business' ? BIZ_ORDER : ORDER; }
-  function defaultStatus(kind){ return kind==='qa' ? 'all' : kind==='business' ? 'claim_pending' : (kind==='posts' || kind==='residents' ? 'pending' : 'pending_publish'); }
+  function orderFor(kind){ return kind==='feedback' ? FB_ST : kind==='qa' ? ['flagged'] : kind==='posts' ? POST_ORDER : kind==='residents' ? RES_ORDER : kind==='business' ? BIZ_ORDER : ORDER; }
+  function defaultStatus(kind){ return kind==='feedback' ? 'פתוח' : kind==='qa' ? 'all' : kind==='business' ? 'claim_pending' : (kind==='posts' || kind==='residents' ? 'pending' : 'pending_publish'); }
   function rid(r){ return r && (r.id || r.user_id); }
   function setRoleUI(){
     const b = $('who-role');
@@ -323,6 +324,32 @@
     if (S.demo) $('demo-admin').textContent = S.role === 'manager'
       ? 'הדגמה · תצוגת מנהל/ת קהילה (מופחתת), לא מחוברת לשרת'
       : 'הדגמה · תצוגת אדמין, לא מחוברת לשרת';
+  }
+  // ---------- רשומות פרטיות (דיווחי צ'אט, הערות ובקשות) ----------
+  // אם לקהילה יש שרת פרטי (CFG.privateStore), הקריאה עוברת דרך ה-worker של האתר, שבודק שזה אדמין וחותם את הבקשה.
+  // אם השרת הפרטי לא זמין מקבלים הודעה ברורה; שום דבר לא נכתב במקום אחר. בלי שרת פרטי: פונקציות Supabase.
+  const FB_KINDS = ['הערה','תגובה','בקשת שיפור','תקלה'], FB_ST = ['פתוח','בטיפול','טופל'];
+  const FB_REL = {place:'מקום', event:'אירוע', post:'פרסום', qa:'דיווח צ׳אט', other:'אחר'};
+  FB_ST.forEach(x => { ST[x] = x; });
+  async function PS(op, a){
+    a = a || {};
+    if (CFG.privateStore) {
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session) return {error:{message:'צריך להתחבר מחדש'}};
+      try {
+        const r = await fetch(CFG.privateStore, {method:'POST', headers:{'content-type':'application/json', authorization:'Bearer ' + session.access_token}, body: JSON.stringify(Object.assign({op}, a))});
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok) return {error:{message: j.message || (r.status === 403 ? 'אין הרשאה' : 'שגיאה בשרת הפרטי (' + (j.error || r.status) + ')'), offline: j.error === 'private_store_offline'}};
+        return {data: j.rows || j.row || j};
+      } catch (e) { return {error:{message:'אין חיבור לאתר כרגע.'}}; }
+    }
+    const m = {
+      'qa.list': () => sb.rpc('admin_list_chat_qa', {p_only_flagged: !!a.only_flagged, p_limit: a.limit || 500}),
+      'fb.list': () => sb.rpc('admin_list_feedback', {p_status: a.status || null, p_kind: a.kind || null, p_since: a.since || null, p_limit: a.limit || 500}),
+      'fb.add': () => sb.rpc('admin_add_feedback', {p_kind: a.kind, p_text: a.body, p_related_kind: a.related_kind || null, p_related_id: a.related_id || null}),
+      'fb.update': () => sb.rpc('admin_update_feedback', {p_id: a.id, p_status: a.status || null, p_reply: a.reply == null ? null : a.reply})
+    }[op];
+    const r = await m(); return r.error ? {error:{message: errMsg(r.error)}} : {data: r.data};
   }
   async function load(){
     if (S.demo) { render(); return; }
@@ -342,8 +369,10 @@
       if (!ms.error) S.managers = ms.data || [];
       if (!cs.error) S.candidates = cs.data || [];
       // שאלות ותשובות מהצ'אט: בלי פרטים מזהים, נמחקות אחרי 30 יום. קריאה לאדמינים בלבד.
-      const qa = await sb.rpc('admin_list_chat_qa', {p_only_flagged: false, p_limit: 500});
+      const [qa, fb] = await Promise.all([PS('qa.list', {limit: 500}), PS('fb.list', {limit: 500})]);
       S.rows.qa = (!qa.error ? (qa.data || []) : []).map(r => Object.assign({}, r, {status: r.flagged ? 'flagged' : 'ok'}));
+      S.rows.feedback = !fb.error ? (fb.data || []) : [];
+      S.storeErr = (qa.error || fb.error) ? (qa.error || fb.error).message : '';
     }
     for (const id of [...S.sel]) if (!cur().some(r => rid(r) === id)) S.sel.delete(id);
     render();
@@ -352,6 +381,7 @@
   function text(r){
     if (S.kind === 'places') return [r.id, r.name_he, r.name_en, r.category, r.category_group, r.address, r.note, r.source, r.badge].join(' ').toLowerCase();
     if (S.kind === 'qa') return [r.question, r.answer, QA_SRC[r.source] || r.source].join(' ').toLowerCase();
+    if (S.kind === 'feedback') return [r.kind, r.body, r.reply, r.author_email, r.related_id].join(' ').toLowerCase();
     if (S.kind === 'posts') return [r.id, r.title, r.body, r.type, r.status].join(' ').toLowerCase();
     if (S.kind === 'residents') return [r.user_id, r.display_name, r.status].join(' ').toLowerCase();
     if (S.kind === 'business') return [r.user_id, r.display_name, r.business_name, r.place_name, r.pending_place_name, r.status, r.claim_status, r.subscription_tier].join(' ').toLowerCase();
@@ -390,6 +420,7 @@
     $('n-residents').textContent = (S.rows.residents||[]).length;
     if ($('n-business')) $('n-business').textContent = (S.rows.business||[]).length;
     if ($('n-qa')) $('n-qa').textContent = (S.rows.qa||[]).length;
+    if ($('n-feedback')) $('n-feedback').textContent = (S.rows.feedback||[]).filter(r => r.status !== 'טופל').length;
     document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t.dataset.kind === S.kind));
     renderManagers();
     if (S.kind === 'managers') { $('meta').textContent = isAdmin() ? ((S.managers||[]).length + ' מנהלי/ות קהילה') : ''; return; }
@@ -404,7 +435,7 @@
       catSel.innerHTML = '<option value="">כל הקטגוריות</option>' + cats.map(c => '<option' + (c === S.cat ? ' selected' : '') + '>' + esc(c) + '</option>').join('');
       catSel.hidden = false;
     } else { catSel.hidden = true; S.cat = ''; }
-    const bulkMap = S.kind==='posts' ? [['open','אישור'],['hidden','הסתרה'],['rejected','דחייה']] : S.kind==='residents' ? [['verified','אימות'],['rejected','דחייה'],['pending','החזרה לממתין']] : (S.kind==='business' || S.kind==='qa') ? [] : [['published','פרסום'],['rejected','דחייה'],['pending_publish','החזרה לממתין']];
+    const bulkMap = S.kind==='posts' ? [['open','אישור'],['hidden','הסתרה'],['rejected','דחייה']] : S.kind==='residents' ? [['verified','אימות'],['rejected','דחייה'],['pending','החזרה לממתין']] : (S.kind==='business' || S.kind==='qa' || S.kind==='feedback') ? [] : [['published','פרסום'],['rejected','דחייה'],['pending_publish','החזרה לממתין']];
     const bulk = $('bulk');
     [...bulk.querySelectorAll('[data-bulk]')].forEach((b,i) => {
       const m = bulkMap[i]; if (!m) { b.hidden = true; return; }
@@ -412,9 +443,11 @@
     });
     const list = visible();
     $('meta').textContent = list.length + ' מוצגים מתוך ' + cur().length;
-    $('bulk').style.display = (S.kind === 'business' || S.kind === 'qa') ? 'none' : '';
+    $('bulk').style.display = (S.kind === 'business' || S.kind === 'qa' || S.kind === 'feedback') ? 'none' : '';
     if (S.kind === 'qa') $('meta').textContent = list.length + ' מוצגים מתוך ' + cur().length + ' · החדשות קודם · נשמרות 30 יום ללא פרטים מזהים';
-    $('list').innerHTML = list.length ? list.map(card).join('') : '<div class="empty card">אין רשומות שמתאימות לסינון.</div>';
+    if (S.kind === 'feedback') $('meta').textContent = list.length + ' מוצגים מתוך ' + cur().length + ' · גלוי לאדמינים בלבד · סודות ופרטים רגישים מוסרים אוטומטית';
+    const storeNote = ((S.kind === 'qa' || S.kind === 'feedback') && S.storeErr) ? '<div class="empty card" role="alert">' + esc(S.storeErr) + '</div>' : '';
+    $('list').innerHTML = storeNote + (S.kind === 'feedback' ? fbForm() : '') + (list.length ? list.map(card).join('') : '<div class="empty card">אין רשומות שמתאימות לסינון.</div>');
     syncSel(list);
   }
   
@@ -542,8 +575,50 @@
        + dlrow('סומנה', r.flagged_at ? esc(fmt(r.flagged_at)) : '') + dlrow('הוסרו פרטים רגישים', r.scrubbed ? 'כן' : '') + '</dl>';
     return h + '</div></article>';
   }
+  function fbForm(){
+    return '<article class="card item" id="fb-new"><div style="flex:1;min-width:0"><h3 style="font-size:16px">הערה או בקשה חדשה</h3>'
+      + '<div class="acts" style="flex-wrap:wrap;gap:8px"><select id="fb-kind" aria-label="סוג">' + FB_KINDS.map(k => '<option>' + k + '</option>').join('') + '</select>'
+      + '<select id="fb-rk" aria-label="קשור ל"><option value="">לא קשור לפריט</option>' + Object.keys(FB_REL).map(k => '<option value="' + k + '">' + FB_REL[k] + '</option>').join('') + '</select>'
+      + '<input id="fb-rid" dir="ltr" maxlength="120" placeholder="מזהה פריט (לא חובה)" aria-label="מזהה פריט" style="max-width:200px"></div>'
+      + '<textarea id="fb-body" rows="3" maxlength="4000" placeholder="מה צריך לתקן, לשפר או לבדוק?" style="width:100%;margin-top:8px"></textarea>'
+      + '<p class="hint">בלי סיסמאות, קודים או פרטים אישיים. מה שנראה כמו סוד יוסר אוטומטית.</p>'
+      + '<div class="acts"><button class="btn ok sm" type="button" data-fb-add>שמירה</button><span class="hint" id="fb-msg" role="status"></span></div></div></article>';
+  }
+  function fbCard(r){
+    let h = '<article class="card item" data-fb="' + esc(r.id) + '"><div style="flex:1;min-width:0">';
+    h += '<h3 style="font-size:16px">' + esc(r.kind) + '<span class="st">' + esc(r.status) + '</span></h3>';
+    h += '<div class="sub">' + esc(fmt(r.created_at)) + (r.author_email ? ' · <bdi dir="ltr">' + esc(r.author_email) + '</bdi>' : '') + '</div>';
+    h += '<p style="white-space:pre-wrap;margin:8px 0">' + esc(r.body) + '</p><dl>'
+       + dlrow('קשור ל', r.related_kind ? esc(FB_REL[r.related_kind] || r.related_kind) + (r.related_id ? ' · <bdi dir="ltr">' + esc(r.related_id) + '</bdi>' : '') : '')
+       + dlrow('תשובה', r.reply ? '<span style="white-space:pre-wrap">' + esc(r.reply) + '</span>' : '')
+       + dlrow('עודכן', r.updated_by_email ? esc(fmt(r.updated_at)) + ' · <bdi dir="ltr">' + esc(r.updated_by_email) + '</bdi>' : '') + '</dl>';
+    h += '<textarea data-fb-reply-text rows="2" maxlength="4000" placeholder="תשובה (לא חובה)" style="width:100%"></textarea><div class="acts">';
+    for (const st of FB_ST) if (st !== r.status) h += '<button class="btn ' + (st === 'טופל' ? 'ok' : 'ghost') + ' sm" type="button" data-fb-st="' + st + '">' + (st === 'פתוח' ? 'פתיחה מחדש' : st === 'בטיפול' ? 'בטיפול' : 'טופל') + '</button>';
+    h += '<button class="btn ghost sm" type="button" data-fb-st="">שמירת תשובה</button>';
+    return h + '</div></div></article>';
+  }
+  document.addEventListener('click', async e => {
+    const add = e.target.closest('[data-fb-add]');
+    if (add) {
+      const body = $('fb-body').value.trim(); if (!body) { $('fb-msg').textContent = 'צריך לכתוב משהו'; return; }
+      add.disabled = true; $('fb-msg').textContent = 'שומרת…';
+      const r = await PS('fb.add', {kind: $('fb-kind').value, body, related_kind: $('fb-rk').value || null, related_id: $('fb-rid').value.trim() || null});
+      add.disabled = false;
+      if (r.error) { $('fb-msg').textContent = r.error.message; return; }
+      S.rows.feedback.unshift(r.data); S.status = 'פתוח'; render(); return;
+    }
+    const b = e.target.closest('[data-fb-st]'); if (!b) return;
+    const art = b.closest('[data-fb]'), id = Number(art.dataset.fb), txt = art.querySelector('[data-fb-reply-text]').value.trim();
+    if (!b.dataset.fbSt && !txt) return;
+    b.disabled = true;
+    const r = await PS('fb.update', {id, status: b.dataset.fbSt || null, reply: txt || null});
+    b.disabled = false;
+    if (r.error) { alert(r.error.message); return; }
+    const i = S.rows.feedback.findIndex(x => Number(x.id) === id); if (i >= 0) S.rows.feedback[i] = r.data; render();
+  });
   function card(r){
     if (S.kind === 'qa') return qaCard(r);
+    if (S.kind === 'feedback') return fbCard(r);
     if (S.kind === 'business') return businessCard(r);
     if (S.kind === 'posts' || S.kind === 'residents') return staffCard(r);
 

@@ -8,6 +8,8 @@
 import { OAuthProvider, OAuthError, type OAuthHelpers, type AuthRequest } from "@cloudflare/workers-oauth-provider";
 import { McpServer } from "@modelcontextprotocol/server";
 import { createMcpHandler, getMcpAuthContext } from "agents/mcp/server";
+// @ts-ignore: shared UMD guard module (door/entry codes, children's names), same code as the apps
+import KehiPipeline from "../../agent/agent-pipeline.js";
 import { z } from "zod";
 
 export interface Env {
@@ -19,6 +21,11 @@ export interface Env {
   APP_ORIGIN?: string; // the community app origin allowed to call /app/mcp from a browser
   COMMUNITY_ID?: string; // optional community_id filter (e.g. "mitzpe")
   HIDE_GROUPS?: string; // comma-separated category_group values the app hides (e.g. "אירוח")
+  // Private store (admin feedback, chat reports) on a machine the community owns. If set, these records go ONLY there,
+  // signed with KEHI_STORE_JWK; if it is offline the tool fails with a clear message (no Supabase fallback).
+  // If unset, the Supabase RPC backend is used (communities whose private machine is not reachable yet).
+  PRIVATE_STORE_URL?: string;
+  KEHI_STORE_JWK?: string; // secret: ECDSA P-256 private JWK; the store holds only the public key
 }
 
 type Props = {
@@ -249,6 +256,14 @@ export async function mcpApi(request: Request, env: Env, ctx: ExecutionContext &
 const txt = (v: unknown) => ({ content: [{ type: "text" as const, text: typeof v === "string" ? v : JSON.stringify(v, null, 2) }] });
 const errTxt = (m: string) => ({ content: [{ type: "text" as const, text: m }], isError: true });
 
+// Private-record tools: the audit log (Supabase) gets the tool name and ids only, never the text.
+const PRIVATE_ARGS = new Set(["add_feedback", "update_feedback_status"]);
+function redactPrivate(args: any) {
+  const out: any = {};
+  for (const [k, v] of Object.entries(args || {})) out[k] = typeof v === "string" && (k === "text" || k === "reply") ? `[${v.length} chars]` : v;
+  return out;
+}
+
 function summarize(args: any) {
   // Args summary for the audit log. Truncates long strings. Never contains tokens.
   const out: any = {};
@@ -258,6 +273,70 @@ function summarize(args: any) {
     else out[k] = v;
   }
   return out;
+}
+
+// ---------- Private records: one interface, two backends ----------
+const FB_KINDS = ["הערה", "תגובה", "בקשת שיפור", "תקלה"] as const;
+const FB_STATUS = ["פתוח", "בטיפול", "טופל"] as const;
+const FB_RELATED = ["place", "event", "post", "qa", "other"] as const;
+type FeedbackStore = {
+  backend: string;
+  add(a: { kind: string; body: string; related_kind?: string | null; related_id?: string | null }): Promise<any>;
+  list(a: { status?: string; kind?: string; since?: string; limit?: number }): Promise<any[]>;
+  update(a: { id: number; status?: string | null; reply?: string | null }): Promise<any>;
+};
+class StoreOffline extends Error {}
+const OFFLINE_MSG = "שרת הקהילה הפרטי לא זמין כרגע. שום דבר לא נשמר במקום אחר; נסו שוב מאוחר יותר.";
+
+// Existing guards (shared agent pipeline) + secret patterns. The store / DB scrub again on their side.
+function guardText(t: string): string {
+  let s = String(t ?? "");
+  const P: any = (KehiPipeline as any) || (globalThis as any).KehiPipeline;
+  if (P?.stripDoorCodes) { const d = P.stripDoorCodes(s); if (d.hit) s = d.text + " [קוד הוסר]"; }
+  if (P?.sensitiveScan) for (const n of P.sensitiveScan(s).names) s = s.split(n).join("[שם]");
+  const R: [RegExp, string][] = [
+    [/-----BEGIN [A-Z ]+-----[\s\S]*?-----END [A-Z ]+-----/g, "[הוסר]"],
+    [/eyJ[\w-]{8,}\.[\w-]{8,}\.[\w-]{8,}/g, "[הוסר]"],
+    [/(sb_secret_|sk-|sk_live_|sk_test_|rk_live_|ghp_|gho_|ghs_|github_pat_|xox[abprs]-|AKIA|AIza)[\w-]{8,}/g, "[הוסר]"],
+    [/(password|passwd|pwd|token|secret|api[ _-]?key|סיסמה|סיסמא|סיסמת|קוד גישה)(\s*[:=]\s*|\s+)\S+/gi, "$1: [הוסר]"],
+    [/(ת["״]ז|תעודת זהות|מספר זהות)\s*:?\s*\d*/g, "[ת״ז]"],
+    [/(^|\D)\d{9}(?!\d)/g, "$1[הוסר]"],
+    [/[A-Fa-f0-9]{32,}/g, "[הוסר]"],
+  ];
+  for (const [re, rep] of R) s = s.replace(re, rep);
+  return s.replace(/[ \t]{2,}/g, " ").trim();
+}
+
+const b64u = (b: Uint8Array) => { let s = ""; for (const x of b) s += String.fromCharCode(x); return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""); };
+let STORE_KEY: CryptoKey | null = null;
+async function storeCall(env: Env, op: string, args: Record<string, unknown>) {
+  if (!env.KEHI_STORE_JWK) throw new Error("private store key missing");
+  if (!STORE_KEY) STORE_KEY = await crypto.subtle.importKey("jwk", JSON.parse(env.KEHI_STORE_JWK), { name: "ECDSA", namedCurve: "P-256" }, false, ["sign"]);
+  const body = JSON.stringify({ op, ...args }), ts = String(Date.now()), nonce = b64u(crypto.getRandomValues(new Uint8Array(18)));
+  const hash = [...new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(body)))].map((b) => b.toString(16).padStart(2, "0")).join("");
+  const sig = new Uint8Array(await crypto.subtle.sign({ name: "ECDSA", hash: "SHA-256" }, STORE_KEY, new TextEncoder().encode(`${ts}\n${nonce}\n${hash}`)));
+  let r: Response;
+  try {
+    r = await fetch(env.PRIVATE_STORE_URL!, { method: "POST", body, headers: { "content-type": "application/json", "x-kehi-ts": ts, "x-kehi-nonce": nonce, "x-kehi-sig": b64u(sig), "x-kehi-caller": "mcp" }, signal: AbortSignal.timeout(8000) });
+  } catch { throw new StoreOffline(OFFLINE_MSG); }
+  if (r.status === 502 || r.status === 503 || r.status === 504) throw new StoreOffline(OFFLINE_MSG);
+  const j: any = await r.json().catch(() => null);
+  if (!r.ok) throw new Error(`private store: ${(j && j.error) || r.status}`);
+  return j;
+}
+function feedbackStore(env: Env, call: (fn: string, args?: Record<string, unknown>) => Promise<any>, actorEmail: string | null): FeedbackStore {
+  if (env.PRIVATE_STORE_URL) return {
+    backend: "private-store",
+    add: async (a) => (await storeCall(env, "fb.add", { ...a, actor_email: actorEmail })).row,
+    list: async (a) => (await storeCall(env, "fb.list", a)).rows,
+    update: async (a) => (await storeCall(env, "fb.update", { ...a, actor_email: actorEmail })).row,
+  };
+  return {
+    backend: "supabase",
+    add: (a) => call("admin_add_feedback", { p_kind: a.kind, p_text: a.body, p_related_kind: a.related_kind ?? null, p_related_id: a.related_id ?? null }),
+    list: async (a) => (await call("admin_list_feedback", { p_status: a.status ?? null, p_kind: a.kind ?? null, p_since: a.since ?? null, p_limit: a.limit ?? 200 })) || [],
+    update: (a) => call("admin_update_feedback", { p_id: a.id, p_status: a.status ?? null, p_reply: a.reply ?? null }),
+  };
 }
 
 export function buildServer(env: Env) {
@@ -279,9 +358,10 @@ export function buildServer(env: Env) {
         try {
           const who = await call("admin_whoami");
           if (!whoamiIsAdmin(who)) return errTxt("not admin");
-          if (mutating) await call("mcp_log", { p_tool: name, p_args: summarize(args) });
+          if (mutating) await call("mcp_log", { p_tool: name, p_args: PRIVATE_ARGS.has(name) ? redactPrivate(args) : summarize(args) });
           return txt(await handler(args || {}));
         } catch (e: any) {
+          if (e instanceof StoreOffline) return errTxt(e.message);
           if (e instanceof RpcError) return errTxt(`DB error${e.code ? ` ${e.code}` : ""}: ${e.message}`);
           return errTxt(String(e?.message || e));
         }
@@ -434,6 +514,29 @@ export function buildServer(env: Env) {
     async (a) => ({ deleted: await call("mcp_admin_delete_slot", { p_id: a.slot_id, p_force: a.force ?? false }) }));
   tool("cancel_course_booking", "Cancel one attendee's booking in a course slot.", z.object({ booking_id: z.number().int() }), true,
     (a) => call("staff_cancel_booking", { p_booking: a.booking_id }));
+
+  // ---------- admin feedback (private records) ----------
+  const fb = feedbackStore(env, call, props.email ?? null);
+  tool("add_feedback", "Add an admin note / reply / improvement request / bug report (admins only). Optionally tie it to a place, event, post or chat-report id. Secrets and sensitive details (passwords, keys, entry codes, ID numbers, children's names) are stripped before saving.",
+    z.object({ kind: z.enum(FB_KINDS), text: z.string().min(1).max(4000), related_kind: z.enum(FB_RELATED).optional(), related_id: z.string().max(120).optional() }), true,
+    async (a) => {
+      const body = guardText(a.text);
+      if (!body) throw new Error("text is empty after removing sensitive details");
+      return { saved_to: fb.backend, feedback: await fb.add({ kind: a.kind, body, related_kind: a.related_kind ?? null, related_id: a.related_id?.trim() || null }) };
+    });
+  tool("list_feedback", "List admin feedback, newest first. Filters: status (פתוח/בטיפול/טופל), kind (הערה/תגובה/בקשת שיפור/תקלה), since (ISO date/time).",
+    z.object({ status: z.enum(FB_STATUS).optional(), kind: z.enum(FB_KINDS).optional(), since: z.string().optional(), limit: z.number().int().min(1).max(500).optional() }), false,
+    async (a) => {
+      if (a.since && isNaN(Date.parse(a.since))) throw new Error("since must be an ISO date/time");
+      const rows = await fb.list({ status: a.status, kind: a.kind, since: a.since ? new Date(a.since).toISOString() : undefined, limit: a.limit ?? 100 });
+      return { source: fb.backend, count: rows.length, feedback: rows };
+    });
+  tool("update_feedback_status", "Set a feedback item's status (פתוח/בטיפול/טופל) and optionally add or replace the reply. Sensitive details are stripped from the reply.",
+    z.object({ id: z.number().int(), status: z.enum(FB_STATUS).optional(), reply: z.string().max(4000).optional() }), true,
+    async (a) => {
+      if (!a.status && a.reply == null) throw new Error("give status and/or reply");
+      return { saved_to: fb.backend, feedback: await fb.update({ id: a.id, status: a.status ?? null, reply: a.reply == null ? null : guardText(a.reply) }) };
+    });
 
   return server;
 }

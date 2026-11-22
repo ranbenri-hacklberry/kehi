@@ -19,6 +19,8 @@ payload = json.dumps({
     "url": cfg["supabase_url"],
     "key": cfg["publishable_key"],
     "storageKey": cfg.get("admin_storage_key") or "kehi-admin",
+    # "/api/admin/store" when the community runs a private store (see docs/private-store.md); else Supabase RPCs.
+    "privateStore": cfg.get("private_store_admin_path") or None,
 })
 out = T
 repl = {

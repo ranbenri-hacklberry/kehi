@@ -13,6 +13,7 @@
   "cloudflare_account_id": "YOUR_CLOUDFLARE_ACCOUNT_ID",
   "worker_name": "your-app",
   "admin_storage_key": "kehi-admin",
+  "private_store_admin_path": null,
   "auth_storage_key": "resident-auth-your-community",
   "fonts": "family=Noto+Serif+Hebrew:wght@400;600&family=Assistant:wght@300;400;600",
   "theme": {

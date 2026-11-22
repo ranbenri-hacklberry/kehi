@@ -16,7 +16,7 @@ const fn = `async () => {
   const vars = ${JSON.stringify(cfg.vars)};
   const bindings = [{ type: "kv_namespace", name: "OAUTH_KV", namespace_id: kvId }]
     .concat(Object.entries(vars).map(([k, v]) => ({ type: "plain_text", name: k, text: v })));
-  const metadata = { main_module: "index.js", compatibility_date: ${JSON.stringify(cfg.compatibility_date)}, compatibility_flags: ${JSON.stringify(cfg.compatibility_flags)}, bindings };
+  const metadata = { main_module: "index.js", compatibility_date: ${JSON.stringify(cfg.compatibility_date)}, compatibility_flags: ${JSON.stringify(cfg.compatibility_flags)}, bindings, keep_bindings: ["secret_text"] };
   const code = ${JSON.stringify(code)};
   const form = new FormData();
   form.append("metadata", new Blob([JSON.stringify(metadata)], { type: "application/json" }));
