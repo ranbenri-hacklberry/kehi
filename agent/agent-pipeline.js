@@ -34,16 +34,23 @@
     while ((m = re.exec(String(text || '')))) if (!NOT_NAME.has(m[1])) names.push(m[1]);
     return { health: HEALTH.test(text || ''), ids: IDS.test(text || ''), names };
   }
+  // Door / gate / building entry codes ("בניין 4590", "קוד לדלת 1234", "#4590"): the code itself is cut out of the value.
+  const DOORCODE = /(?:קוד\s*(?:ל|של\s*)?(?:ה)?(?:דלת|שער|בניין|כניסה|לובי|אינטרקום)\s*:?\s*[#*]?\d{3,8}#?)|(?:(?:ה)?(?:בניין|שער|דלת|לובי|אינטרקום)\s*:?\s*[#*]?\d{4,8}#?)|(?:(?:^|\s)[#*]\d{3,8}#?)/g;
+  function stripDoorCodes(text) { const t = String(text == null ? '' : text); const out = t.replace(DOORCODE, ' ').replace(/\s{2,}/g, ' ').trim().replace(/^[,;.·\s]+/, ''); return { text: out, hit: out !== t.trim() }; }
   function stripSensitive(slots, message, flagged) {
     const scan = sensitiveScan(message);
-    const out = {}; const removed = [];
-    for (const [k, v] of Object.entries(slots || {})) {
-      if (v == null || v === '') { out[k] = v; continue; }
+    const out = {}; const removed = []; let door = false;
+    for (const [k, v0] of Object.entries(slots || {})) {
+      if (v0 == null || v0 === '') { out[k] = v0; continue; }
+      const dc = typeof v0 === 'string' ? stripDoorCodes(v0) : { text: v0, hit: false };
+      if (dc.hit) door = true;
+      const v = dc.text === '' ? null : dc.text;
+      if (v == null) { out[k] = null; removed.push(k); continue; }
       const s = String(v);
       const bad = (HEALTH.test(s) && !ALLOW_HEALTH_FIELDS.has(k)) || IDS.test(s) || scan.names.some(n => s.includes(n));
       if (bad) { out[k] = null; removed.push(k); } else out[k] = v;
     }
-    return { slots: out, removed, sensitive: !!(flagged || scan.health || scan.ids || scan.names.length || removed.length) };
+    return { slots: out, removed, sensitive: !!(flagged || door || scan.health || scan.ids || scan.names.length || removed.length) };
   }
 
 
@@ -104,6 +111,9 @@
     return false;
   }
 
+  // Chat: requests that must be refused before any search (prompt injection, IDs, entry codes, passwords).
+  const FORBIDDEN_ASK = /(ת["״]ז|תעודת זהות|מספר זהות|סיסמ|קוד (כניסה|הכניסה|לבניין|לדלת|לשער|חבילה|איסוף)|פרטי אשראי|מספר כרטיס)/;
+  function isForbiddenAsk(message) { const m = String(message || ''); return INJECTION.test(m) || FORBIDDEN_ASK.test(m); }
   function postprocessIntent(out, message, scenarios) {
     const o = Object.assign({}, out || {});
     if (guardIntent(message, o)) { o.missing_required = []; o.sensitive_detected = false; return o; }
@@ -164,6 +174,6 @@
     else if (o.has_answer === false) o.reply_he = varyRefusal(o.reply_he);
     return o;
   }
-  const API = { groundSlots, cueVariant, varyRefusal, expandDays, expandRecordDays, sensitiveScan, stripSensitive, restrictVariant, postprocessIntent, cleanReply, refusal, REFUSALS, postprocessAnswer };
+  const API = { stripDoorCodes, isForbiddenAsk, groundSlots, cueVariant, varyRefusal, expandDays, expandRecordDays, sensitiveScan, stripSensitive, restrictVariant, postprocessIntent, cleanReply, refusal, REFUSALS, postprocessAnswer };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.KehiPipeline = API;
 })(typeof window !== 'undefined' ? window : globalThis);
