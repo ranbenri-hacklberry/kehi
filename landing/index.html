@@ -108,6 +108,12 @@
     .price li strong{display:block}
     .price li span{color:var(--soft);font-size:16px;line-height:1.55}
     .price .cta{margin:18px 0 0;font-weight:600}
+    .tracks{display:grid;grid-template-columns:1fr;gap:16px;align-items:start}
+    @media(min-width:900px){.tracks{grid-template-columns:1fr 1fr;width:880px;margin-inline:calc((100% - 880px)/2)}}
+    .price .kind{margin:0 0 2px;font-size:13px;letter-spacing:.08em;color:var(--rose)}
+    .price h3{margin:0 0 8px;font-size:22px}
+    .price h4{margin:16px 0 4px;font-size:16px;color:var(--rose-deep)}
+    .price .btn{margin-top:16px}
   </style>
 </head>
 <body>
@@ -209,8 +215,11 @@
 
       <section id="operators">
         <h2>למפעילי קהילות עצמאיים</h2>
-        <p class="sub">רוצים להפעיל אפליקציה כזו בקהילה שלכם? המודל פשוט.</p>
+        <p class="sub">רוצים להפעיל אפליקציה כזו בקהילה שלכם? יש שתי דרכים.</p>
+        <div class="tracks">
         <div class="price">
+          <p class="kind">מסלול שותפות</p>
+          <h3>קהילה מנוהלת</h3>
           <p class="big">20% מההכנסות</p>
           <p class="how">מכל ההכנסות שלכם מהקהילה, 20% עוברים אלינו. בתמורה תקבלו:</p>
           <ul>
@@ -220,6 +229,28 @@
           </ul>
           <p class="cta">רוצים להפעיל קהילה? דברו איתנו.</p>
           <!--OPERATOR_CONTACT-->
+        </div>
+        <div class="price">
+          <p class="kind">קוד פתוח (MIT)</p>
+          <h3>התקנה עצמית</h3>
+          <p class="how">מתקינים ומפעילים לבד, על המחשב והחשבונות שלכם.</p>
+          <h4>דרישות מערכת</h4>
+          <ul>
+            <li><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3.5"/></svg><div><strong>מחשב Mac עם Apple Silicon</strong><span>דולק תמיד ומחובר לאינטרנט. ‏16GB זיכרון למודל הקטן (gemma4:e2b), ‏32GB למודל 12B.</span></div></li>
+            <li><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3.5"/></svg><div><strong>Ollama, ‏Node 22.5 ומעלה, Tailscale עם Funnel</strong></div></li>
+            <li><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3.5"/></svg><div><strong>חשבון Cloudflare ‏(Workers) ופרויקט Supabase</strong></div></li>
+            <li><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3.5"/></svg><div><strong>דומיין משלכם</strong><span>לא חובה.</span></div></li>
+          </ul>
+          <h4>ידע נדרש</h4>
+          <ul>
+            <li><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3.5"/></svg><div><strong>טרמינל ו־git</strong></div></li>
+            <li><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3.5"/></svg><div><strong>JavaScript ו־Node ברמה בסיסית</strong></div></li>
+            <li><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3.5"/></svg><div><strong>פריסה ל־Cloudflare Workers ‏(wrangler)</strong></div></li>
+            <li><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3.5"/></svg><div><strong>Supabase ומיגרציות SQL</strong></div></li>
+            <li><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3.5"/></svg><div><strong>שמירה על סודות ומפתחות</strong></div></li>
+          </ul>
+          <a class="btn ghost" href="https://github.com/ranbenri-hacklberry/kehi" rel="noopener">לקוד ב־GitHub</a>
+        </div>
         </div>
       </section>
 
