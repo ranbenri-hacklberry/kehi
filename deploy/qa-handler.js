@@ -1,4 +1,6 @@
-// POST /api/qa-log and /api/qa-flag: anonymous chat Q&A log. Origin-locked, size capped, per-isolate rate limit.
+// POST /api/qa-report: a chat question + answer the user chose to report ("תשובה לא טובה" -> confirm "לשלוח למנהלים").
+// Nothing is stored unless the user confirms in the app. The old automatic /api/qa-log and /api/qa-flag are closed (410).
+// Origin-locked, size capped, per-isolate rate limit.
 // Stored: question + shown answer (after the sensitive-detail / entry-code strip), record ids, source, latency, time.
 // Never stored: user id, name, phone, email, IP, device id. The caller IP is used only in memory for rate limiting.
 // Storage interface: if QA_STORE is set, private records (chat reports, admin feedback) go ONLY to the community's own
@@ -85,11 +87,12 @@ async function handleAdminStore(req, env){
   catch (e) { if (e instanceof StoreOffline) return qaJson(503, QA_OFFLINE); return qaJson(e.status === 400 || e.status === 404 ? e.status : 502, {error: String(e.message || "store").slice(0, 40)}); }
 }
 async function handleQa(req, env, kind){
+  if (kind !== "report") return qaJson(410, {error:"gone"});
   if (req.method !== "POST") return qaJson(405, {error:"method"});
   const origin = req.headers.get("origin"), site = req.headers.get("sec-fetch-site");
   if (origin !== QA_ORIGIN || (site && site !== "same-origin")) return qaJson(403, {error:"origin"});
   if (!(req.headers.get("content-type") || "").startsWith("application/json")) return qaJson(415, {error:"type"});
-  if (qaLimited(req.headers.get("cf-connecting-ip") || "0", kind === "flag" ? 20 : 30)) return qaJson(429, {error:"rate"});
+  if (qaLimited(req.headers.get("cf-connecting-ip") || "0", 20)) return qaJson(429, {error:"rate"});
   if (QA_STORE ? !env.KEHI_RELAY_JWK : !env.QA_LOG_KEY) return qaJson(503, {error:"unconfigured"});
   const raw = await req.text();
   if (raw.length > 8000) return qaJson(413, {error:"size"});
@@ -110,7 +113,8 @@ async function handleQa(req, env, kind){
     if (!q.text) return qaJson(400, {error:"input"});
     const token = qaB64u(crypto.getRandomValues(new Uint8Array(24)));
     await QA_DB.insert(env, {token, question: q.text, answer: a.text, record_ids: ids, source, latency_ms: ms, scrubbed: q.hit || a.hit});
-    return qaJson(200, {token});
+    await QA_DB.flag(env, token);
+    return qaJson(200, {ok: true});
   } catch (e) {
     if (e instanceof StoreOffline) return qaJson(503, QA_OFFLINE);
     return qaJson(502, {error:"store"});

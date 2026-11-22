@@ -19,3 +19,9 @@ Workers:
 - Admin page: set `private_store_admin_path: "/api/admin/store"` in `community.config.json` to read reports / feedback through the worker.
 
 Moving a community: install the store, add keys, set the Funnel path, deploy the app and MCP with the store URL, copy existing rows into the store, then run `migrations/027_private_store_move.sql`.
+
+## Report-only chat logging and the landing page
+
+- Nothing from the chat is stored automatically. «👎 תשובה לא טובה» opens a dialog showing the question and the answer; only «לשלוח למנהלים» sends them to `POST /api/qa-report` (stored flagged, 30 days). «ביטול» stores nothing. The old `/api/qa-log` and `/api/qa-flag` return 410.
+- `landing/welcome-render.js` renders `/welcome` from a community's `landing-config.js` (examples in `examples/`) and generates `/js/privacy.js` (the in-chat 🔒 sheet and the report dialog). No third-party requests: system or self-hosted fonts, inline SVG icons. The contact block stays hidden until `local.contact` is filled in.
+- First visit: the app redirects to `/welcome` unless the visitor already has the `welcome_key` flag (or other app data in localStorage) or opened a deep link; entering from the landing page sets the flag.
